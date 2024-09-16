@@ -469,6 +469,19 @@ AC_ARG_ENABLE([sagetex],
     AS_VAR_SET([SAGE_ENABLE_sagetex], [$enableval])
   ])
 
+AC_ARG_ENABLE([giac],
+  AS_HELP_STRING([--disable-giac],
+                 [don't build giac, libgiac, or sage.libs.giac]), [
+    AS_IF([test "$(uname -m)" = "riscv64"],[
+      # giac builds on riscv64 but the result segfaults frequently and
+      # fails a large portion of its own test suite.
+      AC_MSG_NOTICE([disabling giac on riscv64 architecture])
+      AS_VAR_SET([SAGE_ENABLE_giac], [no])
+    ],[
+      AS_VAR_SET([SAGE_ENABLE_giac], [$enableval])
+    ])
+  ])
+
 AC_ARG_ENABLE([doc],
   AS_HELP_STRING([--disable-doc],
                  [disable build of the Sage documentation and packages depending on it]), [
