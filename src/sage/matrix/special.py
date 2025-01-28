@@ -3462,19 +3462,32 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
     with a check that if eigenvectors were calculated by hand
     entries would all be integers. ::
 
-        sage: eigenvalues = [ZZ.random_element() for _ in range(3)]
+        sage: eigenvalues = [-12, 4, 6]
         sage: B = random_matrix(QQ, 6, algorithm='diagonalizable',
-        ....:                   eigenvalues=eigenvalues, dimensions=[2,3,1])
-        sage: all(x in ZZ for x in (B-(-12*identity_matrix(6))).rref().list())
-        True
-        sage: all(x in ZZ for x in (B-(4*identity_matrix(6))).rref().list())
-        True
-        sage: all(x in ZZ for x in (B-(6*identity_matrix(6))).rref().list())
+        ....:                   eigenvalues=eigenvalues, dimensions=[2, 3, 1])
+        sage: all(x in ZZ for eigenvalue in eigenvalues
+        ....:                    for x in (B - eigenvalue).rref().list())
         True
 
         sage: S = B.right_eigenmatrix()[1]
         sage: eigenvalues2 = (S.inverse()*B*S).diagonal()
         sage: all(e in eigenvalues for e in eigenvalues2)
+        True
+
+    Repeated eigenvalues describe a single eigenspace, so their dimensions
+    are added before constructing the matrix::
+
+        sage: set_random_seed(42)
+        sage: B = random_matrix(QQ, 4, algorithm='diagonalizable',
+        ....:                   eigenvalues=[0, 0, 1], dimensions=[1, 1, 2])
+        sage: set_random_seed(42)
+        sage: B_normalized = random_matrix(QQ, 4, algorithm='diagonalizable',
+        ....:                              eigenvalues=[0, 1], dimensions=[2, 2])
+        sage: B == B_normalized
+        True
+        sage: B.right_kernel().dimension()
+        2
+        sage: all(x in ZZ for x in B.rref().list())
         True
 
     Matrices over finite fields are also supported::
@@ -3489,6 +3502,23 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
         [0 0 1]
         [2 1 1]
         [1 0 0]
+
+    Eigenvalues are compared after coercion into the base ring::
+
+        sage: K(0) == K(3)
+        True
+        sage: set_random_seed(42)
+        sage: M = random_matrix(K, 4, algorithm='diagonalizable',
+        ....:                   eigenvalues=[0, 3, 1], dimensions=[1, 2, 1])
+        sage: set_random_seed(42)
+        sage: M_normalized = random_matrix(K, 4, algorithm='diagonalizable',
+        ....:                              eigenvalues=[0, 1], dimensions=[3, 1])
+        sage: M == M_normalized
+        True
+        sage: M.base_ring() == K
+        True
+        sage: M.right_kernel().dimension()
+        3
 
     TESTS:
 
@@ -3595,10 +3625,19 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
         raise ValueError("eigenspaces must have a dimension of at least 1.")
     if len(eigenvalues) != len(dimensions):
         raise ValueError("each eigenvalue must have a corresponding dimension and each dimension a corresponding eigenvalue.")
-    # sort the dimensions in order of increasing size, and sort the eigenvalues list in an identical fashion, to maintain corresponding values.
-    dimensions_sort = sorted(zip(dimensions, eigenvalues))
-    dimensions = [x[0] for x in dimensions_sort]
-    eigenvalues = [x[1] for x in dimensions_sort]
+    # Merge equal eigenvalues after coercion into the base ring.
+    eigenvalue_dimensions = []
+    for raw_eigenvalue, dimension in zip(eigenvalues, dimensions):
+        eigenvalue = ring(raw_eigenvalue)
+        for i, (value, old_dimension) in enumerate(eigenvalue_dimensions):
+            if eigenvalue == value:
+                eigenvalue_dimensions[i] = (value, old_dimension + dimension)
+                break
+        else:
+            eigenvalue_dimensions.append((eigenvalue, dimension))
+    eigenvalue_dimensions.sort(key=lambda pair: pair[1])
+    eigenvalues = [pair[0] for pair in eigenvalue_dimensions]
+    dimensions = [pair[1] for pair in eigenvalue_dimensions]
     # Create the matrix of eigenvalues on the diagonal.  Use a lower limit and upper limit determined by the eigenvalue dimensions.
     diagonal_matrix = matrix(ring, size)
     up_bound = 0
