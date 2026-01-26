@@ -48,20 +48,20 @@ def intervals_to_polyomino(intervals) -> list[tuple[int, int]]:
 
 
 class PolyominoFilling(SageObject):
-    def __init__(self, P, F):
+    def __init__(self, P, F) -> None:
         self._P = tuple(sorted(P))
         self._F = tuple(sorted(F))
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self._P, self._F))
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return self._P == other._P and self._F == other._F
 
-    def _repr_(self):
+    def _repr_(self) -> str:
         return f"shape={self._P}, filling={self._F}"
 
-    def _latex_(self):
+    def _latex_(self) -> str:
         draw_grid_lines = True,
         stroke_width = "" # very thin"
         bullet_tex = r"\bullet"
@@ -152,7 +152,7 @@ def ChuteMoveLattice(M, n=None):
 
     def chutable(i, l):
         # Return the other coordinate, if ``l[i]`` is a chutable
-        # coordinate and the result is in ``M``, otherwise ``False``.
+        # coordinate and the result is in ``M``, otherwise ``None``.
 
         # the rectangle is given (in Cartesian coordinates) by
         # a,d - c,d
@@ -179,7 +179,7 @@ def ChuteMoveLattice(M, n=None):
 
         return c, d
 
-    def children(l) -> list:
+    def children(l):
         return [tuple(sorted(l[:i] + (c,) + l[i+1:]))
                 for i in range(1, len(l)-1)
                 if (c := chutable(i, l)) is not None]
