@@ -15,7 +15,30 @@ from sage.sets.recursively_enumerated_set import RecursivelyEnumeratedSet
 from sage.structure.sage_object import SageObject
 
 
-def intervals_to_polyomino(intervals):
+def intervals_to_polyomino(intervals) -> list[tuple[int, int]]:
+    r"""
+    Create a polyomino from a list of intervals.
+
+    INPUT:
+
+    - list of pairs of integers `(i, j)` with `i \leq j`
+
+    OUTPUT:
+
+    cells as a list of pairs of integers `(x, y)`
+
+    EXAMPLES::
+    
+        sage: intervals_to_polyomino([[0,4],[1,3],[2,2]])
+        [(1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (2, 1), (2, 2), (2, 3), (3, 2)]
+
+    TESTS::
+
+        sage: intervals_to_polyomino([[3,2]])
+        Traceback (most recent call last):
+        ...
+        AssertionError: interval=[3, 2] is not a proper interval
+    """
     M = set()
     for x, interval in enumerate(intervals, 1):
         low, high = interval
@@ -156,7 +179,7 @@ def ChuteMoveLattice(M, n=None):
 
         return c, d
 
-    def children(l):
+    def children(l) -> list:
         return [tuple(sorted(l[:i] + (c,) + l[i+1:]))
                 for i in range(1, len(l)-1)
                 if (c := chutable(i, l)) is not None]
