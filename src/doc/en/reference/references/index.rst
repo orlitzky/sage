@@ -132,7 +132,7 @@ REFERENCES:
 
 .. [ADMNT2025] Ilani Axelrod-Freed, Colin Defant, Hanna Mularczyk,
                Son Nguyen and Katherine Tung, *Chute Move Posets are
-               Lattices*. :arXiv:`2507.13214`
+               Lattices*. :arxiv:`2507.13214`
 
 .. [ABBS2013] \J.-C Aval, A. Boussicault, M. Bouvel, M. Silimbani,
               *Combinatorics of non-ambiguous trees*,
@@ -609,7 +609,7 @@ REFERENCES:
 
 .. [BMM2025] Sara Billey, Connor McCausland and Clare Minnerath, *A
              Proof of Rubey's Lattice Conjecture*.
-             :arXiv:`2507.18852`.
+             :arxiv:`2507.18852`.
 
 .. [BPPSST2017] Banik, Pandey, Peyrin, Sasaki, Sim, and Todo,
                 GIFT : A Small Present Towards Reaching the Limit of Lightweight
@@ -1419,7 +1419,7 @@ REFERENCES:
             http://www.moi.math.bas.bg/moiuser/~iliya/pdf_site/gf5srev.pdf.
 
 .. [BS2007] \R. Bröker and P. Stevenhagen. *Constructing elliptic curves of
-            prime order*. [math.NT] (2007), :arXiv:`0712.2022`.
+            prime order*. [math.NT] (2007), :arxiv:`0712.2022`.
 
 .. [BS2010] \P. Baseilhac and K. Shigechi. *A new current algebra and the
             reflection equation*. Lett. Math. Phys. **92** (2010),
@@ -5986,7 +5986,7 @@ REFERENCES:
 .. [Rub2011] Martin Rubey, *Maximal 0–1-fillings of moon polyominoes
              with restricted chain lengths and RC-graphs*. Adv. in
              Appl. Math. **48** (2012), no. 2,
-             290-305. :arXiv:`1009.3919`
+             290-305. :arxiv:`1009.3919`
 
 .. [RS2010] RUBIN, K., & SILVERBERG, A. (2010). CHOOSING THE CORRECT ELLIPTIC
             CURVE IN THE CM METHOD. Mathematics of Computation, 79(269),
