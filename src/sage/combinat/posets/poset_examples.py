@@ -31,6 +31,7 @@ The infinite set of all posets can be used to find minimal examples::
     :meth:`~Posets.BooleanLattice` | Return the Boolean lattice on `2^n` elements.
     :meth:`~Posets.BubblePoset` | Return the Bubble lattice for `(m,n)`.
     :meth:`~Posets.ChainPoset` | Return a chain on `n` elements.
+    :meth:`~Posets.ChuteMoveLattice` | Return the chute move lattice on polyominoes.
     :meth:`~Posets.Crown` | Return the crown poset on `2n` elements.
     :meth:`~Posets.DexterSemilattice` | Return the Dexter semilattice.
     :meth:`~Posets.DiamondPoset` | Return the lattice of rank two on `n` elements.
