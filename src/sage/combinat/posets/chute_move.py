@@ -50,19 +50,35 @@ def intervals_to_polyomino(intervals) -> list[tuple[int, int]]:
 
 class PolyominoFilling(SageObject):
     def __init__(self, P, F) -> None:
+        """
+        """
         self._P = tuple(sorted(P))
         self._F = tuple(sorted(F))
 
     def __hash__(self) -> int:
+        """
+        Return the hash of ``self``.
+        """
         return hash((self._P, self._F))
 
     def __eq__(self, other) -> bool:
+        """
+        Check whether ``self`` is equal to ``other``.
+        """
+        if not isinstance(other, PolyominoFilling):
+            return False
         return self._P == other._P and self._F == other._F
 
     def _repr_(self) -> str:
+        """
+        Return a string representation.
+        """
         return f"shape={self._P}, filling={self._F}"
 
     def _latex_(self) -> str:
+        """
+        Return a latex representation.
+        """
         draw_grid_lines = True,
         stroke_width = "" # very thin"
         bullet_tex = r"\bullet"
