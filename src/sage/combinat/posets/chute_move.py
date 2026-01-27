@@ -88,8 +88,8 @@ class PolyominoFilling(SageObject):
         latex.add_package_to_preamble_if_available("tikz")
 
         # bounding box
-        xs = [x for x,_ in self._P]
-        ys = [y for _,y in self._P]
+        xs = [x for x, _ in self._P]
+        ys = [y for _, y in self._P]
         minx, maxx = min(xs), max(xs)
         miny, maxy = min(ys), max(ys)
 
@@ -105,15 +105,15 @@ class PolyominoFilling(SageObject):
         tikz_lines.append(r"  \path[use as bounding box] (0,0) rectangle (%d,%d);" % (width, height))
         # Draw each cell as a unit square at shifted coordinates
         if draw_grid_lines:
-            for (x, y) in self._P:
+            for x, y in self._P:
                 sx, sy = x + shift_x, y + shift_y
                 tikz_lines.append(f"  \\draw[{stroke_width}] ({sx},{sy}) rectangle ({sx+1},{sy+1});")
         else:
-            for (x, y) in self._P:
+            for x, y in self._P:
                 sx, sy = x + shift_x, y + shift_y
                 tikz_lines.append(f"  \\fill[white] ({sx},{sy}) rectangle ({sx+1},{sy+1});")
 
-        for (x, y) in self._F:
+        for x, y in self._F:
             sx, sy = x + shift_x, y + shift_y
             tikz_lines.append(f"  \\node at ({sx+0.5},{sy+0.5}) {{${bullet_tex}$}};")
 
