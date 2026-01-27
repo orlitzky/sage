@@ -49,37 +49,23 @@ def intervals_to_polyomino(intervals) -> list[tuple[int, int]]:
 
 
 class PolyominoFilling(SageObject):
+    """
+    Class for polyominoes with some filled cells.
+
+    EXAMPLES::
+
+        sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
+    """
     def __init__(self, P, F) -> None:
         """
+        Class for polyominoes with some filled cells.
+
+        EXAMPLES::
+
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
         """
         self._P = tuple(sorted(P))
         self._F = tuple(sorted(F))
-
-    def __hash__(self) -> int:
-        """
-        Return the hash of ``self``.
-        """
-        return hash((self._P, self._F))
-
-    def __eq__(self, other) -> bool:
-        """
-        Check whether ``self`` is equal to ``other``.
-        """
-        if not isinstance(other, PolyominoFilling):
-            return False
-        return self._P == other._P and self._F == other._F
-
-    def _repr_(self) -> str:
-        """
-        Return a string representation.
-        """
-        return f"shape={self._P}, filling={self._F}"
-
-    def _latex_bis_(self) -> str:
-        """
-        tentative of alternative latex
-        """
-        from sage.combinat.output import tex_from_array
         # bounding box
         xs = [x for x, _ in self._P]
         ys = [y for _, y in self._P]
@@ -93,6 +79,71 @@ class PolyominoFilling(SageObject):
             i -= minx
             j -= miny
             array[j][i] = "o" if cell in self._F else " "
+        self._array = array
+
+    def __hash__(self) -> int:
+        """
+        Return the hash of ``self``.
+
+        EXAMPLES::
+
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
+            sage: hash(P)  # random
+            5139392050573932802
+        """
+        return hash((self._P, self._F))
+
+    def __eq__(self, other) -> bool:
+        """
+        Check whether ``self`` is equal to ``other``.
+
+        EXAMPLES::
+
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
+            sage: Q = PolyominoFilling([(1,1),(1,2),(2,1)],[(2,1)])
+            sage: P == P
+            True
+            sage: P == Q
+            False
+        """
+        if not isinstance(other, PolyominoFilling):
+            return False
+        return self._P == other._P and self._F == other._F
+
+    def _repr_(self) -> str:
+        """
+        Return a string representation.
+
+        EXAMPLES::
+
+            sage: PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
+            shape=((1, 1), (1, 2), (2, 1)), filling=((1, 2),)
+        """
+        return f"shape={self._P}, filling={self._F}"
+
+    def _unicode_art_(self):
+        """
+        Return a pretty representation.
+
+        EXAMPLES::
+
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
+            sage: unicode_art(P)
+            ┌───┬───┐
+            │   │   │
+            ├───┼───┘
+            │ o │    
+            └───┘   
+        """
+        from sage.combinat.output import ascii_art_table
+        from sage.typeset.unicode_art import UnicodeArt
+        return UnicodeArt(ascii_art_table(self._array, use_unicode=True).splitlines())
+
+    def _latex_bis_(self) -> str:
+        """
+        tentative of alternative latex
+        """
+        from sage.combinat.output import tex_from_array
         return tex_from_array(self._array)
 
     def _latex_(self) -> str:
@@ -100,7 +151,7 @@ class PolyominoFilling(SageObject):
         Return a latex representation.
         """
         draw_grid_lines = True,
-        stroke_width = "" # very thin"
+        stroke_width = ""  # very thin"
         bullet_tex = r"\bullet"
         cell_size = 0.5
 
