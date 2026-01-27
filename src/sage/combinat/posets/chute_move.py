@@ -29,6 +29,7 @@ def intervals_to_polyomino(intervals) -> list[tuple[int, int]]:
 
     EXAMPLES::
 
+        sage: from sage.combinat.posets.chute_move import intervals_to_polyomino
         sage: intervals_to_polyomino([[0,4],[1,3],[2,2]])
         [(1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (2, 1), (2, 2), (2, 3), (3, 2)]
 
