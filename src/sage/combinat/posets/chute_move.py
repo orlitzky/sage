@@ -86,7 +86,7 @@ class PolyominoFilling(SageObject):
         minx, maxx = min(xs), max(xs)
         miny, maxy = min(ys), max(ys)
 
-        array = [[None for j in range(minx, max + 1)]
+        array = [[None for j in range(minx, maxx + 1)]
                  for i in range(miny, maxy + 1)]
         for cell in self._P:
             i, j = cell
