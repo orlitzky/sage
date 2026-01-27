@@ -138,8 +138,8 @@ class PolyominoFilling(SageObject):
             ┌───┬───┐
             │   │   │
             ├───┼───┘
-            │ o │    
-            └───┘   
+            │ o │
+            └───┘
         """
         from sage.combinat.output import ascii_art_table
         from sage.typeset.unicode_art import UnicodeArt
