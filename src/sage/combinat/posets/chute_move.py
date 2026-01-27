@@ -75,6 +75,26 @@ class PolyominoFilling(SageObject):
         """
         return f"shape={self._P}, filling={self._F}"
 
+    def _latex_bis_(self) -> str:
+        """
+        tentative of alternative latex
+        """
+        from sage.combinat.output import tex_from_array
+        # bounding box
+        xs = [x for x, _ in self._P]
+        ys = [y for _, y in self._P]
+        minx, maxx = min(xs), max(xs)
+        miny, maxy = min(ys), max(ys)
+
+        array = [[None for j in range(minx, max + 1)]
+                 for i in range(miny, maxy + 1)]
+        for cell in self._P:
+            i, j = cell
+            i -= minx
+            j -= miny
+            array[j][i] = "o" if cell in self._F else " "
+        return tex_from_array(self._array)
+
     def _latex_(self) -> str:
         """
         Return a latex representation.
