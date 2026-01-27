@@ -54,6 +54,7 @@ class PolyominoFilling(SageObject):
 
     EXAMPLES::
 
+        sage: from sage.combinat.posets.chute_move import PolyominoFilling
         sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
     """
     def __init__(self, P, F) -> None:
@@ -62,6 +63,7 @@ class PolyominoFilling(SageObject):
 
         EXAMPLES::
 
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
             sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
         """
         self._P = tuple(sorted(P))
@@ -87,6 +89,7 @@ class PolyominoFilling(SageObject):
 
         EXAMPLES::
 
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
             sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
             sage: hash(P)  # random
             5139392050573932802
@@ -99,6 +102,7 @@ class PolyominoFilling(SageObject):
 
         EXAMPLES::
 
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
             sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
             sage: Q = PolyominoFilling([(1,1),(1,2),(2,1)],[(2,1)])
             sage: P == P
@@ -116,6 +120,7 @@ class PolyominoFilling(SageObject):
 
         EXAMPLES::
 
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
             sage: PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
             shape=((1, 1), (1, 2), (2, 1)), filling=((1, 2),)
         """
@@ -127,6 +132,7 @@ class PolyominoFilling(SageObject):
 
         EXAMPLES::
 
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
             sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
             sage: unicode_art(P)
             ┌───┬───┐
