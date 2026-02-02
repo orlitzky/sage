@@ -80,7 +80,7 @@ class PolyominoFilling(SageObject):
             i, j = cell
             i -= minx
             j -= miny
-            array[j][i] = "o" if cell in self._F else " "
+            array[j][i] = "o" if cell in self._F else ""
         self._array = array
 
     def __hash__(self) -> int:
@@ -145,16 +145,32 @@ class PolyominoFilling(SageObject):
         from sage.typeset.unicode_art import UnicodeArt
         return UnicodeArt(ascii_art_table(self._array, use_unicode=True).splitlines())
 
-    def _latex_bis_(self) -> str:
-        """
-        tentative of alternative latex
-        """
-        from sage.combinat.output import tex_from_array
-        return tex_from_array(self._array)
-
     def _latex_(self) -> str:
         """
         Return a latex representation.
+
+        tentative of alternative latex, still not perfect
+
+        EXAMPLES::
+
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
+            sage: latex(P)
+        """
+        from sage.combinat.output import tex_from_array
+        D = {"o": r"\bullet", "": "", None: None}
+        new_array = [[D[cell] for cell in line] for line in self._array]
+        return tex_from_array(new_array, with_lines=True)
+
+    def _latex_bis_(self) -> str:
+        """
+        Return a latex representation.
+
+        EXAMPLES::
+
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
+            sage: latex(P)
         """
         draw_grid_lines = True,
         stroke_width = ""  # very thin"
