@@ -36,12 +36,13 @@ SAGE_VERSION=`echo "$1" | sed 's/^sage-//'`
 SAGE_RELEASE_DATE=`date -u +'%Y-%m-%d'`
 SAGE_VERSION_BANNER="SageMath version $SAGE_VERSION, Release Date: $SAGE_RELEASE_DATE"
 
-# Update Sage version file for all distribution packages
-for version_file in "$SAGE_ROOT"/pkgs/*/VERSION.txt; do
+# Update the versions of sage_docbuild and sage_setup.
+for version_file in "$SAGE_ROOT"/build/pkgs/sage_{docbuild,setup}/src/VERSION.txt; do
     if [ -f "$version_file" ]; then
         echo $SAGE_VERSION > "$version_file"
     fi
 done
+
 
 # Update version_requirements.txt for all distribution packages
 ( cd "$SAGE_ROOT"/build/pkgs/ && for spkg in sage*; do
@@ -136,7 +137,8 @@ git commit -m "Updated SageMath version to $SAGE_VERSION" -- \
     "$SAGE_ROOT/build/pkgs/configure/checksums.ini" \
     "$SAGE_ROOT/build/pkgs/configure/package-version.txt" \
     "$SAGE_ROOT/build/pkgs/*/version_requirements.txt" \
-    "$SAGE_ROOT"/pkgs/*/VERSION.txt \
+    "$SAGE_ROOT/build/pkgs/sage_docbuild/src/VERSION.txt" \
+    "$SAGE_ROOT/build/pkgs/sage_setup/src/VERSION.txt" \
     "$SAGE_ROOT/.upstream.d/20-github.com-sagemath-sage-releases" \
     "$SAGE_ROOT/src/doc/en/website/versions.txt" \
     || die "Error committing to the repository."
