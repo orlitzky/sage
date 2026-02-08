@@ -280,7 +280,6 @@ $ADD config/config.rpath /new/config/config.rpath
 $ADD src/meson.build /new/src/
 $ADD src/bin /new/src/bin
 $ADD m4 /new/m4
-$ADD pkgs /new/pkgs
 $ADD build /new/build
 $ADD .upstream.d /new/.upstream.d
 $ADD tools /new/tools
