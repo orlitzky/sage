@@ -203,6 +203,7 @@ SAGE_I_TARGETS = sagelib
 	all-start build-start toolchain toolchain-deps base-toolchain \
 	pypi-sdists pypi-wheels wheels \
 	sagelib \
+	doc doc-html doc-pdf \
 	doc-uninstall \
 	python3_venv _clean-broken-gcc
 
@@ -309,6 +310,21 @@ SAGERUNTIME = sagelib $(inst_ipython) $(inst_pexpect)
 
 all-sageruntime: toolchain-deps
 	+$(MAKE_REC) $(SAGERUNTIME)
+
+
+###############################################################################
+# Building the documentation
+###############################################################################
+
+doc: doc-html
+
+# All doc-building is delegated to meson eventually. To avoid yet
+# another "make" invocation, we inline the commands that get run.
+doc-html:
+	meson compile -C build/sage-distro doc-html
+
+doc-pdf:
+	meson compile -C build/sage-distro doc-pdf
 
 doc-uninstall:
 	rm -rf "$(SAGE_SHARE)/doc/sage"
