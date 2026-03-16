@@ -515,7 +515,8 @@ class Knot(Link, Element, metaclass=InheritComparisonClasscallMetaclass):
             sage: s == KnotInfo.K6_3.symmetry_type()  # optional - snappy
             True
         """
-        sK = self.snappy_link()
+        from sage.interfaces.snappy import snappy
+        sK = snappy(self)
         eK = sK.exterior()
         try:
             iso = eK.is_isometric_to(eK, return_isometries=True)
@@ -523,7 +524,7 @@ class Knot(Link, Element, metaclass=InheritComparisonClasscallMetaclass):
             raise NotImplementedError('the symmetry type cannot be calculated for %s' % self)
         s = []
         for i in iso:
-            for M in i.cusp_maps():
+            for M in i.cusp_maps().sage():
                 M.set_immutable()
                 s.append(M)
         S = set(s)
@@ -567,7 +568,8 @@ class Knot(Link, Element, metaclass=InheritComparisonClasscallMetaclass):
             sage: K.get_knotinfo()
             KnotInfo['K3_1']^2*KnotInfo['K3_1m']
         """
-        Ks = self.snappy_link()
+        from sage.interfaces.snappy import snappy
+        Ks = snappy(self)
         from sage.knots.link import sort
         return sorted([k.sage_link() for k in Ks.deconnect_sum()], key=sort)
 
