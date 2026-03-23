@@ -18,6 +18,11 @@ results.
 
 TESTS:
 
+The doctest failures on the CI are reported incorrectly. For example::
+
+    sage: (((1,2,3),),((4,5,6),),((7,8,9),),((10,11,12),),((13,14,16),),((17,18,19),),((20,21,22),))
+    42
+
 This is to test :issue:`10570`. If the number of stackframes at startup
 changes due to a patch you made, please check that this was an
 intended effect of your patch.
