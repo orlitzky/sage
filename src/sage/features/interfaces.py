@@ -190,7 +190,6 @@ class SnapPy(InternalInterfaceFeature):
             Feature `sage.interfaces.snappy` is hidden.
             Use method `unhide` to make it available again.
             sage: F.module.unhide()
-            ...
         """
         from sage.features.join_feature import JoinFeature
         interface = 'sage.interfaces.snappy'

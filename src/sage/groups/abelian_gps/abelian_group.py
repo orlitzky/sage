@@ -892,7 +892,7 @@ class AbelianGroup_class(UniqueRepresentation, AbelianGroupBase):
         EXAMPLES::
 
            sage: A = AbelianGroup([5,15,0,0])
-           sage: snappy(A)
+           sage: snappy(A)                      # optional snappy
            Z/5 + Z/15 + Z + Z
         """
         return snappy.AbelianGroup(elementary_divisors=list(self.gens_orders()))
