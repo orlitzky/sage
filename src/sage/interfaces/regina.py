@@ -368,7 +368,6 @@ class ReginaElement(PythonInternalElement):
             sage: fr.sage() == f
             True
         """
-        from sage.repl.preparse import implicit_mul
         def from_detail_str(lc):
             r"""
             Regina provides a detail method for many of its classes.
@@ -433,6 +432,7 @@ class ReginaElement(PythonInternalElement):
             from sage.misc.sage_eval import sage_eval
             return sage_eval(self._sage_repr(), locals=locals)
         return inst
+
 
 # An instance
 regina = Regina()

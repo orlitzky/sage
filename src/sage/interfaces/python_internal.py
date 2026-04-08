@@ -113,7 +113,6 @@ class PythonInternalInterface(ExtraTabCompletion, Interface):
         """
         raise NotImplementedError('this method must be implemented in the child class')
 
-
     def _install_hints(self):
         """
         Hints for installing the interface on your computer.

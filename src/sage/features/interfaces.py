@@ -183,13 +183,14 @@ class SnapPy(InternalInterfaceFeature):
             sage: from sage.features.interfaces import SnapPy
             sage: F = SnapPy()
             sage: F.module.hide()
-            sage: snappy(~7)
+            sage: snappy(Link([]))
             Traceback (most recent call last):
             ...
             FeatureNotPresentError: sage.interfaces.snappy is not available.
             Feature `sage.interfaces.snappy` is hidden.
             Use method `unhide` to make it available again.
             sage: F.module.unhide()
+            ...
         """
         from sage.features.join_feature import JoinFeature
         interface = 'sage.interfaces.snappy'

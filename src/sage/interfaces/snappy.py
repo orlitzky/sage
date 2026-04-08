@@ -129,7 +129,6 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 ##############################################################################
 
-from enum import Enum
 from sage.interfaces.python_internal import PythonInternalInterface, PythonInternalElement
 from sage.misc.instancedoc import instancedoc
 
@@ -186,7 +185,8 @@ class SnapPy(PythonInternalInterface):
         if not self._interface_globals:
             from sage.features.interfaces import SnapPy
             SnapPy().module.require()
-            import snappy, spherogram
+            import snappy
+            import spherogram
             if self._high_precision:
                 d = snappy.SnapPyHP.__dict__
             else:
@@ -214,6 +214,7 @@ class SnapPy(PythonInternalInterface):
 In order to use the SnapPy interface you need to have the
 optional Sage package SnapPy installed.
 """
+
     def _object_class(self):
         r"""
         Return the element class of this parent.
@@ -330,7 +331,6 @@ class SnapPyElement(PythonInternalElement):
             sage: N.get_knotinfo()
             KnotInfo['K3_1m']
         """
-        P = self._check_valid()
         inst = self._inst
         if hasattr(inst, 'sage'):
             return inst.sage()
@@ -342,6 +342,7 @@ class SnapPyElement(PythonInternalElement):
             from sage.misc.sage_eval import sage_eval
             return sage_eval(self._sage_repr(), locals=locals)
         return inst
+
 
 # An instance
 snappy = SnapPy()
