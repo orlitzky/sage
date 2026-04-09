@@ -658,7 +658,7 @@ def binomial_mod2(n, k):
     """
     if n < k:
         return 0
-    elif ((n-k) & k) == 0:
+    if ((n-k) & k) == 0:
         return 1
     return 0
 

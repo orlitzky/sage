@@ -704,7 +704,7 @@ def _connected_mutation_type(dg):
                     return _check_special_BC_cases(dg, n, ['BD'], [None], ['D'])
                 return mt_tmp
             return _false_return()
-        elif dict_in_out[v1][2] == 1 and dict_in_out[v2][2] == 1:
+        if dict_in_out[v1][2] == 1 and dict_in_out[v2][2] == 1:
             if label1 == (1, -2) and label2 == (1, -2):
                 return _check_special_BC_cases(dg, n, ['BC'], [1], ['A'])
             if label1 == (2, -1) and label2 == (2, -1):
