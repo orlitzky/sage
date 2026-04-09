@@ -7,6 +7,25 @@ generalization of the chute and ladder posets of Bergeron and Billey
 Billey, Connor McCausland and Clare Minnerath in [BMM2025]_ and by
 Ilani Axelrod-Freed, Colin Defant, Hanna Mularczyk, Son Nguyen and
 Katherine Tung in [ADMNT2025]_.
+
+TESTS:
+
+We check Corollary 5.8 of [BMM2025]_::
+
+    sage: def l0(w):
+    ....:    return posets.ChuteMoveLattice(w).maximal_chain_length()
+
+    sage: def R(x, y, w):
+    ....:     return sum(1 for i in range(1, w.inverse()(y) + 1) if w(i) <= x)
+
+    sage: def l1(w):
+    ....:     return 1 + sum(R(x, y, w) for x, y in w.inverse().inversions())
+
+    sage: def l2(w):
+    ....:     return 1 + len(w.pattern_positions([1,3,2]))
+
+    sage: all(l0(w) == l1(w) == l2(w) for n in range(7) for w in Permutations(n))
+    True
 """
 from sage.categories.finite_lattice_posets import FiniteLatticePosets
 from sage.combinat.permutation import Permutation
@@ -31,7 +50,7 @@ def intervals_to_polyomino(intervals) -> list[tuple[int, int]]:
 
         sage: from sage.combinat.posets.chute_move import intervals_to_polyomino
         sage: intervals_to_polyomino([[0,4],[1,3],[2,2]])
-        [(1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (2, 1), (2, 2), (2, 3), (3, 2)]
+        ((1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (2, 1), (2, 2), (2, 3), (3, 2))
 
     TESTS::
 
@@ -45,173 +64,161 @@ def intervals_to_polyomino(intervals) -> list[tuple[int, int]]:
         low, high = interval
         assert low <= high, f"interval={interval} is not a proper interval"
         M.update((x, y) for y in range(low, high + 1))
-    return sorted(M)
+    return tuple(sorted(M))
 
 
 class PolyominoFilling(SageObject):
-    """
+    r"""
     Class for polyominoes with some filled cells.
 
-    EXAMPLES::
-
-        sage: from sage.combinat.posets.chute_move import PolyominoFilling
-        sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
+    A filling is represented by a list of matrix coordinates.
     """
-    def __init__(self, P, F) -> None:
-        """
-        Class for polyominoes with some filled cells.
+    def __init__(self, P, B, check=True) -> None:
+        r"""
+        Initialize a filling of a polyomino.
+
+        INPUT:
+
+        - ``P`` -- an iterable of cells (i,j)
+
+        - ``B`` -- a subset of ``P``
+
+        - ``check`` -- boolean (default: ``True``) whether to
+          transform ``P`` and ``Q`` into tuples of sorted coordinates
 
         EXAMPLES::
 
             sage: from sage.combinat.posets.chute_move import PolyominoFilling
-            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
-        """
-        self._P = tuple(sorted(P))
-        self._F = tuple(sorted(F))
-        # bounding box
-        xs = [x for x, _ in self._P]
-        ys = [y for _, y in self._P]
-        minx, maxx = min(xs), max(xs)
-        miny, maxy = min(ys), max(ys)
-
-        array = [[None for j in range(minx, maxx + 1)]
-                 for i in range(miny, maxy + 1)]
-        for cell in self._P:
-            i, j = cell
-            i -= minx
-            j -= miny
-            array[j][i] = "o" if cell in self._F else ""
-        self._array = array
-
-    def __hash__(self) -> int:
-        """
-        Return the hash of ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.posets.chute_move import PolyominoFilling
-            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
-            sage: hash(P)  # random
-            5139392050573932802
-        """
-        return hash((self._P, self._F))
-
-    def __eq__(self, other) -> bool:
-        """
-        Check whether ``self`` is equal to ``other``.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.posets.chute_move import PolyominoFilling
-            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
-            sage: Q = PolyominoFilling([(1,1),(1,2),(2,1)],[(2,1)])
-            sage: P == P
-            True
-            sage: P == Q
-            False
-        """
-        if not isinstance(other, PolyominoFilling):
-            return False
-        return self._P == other._P and self._F == other._F
-
-    def _repr_(self) -> str:
-        """
-        Return a string representation.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.posets.chute_move import PolyominoFilling
-            sage: PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
+            sage: PolyominoFilling([(1,1),(1,2),(2,1)], [(1,2)])
             shape=((1, 1), (1, 2), (2, 1)), filling=((1, 2),)
         """
-        return f"shape={self._P}, filling={self._F}"
+        if check:
+            self._P = tuple(sorted(P))
+            self._B = tuple(sorted(B))
+        else:
+            self._P = P
+            self._B = B
+
+    def _repr_(self):
+        r"""
+        Return a text representation of a filling.
+
+        EXAMPLES::
+
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
+            sage: PolyominoFilling([(1,1),(1,2),(2,1)], [(1,2)])
+            shape=((1, 1), (1, 2), (2, 1)), filling=((1, 2),)
+        """
+        return f"shape={self._P}, filling={self._B}"
 
     def _unicode_art_(self):
-        """
+        r"""
         Return a pretty representation.
 
         EXAMPLES::
 
             sage: from sage.combinat.posets.chute_move import PolyominoFilling
-            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)], [(1,2)])
             sage: unicode_art(P)
             ┌───┬───┐
-            │   │   │
+            │   │ o │
             ├───┼───┘
-            │ o │
+            │   │
             └───┘
         """
         from sage.combinat.output import ascii_art_table
         from sage.typeset.unicode_art import UnicodeArt
-        return UnicodeArt(ascii_art_table(self._array, use_unicode=True).splitlines())
 
-    def _latex_(self) -> str:
-        """
-        Return a latex representation.
+        xs = [i for i, _ in self._P]
+        ys = [j for _, j in self._P]
+        min_i, max_i = min(xs), max(xs)
+        min_j, max_j = min(ys), max(ys)
 
-        tentative of alternative latex, still not perfect
+        array = []
+        for i in range(min_i, max_i + 1):
+            row = []
+            for j in range(min_j, max_j + 1):
+                if (i, j) not in self._P:
+                    row.append(None)
+                elif (i, j) in self._B:
+                    row.append("o")
+                else:
+                    row.append("")
+            array.append(row)
+
+        return UnicodeArt(ascii_art_table(array, use_unicode=True).splitlines())
+
+    def _latex_(self):
+        r"""
+        Return a LaTeX representation.
 
         EXAMPLES::
 
             sage: from sage.combinat.posets.chute_move import PolyominoFilling
-            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)], [(1,2)])
             sage: latex(P)
+            \begin{tikzpicture}[x=0.5cm,y=0.5cm]
+            ...
+            \end{tikzpicture}
         """
-        from sage.combinat.output import tex_from_array
-        D = {"o": r"\bullet", "": "", None: None}
-        new_array = [[D[cell] for cell in line] for line in self._array]
-        return tex_from_array(new_array, with_lines=True)
-
-    def _latex_bis_(self) -> str:
-        """
-        Return a latex representation.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.posets.chute_move import PolyominoFilling
-            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)],[(1,2)])
-            sage: latex(P)
-        """
-        draw_grid_lines = True,
-        stroke_width = ""  # very thin"
-        bullet_tex = r"\bullet"
-        cell_size = 0.5
-
         from sage.misc.latex import latex
         latex.add_package_to_preamble_if_available("tikz")
 
-        # bounding box
-        xs = [x for x, _ in self._P]
-        ys = [y for _, y in self._P]
-        minx, maxx = min(xs), max(xs)
-        miny, maxy = min(ys), max(ys)
+        xs = [i for i, _ in self._P]
+        ys = [j for _, j in self._P]
+        min_i, max_i = min(xs), max(xs)
+        min_j, max_j = min(ys), max(ys)
 
-        # shift so lower-left is (0,0)
-        shift_x = -minx
-        shift_y = -miny
-        width = maxx - minx + 1
-        height = maxy - miny + 1
+        height = max_i - min_i + 1
 
-        # Build TikZ code
-        tikz_lines = []
-        tikz_lines.append(r"\begin{tikzpicture}[x=%scm,y=%scm]" % (cell_size, cell_size))
-        tikz_lines.append(r"  \path[use as bounding box] (0,0) rectangle (%d,%d);" % (width, height))
-        # Draw each cell as a unit square at shifted coordinates
-        if draw_grid_lines:
-            for x, y in self._P:
-                sx, sy = x + shift_x, y + shift_y
-                tikz_lines.append(f"  \\draw[{stroke_width}] ({sx},{sy}) rectangle ({sx+1},{sy+1});")
-        else:
-            for x, y in self._P:
-                sx, sy = x + shift_x, y + shift_y
-                tikz_lines.append(f"  \\fill[white] ({sx},{sy}) rectangle ({sx+1},{sy+1});")
+        cell_size = 0.5
+        bullet = r"\bullet"
 
-        for x, y in self._F:
-            sx, sy = x + shift_x, y + shift_y
-            tikz_lines.append(f"  \\node at ({sx+0.5},{sy+0.5}) {{${bullet_tex}$}};")
+        lines = []
+        lines.append(r"\begin{tikzpicture}[x=%scm,y=%scm]" % (cell_size, cell_size))
 
-        tikz_lines.append(r"\end{tikzpicture}")
-        return "\n".join(tikz_lines)
+        for (i, j) in self._P:
+            x = j - min_j
+            y = height - (i - min_i) - 1
+
+            lines.append(f"\\draw ({x},{y}) rectangle ({x+1},{y+1});")
+
+            if (i, j) in self._B:
+                lines.append(f"\\node at ({x+0.5},{y+0.5}) {{$ {bullet} $}};")
+
+        lines.append(r"\end{tikzpicture}")
+        return "\n".join(lines)
+
+    def __hash__(self):
+        r"""
+        Return the hash of ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)], [(1,2)])
+            sage: hash(P)  # random
+            5139392050573932802
+        """
+        return hash((self._P, self._B))
+
+    def __eq__(self, other):
+        r"""
+        Check whether ``self`` is equal to ``other``.
+
+        EXAMPLES::
+
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)], [(1,2)])
+            sage: Q = PolyominoFilling([(1,1),(1,2),(2,1)], [(2,1)])
+            sage: P == P
+            True
+            sage: P == Q
+            False
+        """
+        return (isinstance(other, PolyominoFilling)
+                and self._P == other._P
+                and self._B == other._B)
 
 
 def ChuteMoveLattice(M, n=None):
@@ -247,13 +254,18 @@ def ChuteMoveLattice(M, n=None):
         def above_left(j):
             return sum(M(i) > j for i in range(1, Minv(j)))
 
-        top = tuple([(j, c)
-                     for j in range(1, n + 1)
-                     for c in range(1 + above_left(j), n + 2 - j)])
+        top = tuple(sorted([(j, c)
+                            for j in range(1, n + 1)
+                            for c in range(1 + above_left(j), n + 2 - j)]))
+
         M = intervals_to_polyomino([(1, n - i) for i in range(n)])
+
     else:
         boundary_cells = [(x, y) for x, y in M
-                          if (x-1, y) not in M or (x, y+1) not in M or (x-1, y+1) not in M]
+                          if (x-1, y) not in M
+                          or (x, y+1) not in M
+                          or (x-1, y+1) not in M]
+
         top = tuple(sorted(set((cx, cy)
                                for x, y in boundary_cells
                                for cx in range(x, x + n)
@@ -261,23 +273,30 @@ def ChuteMoveLattice(M, n=None):
                                if (cx, cy) in M)))
 
     def chutable(i, l):
-        # Return the other coordinate, if ``l[i]`` is a chutable
-        # coordinate and the result is in ``M``, otherwise ``None``.
+        r"""
+        Return the other coordinate, if ``l[i]`` is a chutable
+        coordinate and the result is in the polyomino, otherwise
+        return ``None``.
 
-        # the rectangle is given (in Cartesian coordinates) by
+        The rectangle is given (in Cartesian coordinates) by
+
         # a,d - c,d
         #  |     |
         # a,b - c,b
-        # with a < c and d < b
+
+        with `a < c` and `d < b`.
+
+        `(a, b)` must not be the first or last element of ``l``, and
+        the predecessor `(a, d)` of `(a, b)` must have the same `x`
+        coordinate.
+        """
         a, b = l[i]
-        # (a, b) must not be the first or last element of l
-        # the predecessor (a, d) of (a, b) must have same x coordinate
+
         i -= 1
         a1, d = l[i]
         if a1 != a:
             return
 
-        # the first element within the rectangle must be (c, b)
         i += 2
         c, b1 = l[i]
         while i + 1 < len(l) and (c == a or b1 < d or b1 > b):
@@ -290,13 +309,18 @@ def ChuteMoveLattice(M, n=None):
         return c, d
 
     def children(l):
+        r"""
+        Return the children of a given filling.
+        """
         return [tuple(sorted(l[:i] + (c,) + l[i+1:]))
                 for i in range(1, len(l)-1)
                 if (c := chutable(i, l)) is not None]
 
     S = RecursivelyEnumeratedSet([top], children,
                                  structure=None, enumeration="naive")
-    d = {PolyominoFilling(M, f): [PolyominoFilling(M, g) for g in children(f)]
+
+    F = PolyominoFilling
+    d = {F(M, f, check=False): [F(M, g, check=False) for g in children(f)]
          for f in S}
-    cat = FiniteLatticePosets().CongruenceUniform()
-    return LatticePoset(d, category=cat)
+
+    return LatticePoset(d, category=FiniteLatticePosets().CongruenceUniform())
