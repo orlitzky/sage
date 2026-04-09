@@ -597,8 +597,7 @@ cdef class Matrix(sage.structure.element.Matrix):
         """
         if self.get_unsafe(i, j):
             return 0
-        else:
-            return 1
+        return 1
 
     def add_to_entry(self, Py_ssize_t i, Py_ssize_t j, elt):
         r"""
@@ -3963,8 +3962,7 @@ cdef class Matrix(sage.structure.element.Matrix):
                     L.extend( L_prime )
         if return_diag:
             return [d[i] for i in range(self._nrows)]
-        else:
-            return True
+        return True
 
     ###################################################
     # Matrix-vector multiply
@@ -4947,8 +4945,7 @@ cdef class Matrix(sage.structure.element.Matrix):
         """
         if column_order:
             return self._nonzero_positions_by_column(copy)
-        else:
-            return self._nonzero_positions_by_row(copy)
+        return self._nonzero_positions_by_row(copy)
 
     def _nonzero_positions_by_row(self, copy=True):
         """
@@ -5144,8 +5141,7 @@ cdef class Matrix(sage.structure.element.Matrix):
             ....:         return 0
             ....:     elif i == j:
             ....:         return 1
-            ....:     else:
-            ....:         return ZZ.random_element(-100,100)
+            ....:     return ZZ.random_element(-100,100)
             sage: rnd = matrix(ZZ, 8, 8, val)
             sage: (rnd * m24 * rnd.inverse_of_unit()).multiplicative_order()            # needs sage.libs.pari
             24
@@ -5228,8 +5224,7 @@ cdef class Matrix(sage.structure.element.Matrix):
             x = P.parent().gen()
             if x**o1 % P == 1:  # or (x % P)**o1 == 1 ? maybe faster
                 return o1
-            else:
-                return Infinity
+            return Infinity
         else:
             raise NotImplementedError("multiplicative order is only implemented"
                                       " for matrices over finite fields or ZZ")
@@ -5737,8 +5732,7 @@ cdef class Matrix(sage.structure.element.Matrix):
         # Both self and right are matrices with compatible dimensions and base ring.
         if self._will_use_strassen(right):
             return self._multiply_strassen(right)
-        else:
-            return self._multiply_classical(right)
+        return self._multiply_classical(right)
 
     cdef bint _will_use_strassen(self, Matrix right) except -2:
         """
@@ -5921,8 +5915,7 @@ cdef class Matrix(sage.structure.element.Matrix):
         if R not in _Fields:
             if R in _IntegralDomains:
                 return ~self.matrix_over_field()
-            else:
-                return self.inverse_of_unit()
+            return self.inverse_of_unit()
         else:
             A = self.augment(self.parent().identity_matrix())
             A.echelonize()

@@ -547,8 +547,7 @@ draw %s width %s {%s %s %s} {%s %s %s}\n%s
         """
         if transform is None:
             return (0,0,0), (0,0,self.height)
-        else:
-            return transform.transform_point((0,0,0)), transform.transform_point((0,0,self.height))
+        return transform.transform_point((0,0,0)), transform.transform_point((0,0,self.height))
 
     def get_radius(self, transform=None):
         """
@@ -663,8 +662,7 @@ def LineSegment(start, end, thickness=1, radius=None, **kwds):
     if axis == 0:
         if diff[2] < 0:
             return cyl.translate(end)
-        else:
-            return cyl.translate(start)
+        return cyl.translate(start)
     else:
         theta = -acos(diff[2]/height)
         return cyl.rotate(axis, theta).translate(start)
@@ -790,8 +788,7 @@ def arrow3d(start, end, width=1, radius=None, head_radius=None, head_len=None, *
     if axis == 0:
         if diff[2] >= 0:
             return arrow.translate(start)
-        else:
-            return arrow.scale(-1).translate(start)
+        return arrow.scale(-1).translate(start)
     else:
         theta = -acos(diff[2]/length)
         return arrow.rotate(axis, theta).translate(start)

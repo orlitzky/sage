@@ -435,8 +435,7 @@ cpdef closest(target, values, margin=1):
             for i in range(len(values)):
                 if dists[i] is min_dist:
                     return values[i]
-        else:
-            return None
+        return None
 
 
 def root_from_approx(f, a):

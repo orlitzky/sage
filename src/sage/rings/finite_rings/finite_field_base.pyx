@@ -134,10 +134,9 @@ cdef class FiniteField(Field):
         else:
             if m == 2:
                 return False
-            elif m == 3:
+            if m == 3:
                 return True
-            else:
-                return NotImplemented
+            return NotImplemented
 
     def __repr__(self) -> str:
         """
@@ -1709,8 +1708,7 @@ cdef class FiniteField(Field):
                     pass
         if map:
             return K, inc
-        else:
-            return K
+        return K
 
     def subfields(self, degree=0, name=None):
         """

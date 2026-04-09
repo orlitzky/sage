@@ -323,8 +323,7 @@ cdef class Cache_ntl_gf2e(Cache_base):
         elif isinstance(e, Polynomial):
             if e.is_constant():
                 return self._parent(e.constant_coefficient())
-            else:
-                return e(self._parent.gen())
+            return e(self._parent.gen())
 
         elif isinstance(e, Rational):
             num = e.numer()
@@ -620,8 +619,7 @@ cdef class FiniteField_ntl_gf2eElement(FinitePolyExtElement):
         (<Cache_ntl_gf2e>self._parent._cache).F.restore()
         if not GF2E_IsZero(self.x):
             return True
-        else:
-            return False
+        return False
 
     def is_square(FiniteField_ntl_gf2eElement self):
         r"""
@@ -664,8 +662,7 @@ cdef class FiniteField_ntl_gf2eElement(FinitePolyExtElement):
         a = self ** (self._cache._order // 2)
         if all:
             return [a]
-        else:
-            return a
+        return a
 
     cpdef _add_(self, right):
         """
@@ -1080,8 +1077,7 @@ cdef class FiniteField_ntl_gf2eElement(FinitePolyExtElement):
         """
         if GF2_IsOne(GF2E_trace(self.x)):
             return GF2_1
-        else:
-            return GF2_0
+        return GF2_0
 
     def weight(self):
         """

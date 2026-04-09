@@ -52,13 +52,11 @@ cdef object binary_tree_get(binary_tree_node *self, int key):
     elif self.key > key:
         if self.left == NULL:
             return None
-        else:
-            return binary_tree_get(self.left, key)
+        return binary_tree_get(self.left, key)
     else:
         if self.right == NULL:
             return None
-        else:
-            return binary_tree_get(self.right, key)
+        return binary_tree_get(self.right, key)
 
 cdef object binary_tree_delete(binary_tree_node *self, int key):
     cdef object t

@@ -501,8 +501,7 @@ cdef class CVXPYBackend:
         else:
             if variable < len(self.objective_coefficients):
                 return self.objective_coefficients[variable]
-            else:
-                return 0
+            return 0
 
     cpdef int solve(self) except -1:
         """
@@ -667,8 +666,7 @@ cdef class CVXPYBackend:
         if name is None:
             if self.prob_name is not None:
                 return self.prob_name
-            else:
-                return ""
+            return ""
         else:
             self.prob_name = str(name)
 

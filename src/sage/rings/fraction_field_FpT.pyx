@@ -370,8 +370,7 @@ cdef class FpTElement(FieldElement):
         """
         if nmod_poly_degree(self._denom) == 0 and nmod_poly_get_coeff_ui(self._denom, 0) == 1:
             return self.numer()._latex_()
-        else:
-            return "\\frac{%s}{%s}" % (self.numer()._latex_(), self.denom()._latex_())
+        return "\\frac{%s}{%s}" % (self.numer()._latex_(), self.denom()._latex_())
 
     cpdef _richcmp_(self, other, int op):
         """
@@ -828,8 +827,7 @@ cdef class FpTElement(FieldElement):
             if all:
                 if not s:
                     return [s]
-                else:
-                    return [s, -s]
+                return [s, -s]
             else:
                 return s
 

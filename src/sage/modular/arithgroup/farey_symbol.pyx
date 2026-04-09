@@ -580,10 +580,9 @@ cdef class Farey:
         """
         if hasattr(self.group, "_repr_"):
             return "FareySymbol(%s)" % self.group._repr_()
-        elif hasattr(self.group, "__repr__"):
+        if hasattr(self.group, "__repr__"):
             return "FareySymbol(%r)" % self.group
-        else:
-            return "FareySymbol(?)"
+        return "FareySymbol(?)"
 
     def _latex_(self, forced_format=None):
         r"""

@@ -296,7 +296,7 @@ def solve(F, converter=None, solver=None, n=1, target_variables=None, **kwds):
             return False
         if S[0] is None:
             return None
-    elif S[-1] is False:
+    if S[-1] is False:
         return S[0:-1]
     return S
 

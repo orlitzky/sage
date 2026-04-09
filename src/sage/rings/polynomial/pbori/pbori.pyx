@@ -817,8 +817,7 @@ cdef class BooleanPolynomialRing(BooleanPolynomialRing_base):
         if isinstance(other, (int, Integer)):
             if other % 2:
                 return self._one_element
-            else:
-                return self._zero_element
+            return self._zero_element
         elif isinstance(other, BooleanMonomial):
             if (<BooleanMonomial>other)._ring is self:
                 p = new_BP_from_PBMonom(self, (<BooleanMonomial>other)._pbmonom)
@@ -1014,8 +1013,7 @@ cdef class BooleanPolynomialRing(BooleanPolynomialRing_base):
 
         if i % 2:
             return self._one_element
-        else:
-            return self._zero_element
+        return self._zero_element
 
     def __hash__(self) -> int:
         """
@@ -1287,8 +1285,7 @@ cdef class BooleanPolynomialRing(BooleanPolynomialRing_base):
         if l == 1:
             if dfirst:
                 return self._random_monomial_dfirst(degree, vars_set)
-            else:
-                return self._random_monomial_uniform(monom_counts, vars_set)
+            return self._random_monomial_uniform(monom_counts, vars_set)
 
         return (self._random_uniform_rec(degree, monom_counts,
                                          vars_set, dfirst, l // 2) +
@@ -2532,8 +2529,7 @@ cdef class BooleanMonomial(MonoidElement):
 
         if self.reducible_by(x.lm()):
             return 1
-        else:
-            return 0
+        return 0
 
     def divisors(self):
         """
@@ -3101,8 +3097,7 @@ cdef class BooleanPolynomial(MPolynomial):
         """
         if left:
             return new_BP_from_PBPoly(self._parent, self._pbpoly)
-        else:
-            return self._parent.zero()
+        return self._parent.zero()
 
     cpdef _mul_(left, right):
         """
@@ -3356,8 +3351,7 @@ cdef class BooleanPolynomial(MPolynomial):
         if x is not None:
             if self._pbpoly.set().multiplesOf(x._pbpoly.firstTerm()).isZero():
                 return 0
-            else:
-                return 1
+            return 1
         return self._pbpoly.deg()
 
     def lm(BooleanPolynomial self):
@@ -3868,8 +3862,7 @@ cdef class BooleanPolynomial(MPolynomial):
         mon = B.coerce(mon)
         if mon in set(self.set()):
             return k._one_element
-        else:
-            return k._zero_element
+        return k._zero_element
 
     def constant_coefficient(self):
         """
@@ -3886,8 +3879,7 @@ cdef class BooleanPolynomial(MPolynomial):
         cdef BooleanPolynomialRing B = <BooleanPolynomialRing>self._parent
         if self._pbpoly.hasConstantPart():
             return B._base._one_element
-        else:
-            return B._base._zero_element
+        return B._base._zero_element
 
     def __hash__(self) -> int:
         r"""
@@ -5210,12 +5202,10 @@ class BooleanPolynomialIdeal(MPolynomialIdeal):
             sage: I == J
             False
         """
-        if not isinstance(other, BooleanPolynomialIdeal):
+        if not isinstance(other, BooleanPolynomialIdeal) or \
+           self.ring() != other.ring():
             return False
-        elif self.ring() != other.ring():
-            return False
-        else:
-            return self.groebner_basis() == other.groebner_basis()
+        return self.groebner_basis() == other.groebner_basis()
 
     def __ne__(self, other) -> bool:
         """
@@ -5994,10 +5984,9 @@ cdef class CCuddNavigator:
 
         if op == Py_EQ:
             return equal
-        elif op == Py_NE:
+        if op == Py_NE:
             return not equal
-        else:
-            return NotImplemented
+        return NotImplemented
 
     def __hash__(self) -> int:
         return self._pbnav.hash()

@@ -367,8 +367,7 @@ cdef class GLPKBackend(GenericBackend):
             n = <char *> glp_get_prob_name(self.lp)
             if n == NULL:
                 return ""
-            else:
-                return char_to_str(n)
+            return char_to_str(n)
 
         else:
             name = str_to_bytes(name)
@@ -1416,8 +1415,7 @@ cdef class GLPKBackend(GenericBackend):
 
         if s != NULL:
             return char_to_str(s)
-        else:
-            return ""
+        return ""
 
     cpdef row_name(self, int index):
         """
@@ -1456,8 +1454,7 @@ cdef class GLPKBackend(GenericBackend):
 
         if s != NULL:
             return char_to_str(s)
-        else:
-            return ""
+        return ""
 
     cpdef bint is_variable_binary(self, int index) noexcept:
         """
@@ -1658,8 +1655,7 @@ cdef class GLPKBackend(GenericBackend):
             sig_off()
             if x == DBL_MAX:
                 return None
-            else:
-                return x
+            return x
         else:
             sig_on()
             min = glp_get_col_lb(self.lp, index + 1)
@@ -1758,8 +1754,7 @@ cdef class GLPKBackend(GenericBackend):
             sig_off()
             if x == -DBL_MAX:
                 return None
-            else:
-                return x
+            return x
         else:
             sig_on()
             max = glp_get_col_ub(self.lp, index + 1)
@@ -2633,8 +2628,7 @@ cdef class GLPKBackend(GenericBackend):
 
         if self.simplex_or_intopt == simplex_only:
             return glp_get_row_dual(self.lp, variable+1)
-        else:
-            return 0.0
+        return 0.0
 
     cpdef double get_col_dual(self, int variable) except? -1:
         """
@@ -2687,8 +2681,7 @@ cdef class GLPKBackend(GenericBackend):
 
         if self.simplex_or_intopt == simplex_only:
             return glp_get_col_dual(self.lp, variable+1)
-        else:
-            return 0.0
+        return 0.0
 
     cpdef int get_row_stat(self, int i) except? -1:
         """

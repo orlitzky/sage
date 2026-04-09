@@ -871,8 +871,7 @@ cdef class Matrix_gfpn_dense(Matrix_dense):
         if self.Data == NULL:
             if N.Data == NULL:
                 return rich_to_bool(op, 0)
-            else:
-                return rich_to_bool(op, 1)
+            return rich_to_bool(op, 1)
         elif N.Data == NULL:
             return rich_to_bool(op, -1)
         if self.Data.Field != N.Data.Field:

@@ -755,8 +755,7 @@ cdef class InteractiveLPBackend:
         if name is None:
             if self.prob_name is not None:
                 return self.prob_name
-            else:
-                return ""
+            return ""
         else:
             self.prob_name = str(name)
 

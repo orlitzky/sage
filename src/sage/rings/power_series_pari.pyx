@@ -713,8 +713,7 @@ cdef class PowerSeries_pari(PowerSeries):
             l = lg(g.g) - 2  # t_POL has 2 codewords
             if n <= l:
                 return [R(g.new_ref(gel(g.g, i + 2))) for i in range(n)]
-            else:
-                return ([R(g.new_ref(gel(g.g, i + 2))) for i in range(l)]
+            return ([R(g.new_ref(gel(g.g, i + 2))) for i in range(l)]
                         + [R.zero()] * (n - l))
         elif typ(g.g) == t_SER and varn(g.g) == get_var(self._parent.variable_name()):
             l = lg(g.g) - 2  # t_SER has 2 codewords

@@ -2213,8 +2213,7 @@ cdef class Polynomial_rational_flint(Polynomial):
             H = PariGroup(G, self.degree())
             if pari_group:
                 return H
-            else:
-                return PermutationGroup(H)
+            return PermutationGroup(H)
 
         elif algorithm == 'kash':
             try:
