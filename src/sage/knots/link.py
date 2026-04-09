@@ -3766,10 +3766,11 @@ class Link(SageObject):
 
         .. NOTE::
 
-            an alternative plot can be optained by the
-            `SnapPy method view <https://snappy.computop.org/spherogram.html#spherogram.Link.view>__`.
+            an alternative plot can be optained by the SnapPy method `view`_.
             If the optional package ``snappy`` has been installed this can be
-            obtained by ``L.snappy_link().view()`` for a link ``L``.
+            obtained by ``snappy(L).view()`` for a link ``L``.
+
+        .. _`view`: https://snappy.computop.org/spherogram.html#spherogram.Link.view
 
         EXAMPLES:
 
@@ -5032,9 +5033,10 @@ class Link(SageObject):
         .. NOTE::
 
             This method is taken from the SnapPy method ``verify_hyperbolicity``
-            and therefore needs the optional package ``snappy``. More
-            information on the usage of the method can be found
-            `here <https://snappy.computop.org/manifold.html#snappy.Manifold.verify_hyperbolicity>`__.
+            and therefore needs the optional package ``snappy``. For more
+            information on the usage of the method see `verify_hyperbolicity`_.
+
+        .. _`verify_hyperbolicity`: https://snappy.computop.org/manifold.html#snappy.Manifold.verify_hyperbolicity
 
         OUTPUT: a list of elements of :class:`~sage.rings.complex_interval.ComplexIntervalField`
 
@@ -5063,9 +5065,8 @@ class Link(SageObject):
         .. NOTE::
 
             This method is taken from the SnapPy method ``verify_hyperbolicity``
-            and therefore needs the optional package ``snappy``. More
-            information on the usage of the method can be found
-            `here <https://snappy.computop.org/manifold.html#snappy.Manifold.verify_hyperbolicity>`__.
+            and therefore needs the optional package ``snappy``. For more
+            information on the usage of the method see `verify_hyperbolicity`_.
 
         OUTPUT: a boolean
 
@@ -5115,17 +5116,17 @@ class Link(SageObject):
 
         .. NOTE::
 
-            This method is taken from the SnapPy method ``simplify``
-            and therefore needs the optional package ``snappy``. More
-            information on the usage of the method can be found
-            `here <https://snappy.computop.org/spherogram.html#spherogram.Link.simplify>`__.
+            This method is taken from the SnapPy method ``simplify`` by
+            default. If the optional package ``snappy`` is not present
+            a second attempt is performed via the optional package ``regina``.
+            and its methods ``simplifyExhaustive`` (for knots) and
+            ``simplify`` (for multi-component links or if
+            the option ``exhaustive=False`` is set). For more
+            information on the usage of these methods see `simplify_snappy`_
+            respective `simplify_regina`_.
 
-            This method is taken from the Regina methods ``simplifyExhaustive``
-            (for knots) and ``intelligentSimplify`` (for multi-component links
-            or if the option ``exhaustive=False`` is set) and therefore needs
-            the optional package ``regina``. More information on the usage of
-            the method can be found
-            `here <https://regina-normal.github.io/engine-docs/classregina_1_1Link.html#a60fe044c436e5e1a8861de2ccb106e1c>`__.
+        .. _`simplify_snappy`: https://snappy.computop.org/spherogram.html#spherogram.Link.simplify
+        .. _`simplify_regina`: https://regina-normal.github.io/engine-docs/classregina_1_1Link.html#a0ae2d7740007b145ca98a0c8e4f4d2d9
 
         OUTPUT: an instance of class :class:`Link` or ``None``
 
@@ -5167,7 +5168,7 @@ class Link(SageObject):
         if self.is_knot() and exhaustive:
             res = rL.simplifyExhaustive(height=height, threads=threads)
         else:
-            res = rL.intelligentSimplify()
+            res = rL.simplify()
         if res:
             return self.__class__(rL)
         return None

@@ -504,8 +504,9 @@ class Knot(Link, Element, metaclass=InheritComparisonClasscallMetaclass):
 
            This method uses the SnapPy ``is_isometric_to`` method of manifolds.
            It therefore needs the optional package ``snappy``. For more
-           information on this see
-           `here <https://snappy.computop.org/manifold.html#snappy.Manifold.is_isometric_to>`__.
+           information on this see `is_isometric_to`_.
+
+        .. _`is_isometric_to`: https://snappy.computop.org/manifold.html#snappy.Manifold.is_isometric_to
 
         EXAMPLES::
 
@@ -551,8 +552,9 @@ class Knot(Link, Element, metaclass=InheritComparisonClasscallMetaclass):
 
            This method is taken from the SnapPy method ``deconnect_sum``
            and therefore needs the optional package ``snappy``. More
-           information on the usage of the method can be found
-           `here <https://snappy.computop.org/spherogram.html#spherogram.Link.deconnect_sum>`__.
+           information on the usage of the method can be found in `deconnect_sum`_.
+
+        .. _`deconnect_sum`: https://snappy.computop.org/spherogram.html#spherogram.Link.deconnect_sum
 
         OUTPUT: a list of instances of class :class:`Knot`
 
