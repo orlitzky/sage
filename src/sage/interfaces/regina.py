@@ -391,7 +391,7 @@ class ReginaElement(PythonInternalElement):
         nspc = P._namespace
         if hasattr(inst, 'sage'):
             return inst.sage()
-        elif isinstance(inst, (nspc.Polynomial, nspc.Laurent, nspc.Laurent2)):
+        if isinstance(inst, (nspc.Polynomial, nspc.Laurent, nspc.Laurent2)):
             if self._sage_parent:
                 R = self._sage_parent
                 old_var_names = ['x', 'y']
@@ -411,7 +411,7 @@ class ReginaElement(PythonInternalElement):
                     R = LaurentPolynomialRing(ZZ, 'x, y')
                 lc = R.gens_dict()
             return from_detail_str(lc)
-        elif isinstance(inst, nspc.GroupExpression):
+        if isinstance(inst, nspc.GroupExpression):
             num_gens = max(t.generator for t in inst.terms()) + 1
             if self._sage_parent:
                 F = self._sage_parent
@@ -421,12 +421,12 @@ class ReginaElement(PythonInternalElement):
             gens = F.gens()
             lc = {'g%s' % i: gens[i] for i in range(num_gens)}
             return from_detail_str(lc)
-        elif isinstance(inst, nspc.Link):
+        if isinstance(inst, nspc.Link):
             from sage.knots.link import Link
             return Link(inst.pdData())
-        elif hasattr(self, 'detail'):
+        if hasattr(self, 'detail'):
             return from_detail_str(locals)
-        elif locals:
+        if locals:
             # if locals are given we use `_sage_repr`
             # surely this only covers simple cases
             from sage.misc.sage_eval import sage_eval

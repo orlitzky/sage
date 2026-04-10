@@ -145,10 +145,8 @@ class PythonInternalInterface(ExtraTabCompletion, Interface):
                 nam = self._namespace.__name__
                 if callable(val):
                     return eval('%s.%s' % (nam, code), globs)
-                else:
-                    return val
-            else:
-                return eval(code, globs)
+                return val
+            return eval(code, globs)
         return exec(code, globs)
 
     def eval(self, code, *args, **kwds):
@@ -286,14 +284,13 @@ class PythonInternalInterface(ExtraTabCompletion, Interface):
             coerce_name = '_%s_' % self.name()
             if isinstance(arg, InterfaceElement) and arg.parent() is self:
                 return arg._inst
-            elif isinstance(arg, (list, tuple)):
+            if isinstance(arg, (list, tuple)):
                 return type(arg)([convert_arg(i) for i in arg])
-            elif hasattr(arg, coerce_name):
+            if hasattr(arg, coerce_name):
                 coerce = arg.__getattribute__(coerce_name)
                 reg = coerce(self)
                 return convert_arg(reg)
-            else:
-                return arg
+            return arg
 
         if args:
             args = list(args)
@@ -343,12 +340,10 @@ class PythonInternalInterface(ExtraTabCompletion, Interface):
                 from sage.interfaces.regina import Regina
                 if isinstance(self, Regina):
                     return self(res.__class__(res))  # this is the way to get a copy of a Regina object
-                else:
-                    return self._object_class()(self, res)
-            elif type(res) in (list, tuple):
                 return self._object_class()(self, res)
-            else:
-                return res
+            if type(res) in (list, tuple):
+                return self._object_class()(self, res)
+            return res
 
     def _equality_symbol(self):
         r"""
@@ -548,7 +543,7 @@ class PythonInternalElement(ExtraTabCompletion, InterfaceElement):
         if attrname == '_inst':
             self._inst = P.get(self.name())
             return self._inst
-        elif attrname[:1] == "_":
+        if attrname[:1] == "_":
             raise AttributeError
         else:
             inst = self._inst
@@ -624,14 +619,14 @@ class PythonInternalElement(ExtraTabCompletion, InterfaceElement):
         from sage.structure.richcmp import rich_to_bool, op_EQ, op_NE
         if self._inst == other._inst:
             return rich_to_bool(op, 0)
-        elif op == op_EQ:
+        if op == op_EQ:
             return False
-        elif op == op_NE:
+        if op == op_NE:
             return True
         try:
             if self._inst < other._inst:
                 return rich_to_bool(op, -1)
-            elif self._inst > other._inst:
+            if self._inst > other._inst:
                 return rich_to_bool(op, 1)
         except TypeError:
             pass
@@ -684,8 +679,7 @@ class PythonInternalElement(ExtraTabCompletion, InterfaceElement):
             if is_native(sinst) and is_native(oinst):
                 if operation == '*':
                     return P(sinst * oinst)
-                else:
-                    return P(sinst + oinst)
+                return P(sinst + oinst)
             if type(sinst) == type(oinst):
                 if hasattr(self, 'addTermsLast'):
                     new = self.__deepcopy__()
@@ -702,13 +696,11 @@ class PythonInternalElement(ExtraTabCompletion, InterfaceElement):
 
             if exp == 1:
                 return self
-            elif exp == 2:
+            if exp == 2:
                 return self * self
-            elif exp > 0:
-                for i in range(exp):
-                    return self**(exp - 1) * self
-            else:
-                return (~self)**(-exp)
+            if exp > 0:
+                return self**(exp - 1) * self
+            return (~self)**(-exp)
         if operation == '1/':
             if is_native(sinst):
                 return P(1 / sinst)
