@@ -1707,7 +1707,10 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
             k = self.parent()._arity
             if parent is None:
                 p = SymmetricFunctions(QQ).powersum()
-                parent = tensor([p]*k)
+                if k == 1:
+                    parent = p
+                else:
+                    parent = tensor([p]*k)
             elif parent not in Modules.WithBasis:
                 raise ValueError("`parent` should be a module with basis indexed by partitions")
             base_ring = parent.base_ring()
@@ -1716,13 +1719,17 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
             for i, s in enumerate(dompart):
                 pi.update({e: i for e in s})
 
+
             def cycle_type(g):
                 tuples = g.cycle_tuples(singletons=True)
                 cycle_type = [[] for _ in range(k)]
                 for c in tuples:
                     cycle_type[pi[c[0]]].append(len(c))
-                return tuple([_Partitions(sorted(c, reverse=True))
-                              for c in cycle_type])
+                parts = [_Partitions(sorted(c, reverse=True))
+                         for c in cycle_type]
+                if k == 1:
+                    return parts[0]
+                return tuple(parts)
 
             return (parent.sum_of_terms([cycle_type(C.an_element()),
                                          base_ring(C.cardinality())]
