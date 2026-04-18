@@ -103,12 +103,10 @@ class PythonInternalInterface(ExtraTabCompletion, Interface):
         EXAMPLES::
 
             sage: regina._start()
-            sage: type(regina._namespace.Cyclotomic())
+            sage: regina._namespace.Cyclotomic
             <class 'regina.engine.Cyclotomic'>
             sage: snappy._start()
-            sage: type(snappy._namespace.Manifold())
-            Starting the link editor.
-            Select Tools->Send to SnapPy to load the link complement.
+            sage: snappy._namespace.Manifold
             <class 'SnapPy.Manifold'>
         """
         raise NotImplementedError('this method must be implemented in the child class')
@@ -536,8 +534,8 @@ class PythonInternalElement(ExtraTabCompletion, InterfaceElement):
 
             sage: type(regina.AbelianGroup().detail)
             <class 'sage.interfaces.python_internal.PythonInternalFunctionElement'>
-            sage: regina.AbelianGroup().detail._name
-            <bound method pybind11_detail_function_record_v1_system_libstdcpp_gxx_abi_1xxx_use_cxx11_abi_1.detail of <regina.AbelianGroup: 0>>
+            sage: snappy.Link().PD_code
+            <bound method Link.PD_code of <Link: 0 comp; 0 cross>>
         """
         P = self._check_valid()
         if attrname == '_inst':
@@ -717,9 +715,12 @@ class PythonInternalFunctionElement(InterfaceFunctionElement):
     EXAMPLES::
 
         sage: A = regina.AbelianGroup()
-        sage: A.addRank
-        <bound method pybind11_detail_function_record_v1_system_libstdcpp_gxx_abi_1xxx_use_cxx11_abi_1.addRank of <regina.AbelianGroup: 0>>
         sage: type(A.addRank)
+        <class 'sage.interfaces.python_internal.PythonInternalFunctionElement'>
+        sage: M = snappy.Manifold('9_42')
+        sage: M.DT_code
+        <bound method Triangulation.DT_code of 9_42(0,0)>
+        sage: type(M.DT_code)
         <class 'sage.interfaces.python_internal.PythonInternalFunctionElement'>
     """
     def __call__(self, *args, **kwds):
