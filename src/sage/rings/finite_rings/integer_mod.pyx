@@ -3021,9 +3021,9 @@ cdef class IntegerMod_int(IntegerMod_abstract):
                 if all:
                     return [self._new_c(i), self._new_c(n-i)]
                 return self._new_c(i)
-            elif self.ivalue == 0:
+            if self.ivalue == 0:
                 return [self] if all else self
-            elif not extend:
+            if not extend:
                 if all:
                     return []
                 raise ValueError("self must be a square")
@@ -3033,14 +3033,13 @@ cdef class IntegerMod_int(IntegerMod_abstract):
         elif n <= 100 or n / (1 << len(moduli)) < 5000:
             if all:
                 return [self._new_c(i) for i from 0 <= i < n if (i*i) % n == self.ivalue]
-            else:
-                for i from 0 <= i <= n/2:
-                    if (i*i) % n == self.ivalue:
-                        return self._new_c(i)
-                if not extend:
-                    if all:
-                        return []
-                    raise ValueError("self must be a square")
+            for i from 0 <= i <= n/2:
+                if (i*i) % n == self.ivalue:
+                    return self._new_c(i)
+            if not extend:
+                if all:
+                    return []
+                raise ValueError("self must be a square")
         # Either it failed but extend was True, or the generic algorithm is better
         return IntegerMod_abstract.sqrt(self, extend=extend, all=all)
 

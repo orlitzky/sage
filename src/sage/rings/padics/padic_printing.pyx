@@ -1102,25 +1102,25 @@ cdef class pAdicPrinter_class(SageObject):
                 if paren and not do_latex:
                     return "(%s)" % (s)
                 return s
-            else: # mode == series
-                slist = self.base_p_list(elt, pos)
-                slist, ellipsis = self._truncate_list(slist, self.max_ram_terms, 0)
-                s = ""
-                exp = elt.valuation()
-                for a in slist:
-                    if a != 0:
-                        if a < 0:
-                            if len(s) == 0:
-                                s = "-"
-                            else:
-                                s += " - "
-                            a = -a
-                        elif len(s) != 0:
-                            s += " + "
-                        s += self._co_dot_var(a, ram_name, exp, do_latex)
-                    exp += 1
-                if ellipsis:
-                    s += self._plus_ellipsis(do_latex)
+            # mode == series
+            slist = self.base_p_list(elt, pos)
+            slist, ellipsis = self._truncate_list(slist, self.max_ram_terms, 0)
+            s = ""
+            exp = elt.valuation()
+            for a in slist:
+                if a != 0:
+                    if a < 0:
+                        if len(s) == 0:
+                            s = "-"
+                        else:
+                            s += " - "
+                        a = -a
+                    elif len(s) != 0:
+                        s += " + "
+                    s += self._co_dot_var(a, ram_name, exp, do_latex)
+                exp += 1
+            if ellipsis:
+                s += self._plus_ellipsis(do_latex)
         else: # not self.base
             if mode == terse:
                 if elt.parent()._implementation == 'FLINT':

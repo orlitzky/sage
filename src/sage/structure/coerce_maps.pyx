@@ -107,10 +107,9 @@ cdef class DefaultConvertMap_unique(Map):
                 if len(kwds) == 0:
                     return C._element_constructor(x)
                 return C._element_constructor(x, **kwds)
-            else:
-                if len(kwds) == 0:
-                    return C._element_constructor(x, *args)
-                return C._element_constructor(x, *args, **kwds)
+            if len(kwds) == 0:
+                return C._element_constructor(x, *args)
+            return C._element_constructor(x, *args, **kwds)
         except Exception:
             if print_warnings:
                 print(type(C), C)

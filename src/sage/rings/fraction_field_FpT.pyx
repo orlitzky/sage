@@ -821,15 +821,12 @@ cdef class FpTElement(FieldElement):
         if s is None:
             if extend:
                 raise NotImplementedError("function fields not yet implemented")
-            else:
-                raise ValueError("not a perfect square")
-        else:
-            if all:
-                if not s:
-                    return [s]
-                return [s, -s]
-            else:
-                return s
+            raise ValueError("not a perfect square")
+        if all:
+            if not s:
+                return [s]
+            return [s, -s]
+        return s
 
     def __pow__(FpTElement self, Py_ssize_t e, dummy):
         r"""

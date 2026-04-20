@@ -1338,11 +1338,10 @@ cdef class LazyNamedUnop(LazyUnop):
             if has_extra_args:
                 return f(arg, *self._extra_args)
             return f(arg)
-        else:
-            f = getattr(arg, self._op)
-            if has_extra_args:
-                return f(*self._extra_args)
-            return f()
+        f = getattr(arg, self._op)
+        if has_extra_args:
+            return f(*self._extra_args)
+        return f()
 
     def approx(self):
         """
@@ -1485,33 +1484,31 @@ cdef class LazyConstant(LazyFieldElement):
         if self._name == 'I':
             if R is float:
                 raise ValueError('I is not a real number')
-            elif R is complex:
+            if R is complex:
                 return 1j
-            else:
-                I = R.gen()
-                if I*I != -R.one():
-                    raise TypeError("The complex constant I is not in this complex field.")
-                return I
+            I = R.gen()
+            if I*I != -R.one():
+                raise TypeError("The complex constant I is not in this complex field.")
+            return I
 
-        elif self._name == 'e':
+        if self._name == 'e':
             if R is float:
                 return math.e
             if R is complex:
                 return complex(math.e)
             return R(1).exp()
 
-        elif R is float:
+        if R is float:
             # generic float
             return getattr(math, self._name)
-        elif R is complex:
+        if R is complex:
             # generic complex
             return complex(getattr(cmath, self._name))
-        else:
-            # generic Sage parent
-            f = getattr(R, self._name)
-            if self._extra_args is None:
-                return f()
-            return f(*self._extra_args)
+        # generic Sage parent
+        f = getattr(R, self._name)
+        if self._extra_args is None:
+            return f()
+        return f(*self._extra_args)
 
     def __call__(self, *args):
         """

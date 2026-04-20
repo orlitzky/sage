@@ -1074,8 +1074,7 @@ cdef class Rational(sage.structure.element.FieldElement):
             if sizeof(long) == 4 and mpz_sizeinbase(mpq_numref(self.value), 2) <= 63:
                 return numpy_int64_interface
             return numpy_object_interface
-        else:
-            return numpy_double_interface
+        return numpy_double_interface
 
     def _mathml_(self):
         """
@@ -3969,7 +3968,7 @@ cdef double mpq_get_d_nearest(mpq_t x) except? -648555075988944.5:
         if resultsign < 0:
             return -0.0
         return 0.0
-    elif shift >= 971:  # |d| > 2^1024
+    if shift >= 971:  # |d| > 2^1024
         if resultsign < 0:
             return float('-inf')
         return float('inf')

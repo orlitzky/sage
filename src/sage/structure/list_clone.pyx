@@ -1612,7 +1612,7 @@ cdef class ClonableIntArray(ClonableElement):
             if rgt._list is NULL:
                 return rich_to_bool(op, 0)
             return rich_to_bool(op, -1)
-        elif rgt._list is NULL:
+        if rgt._list is NULL:
             return rich_to_bool(op, 1)
         if left._len < rgt._len:
             minlen = left._len

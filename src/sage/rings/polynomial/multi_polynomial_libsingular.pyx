@@ -1821,15 +1821,15 @@ cdef class MPolynomialRing_libsingular(MPolynomialRing_base):
 
         if p == NULL:
             if q == NULL:
-                return False #GCD(0,0) = 0
-            return True #GCD(x,0) = 1
-        elif q == NULL:
-            return True # GCD(0,x) = 1
-        elif p_IsConstant(p,r) or p_IsConstant(q,r): # assuming a base field
+                return False  # GCD(0,0) = 0
+            return True  # GCD(x,0) = 1
+        if q == NULL:
+            return True  # GCD(0,x) = 1
+        if p_IsConstant(p, r) or p_IsConstant(q, r):  # assuming a base field
             return False
 
         for i from 1 <= i <= r.N:
-            if p_GetExp(p,i,r) and p_GetExp(q,i,r):
+            if p_GetExp(p, i, r) and p_GetExp(q, i, r):
                 return False
         return True
 

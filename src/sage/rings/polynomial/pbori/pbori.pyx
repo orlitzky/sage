@@ -818,11 +818,11 @@ cdef class BooleanPolynomialRing(BooleanPolynomialRing_base):
             if other % 2:
                 return self._one_element
             return self._zero_element
-        elif isinstance(other, BooleanMonomial):
+        if isinstance(other, BooleanMonomial):
             if (<BooleanMonomial>other)._ring is self:
                 p = new_BP_from_PBMonom(self, (<BooleanMonomial>other)._pbmonom)
                 return p
-            elif (<BooleanMonomial>other)._parent.ngens() <= \
+            if (<BooleanMonomial>other)._parent.ngens() <= \
                     self._pbring.nVariables():
                 try:
                     var_mapping = get_var_mapping(self, other.parent())
@@ -832,11 +832,9 @@ cdef class BooleanPolynomialRing(BooleanPolynomialRing_base):
                 for i in other.iterindex():
                     p *= var_mapping[i]
                 return p
-            else:
-                raise TypeError("cannot coerce monomial %s to %s" % (other, self))
-
-        elif isinstance(other, BooleanPolynomial) and \
-                ((<BooleanPolynomialRing>(<BooleanPolynomial>other)._parent)._pbring.nVariables() <= self._pbring.nVariables()):
+            raise TypeError("cannot coerce monomial %s to %s" % (other, self))
+        if isinstance(other, BooleanPolynomial) and \
+            ((<BooleanPolynomialRing>(<BooleanPolynomial>other)._parent)._pbring.nVariables() <= self._pbring.nVariables()):
             # try PolyBoRi's built-in coercions
             if self._pbring.hash() == \
                     (<BooleanPolynomialRing>(<BooleanPolynomial>other)._parent)._pbring.hash():
@@ -853,7 +851,7 @@ cdef class BooleanPolynomialRing(BooleanPolynomialRing_base):
                     new_monom *= var_mapping[i]
                 p += new_monom
             return p
-        elif isinstance(other, (MPolynomial, Polynomial_generic)) and \
+        if isinstance(other, (MPolynomial, Polynomial_generic)) and \
                 self.base_ring().has_coerce_map_from(other.base_ring()) and \
                 (other.parent().ngens() <= self._pbring.nVariables()):
             try:
@@ -871,15 +869,12 @@ cdef class BooleanPolynomialRing(BooleanPolynomialRing_base):
                             m *= var_mapping[j]
                     p += m
             return p
-
-        elif isinstance(other, Element) and \
+        if isinstance(other, Element) and \
                 self.base_ring().has_coerce_map_from(other.parent()):
             if self.base_ring()(other).is_zero():
                 return self._zero_element
             return self._one_element
-        else:
-            raise TypeError("cannot coerce from %s to %s" %
-                            (type(other), str(self)))
+        raise TypeError("cannot coerce from %s to %s" % (type(other), str(self)))
 
     def _element_constructor_(self, other):
         """

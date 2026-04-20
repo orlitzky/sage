@@ -5213,8 +5213,7 @@ cdef _simplest_rational_exact(Rational low, Rational high, int low_open, int hig
                 if high_open:
                     return ~Rational(inv_high.floor() + 1)
                 return ~Rational(inv_high.ceil())
-            else:
-                return Rational(0)
+            return Rational(0)
 
         if high > 1:
             return Rational(1)

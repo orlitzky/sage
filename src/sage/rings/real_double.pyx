@@ -344,7 +344,7 @@ cdef class RealDoubleField_class(sage.rings.abc.RealDoubleField):
             if S.prec() >= 53:
                 return ToRDF(S)
             return None
-        elif is_numpy_type(S):
+        if is_numpy_type(S):
             import numpy
             if issubclass(S, numpy.integer) or issubclass(S, numpy.floating):
                 return ToRDF(S)

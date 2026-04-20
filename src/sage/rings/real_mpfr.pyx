@@ -2066,7 +2066,7 @@ cdef class RealNumber(sage.structure.element.RingElement):
             if base >= 24:
                 return "@NaN@"
             return "NaN"
-        elif mpfr_inf_p(self.value):
+        if mpfr_inf_p(self.value):
             if mpfr_sgn(self.value) > 0:
                 return "+infinity"
             return "-infinity"

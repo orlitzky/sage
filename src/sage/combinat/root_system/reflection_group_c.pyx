@@ -175,12 +175,11 @@ cdef class Iterator():
             if self.tracking_words:
                 return self.iter_words_depth()
             return self.iter_depth()
-        elif self.algorithm == "breadth":
+        if self.algorithm == "breadth":
             if self.tracking_words:
                 return self.iter_words_breadth()
             return self.iter_breadth()
-        elif self.algorithm == "parabolic":
-            return self.iter_parabolic()
+        return self.iter_parabolic()
 
     def iter_depth(self):
         """

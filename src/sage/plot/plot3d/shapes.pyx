@@ -651,21 +651,20 @@ def LineSegment(start, end, thickness=1, radius=None, **kwds):
     - Robert Bradshaw
     """
     if radius is None:
-        radius = thickness/50.0
+        radius = thickness / 50.0
     start = vector(RDF, start, sparse=False)
-    end   = vector(RDF, end, sparse=False)
-    zaxis = vector(RDF, (0,0,1), sparse=False)
-    diff  = end - start
-    height= sqrt(diff.dot_product(diff))
-    cyl   = Cylinder(radius, height, **kwds)
-    axis  = zaxis.cross_product(diff)
+    end = vector(RDF, end, sparse=False)
+    zaxis = vector(RDF, (0, 0, 1), sparse=False)
+    diff = end - start
+    height = sqrt(diff.dot_product(diff))
+    cyl = Cylinder(radius, height, **kwds)
+    axis = zaxis.cross_product(diff)
     if axis == 0:
         if diff[2] < 0:
             return cyl.translate(end)
         return cyl.translate(start)
-    else:
-        theta = -acos(diff[2]/height)
-        return cyl.rotate(axis, theta).translate(start)
+    theta = -acos(diff[2] / height)
+    return cyl.rotate(axis, theta).translate(start)
 
 
 def arrow3d(start, end, width=1, radius=None, head_radius=None, head_len=None, **kwds):

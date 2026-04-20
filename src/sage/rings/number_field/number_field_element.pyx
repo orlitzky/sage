@@ -2188,8 +2188,7 @@ cdef class NumberFieldElement(NumberFieldElement_base):
             if t:
                 return t, v[0]
             return False, None
-        else:
-            return t
+        return t
 
     def is_padic_square(self, P, check=True):
         r"""
@@ -4885,14 +4884,12 @@ cdef class NumberFieldElement_absolute(NumberFieldElement):
         """
         if self != self.conjugate() or self.is_zero():
             return False
-        else:
-            approx = RealInterval(self.n(min_prec).real())
-            if approx.lower() > 0:
-                return True
-            else:
-                if approx.upper() < 0:
-                    return False
-                return self.is_real_positive(min_prec+20)
+        approx = RealInterval(self.n(min_prec).real())
+        if approx.lower() > 0:
+            return True
+        if approx.upper() < 0:
+            return False
+        return self.is_real_positive(min_prec+20)
 
 cdef class NumberFieldElement_relative(NumberFieldElement):
     r"""

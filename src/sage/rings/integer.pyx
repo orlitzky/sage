@@ -5078,15 +5078,15 @@ cdef class Integer(sage.structure.element.EuclideanDomainElement):
                     if mpz_cmp_ui(self.value, 1) == 0:  # Only 1 is a power of 1
                         return 1
                     return 0
-                elif a == 0:  # n == 0
+                if a == 0:  # n == 0
                     if mpz_cmp_ui(self.value, 0) == 0 or mpz_cmp_ui(self.value, 1) == 0:  # 0^0 = 1, 0^x = 0
                         return 1
                     return 0
-                elif a == -1:  # n == -1
+                if a == -1:  # n == -1
                     if mpz_cmp_ui(self.value, 1) == 0 or mpz_cmp_si(self.value, -1) == 0:  # 1 and -1 are powers of -1
                         return 1
                     return 0
-                elif a == -2:  # n == -2
+                if a == -2:  # n == -2
                     mpz_init(sabs)
                     mpz_abs(sabs, self.value)
                     if mpz_popcount(sabs) == 1:  # number of bits set in |self| == 1
@@ -5095,10 +5095,10 @@ cdef class Integer(sage.structure.element.EuclideanDomainElement):
                         if (b == 1 and mpz_cmp_ui(self.value, 0) < 0) or (b == 0 and mpz_cmp_ui(self.value, 0) > 0):
                             # An odd power of -2 is negative, an even power must be positive.
                             return 1
-                        else:  # number of bits set in |self| is not 1, so self cannot be a power of -2
-                            return 0
-                    else:  # |self| is not a power of 2, so self cannot be a power of -2
+                        # number of bits set in |self| is not 1, so self cannot be a power of -2
                         return 0
+                    # |self| is not a power of 2, so self cannot be a power of -2
+                    return 0
             else:  # n < -2
                 mpz_init(nabs)
                 mpz_neg(nabs, n.value)
@@ -5117,14 +5117,14 @@ cdef class Integer(sage.structure.element.EuclideanDomainElement):
                             if b == 0 and a > 0 or b == 1 and a < 0:
                                 # These two cases are that b // c is even and self positive, or b // c is odd and self negative
                                 return 1
-                            else:  # The sign of self is wrong
-                                return 0
-                        else:  # Since |self| is not a power of |n|, self cannot be a power of n
+                            # The sign of self is wrong
                             return 0
-                    else:  # self is not a power of 2, and thus cannot be a power of n, which is a power of 2.
-                        mpz_clear(nabs)
-                        mpz_clear(sabs)
+                        # Since |self| is not a power of |n|, self cannot be a power of n
                         return 0
+                    # self is not a power of 2, and thus cannot be a power of n, which is a power of 2.
+                    mpz_clear(nabs)
+                    mpz_clear(sabs)
+                    return 0
                 else:  # |n| is not a power of 2, so we use mpz_remove
                     mpz_init(u)
                     sig_on()
@@ -5137,21 +5137,21 @@ cdef class Integer(sage.structure.element.EuclideanDomainElement):
                         if b % 2 == 0:  # an even power of |n|, and since self > 0, this means that self is a power of n
                             return 1
                         return 0
-                    elif mpz_cmp_si(u, -1) == 0:  # -self is a power of |n|
+                    if mpz_cmp_si(u, -1) == 0:  # -self is a power of |n|
                         mpz_clear(u)
                         if b % 2 == 1:  # an odd power of |n|, and thus self is a power of n
                             return 1
                         return 0
-                    else:  # |self| is not a power of |n|, so self cannot be a power of n
-                        mpz_clear(u)
-                        return 0
+                    # |self| is not a power of |n|, so self cannot be a power of n
+                    mpz_clear(u)
+                    return 0
         elif mpz_popcount(n.value) == 1:  # n > 2 and in fact n = 2^k for k >= 2
             if mpz_popcount(self.value) == 1:  # since n is a power of 2, so must self be.
                 if mpz_scan1(self.value, 0) % mpz_scan1(n.value, 0) == 0:  # log_2(self) is divisible by log_2(n)
                     return 1
                 return 0
-            else:  # self is not a power of 2, and thus not a power of n
-                return 0
+            # self is not a power of 2, and thus not a power of n
+            return 0
         else:  # n > 2, but not a power of 2, so we use mpz_remove
             mpz_init(u)
             sig_on()

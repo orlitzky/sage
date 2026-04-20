@@ -2191,8 +2191,8 @@ cdef class Expression(Expression_abc):
 
             if op == Py_EQ:
                 return e2
-            else:                       # op == Py_NE, checked earlier.
-                return not e2
+            # op == Py_NE, checked earlier.
+            return not e2
 
         elif is_a_relational(r._gobj):  # l isn't relational but r is.
             # things aren't <, >, <=, >=, or == to relations; they
@@ -3593,7 +3593,7 @@ cdef class Expression(Expression_abc):
             else:
                 if self.operator()(val, zero):
                     return True
-                elif falsify(val, zero):
+                if falsify(val, zero):
                     return False
                 if is_interval and not proof:
                     return val.contains_zero() == equality_ok
@@ -10217,7 +10217,7 @@ cdef class Expression(Expression_abc):
                 sig_off()
             return (new_Expression_from_GEx(self._parent, ex.op(0)),
                     new_Expression_from_GEx(self._parent, ex.op(1)))
-        elif is_a_mul(self._gobj):
+        if is_a_mul(self._gobj):
             for i in range(self._gobj.nops()):
                 oper = self._gobj.op(i)
                 if is_a_power(oper):   # oper = ex^power
@@ -10225,7 +10225,7 @@ cdef class Expression(Expression_abc):
                     power = oper.op(1)
                     if not is_a_numeric(power):
                         raise TypeError("self is not a rational expression")
-                    elif is_a_numeric(power):
+                    if is_a_numeric(power):
                         power_num = ex_to_numeric(power)
                         if power_num.is_positive():
                             vecnumer.push_back(oper)
@@ -10237,7 +10237,7 @@ cdef class Expression(Expression_abc):
                                             g_mul_construct(vecnumer, False)),
                     new_Expression_from_GEx(self._parent,
                                             g_mul_construct(vecdenom, False)))
-        elif is_a_power(self._gobj):
+        if is_a_power(self._gobj):
             power = self._gobj.op(1)
             if is_a_numeric(power) and ex_to_numeric(power).is_positive():
                 return (self, self._parent.one())

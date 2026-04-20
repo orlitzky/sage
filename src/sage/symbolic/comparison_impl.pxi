@@ -354,9 +354,8 @@ class _mixed_key():
             if otherv:
                 return _print_key(self.ex) < _print_key(other.ex)
             return False
-        else:
-            if otherv:
-                return True
+        if otherv:
+            return True
 
         # no variables involved from here on
         rel = self.ex < other.ex

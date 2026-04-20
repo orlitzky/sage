@@ -618,9 +618,9 @@ cdef class Cache_givaro(Cache_base):
             sage: k._cache._element_repr(a^20)
             '20'
         """
-        if self.repr==0:
+        if self.repr == 0:
             return self._element_poly_repr(e)
-        if self.repr==1:
+        if self.repr == 1:
             return self._element_log_repr(e)
         return self._element_int_repr(e)
 

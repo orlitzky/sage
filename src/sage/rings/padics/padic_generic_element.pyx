@@ -3498,10 +3498,9 @@ cdef class pAdicGenericElement(LocalGenericElement):
             return ans
         if extend:
             raise NotImplementedError("extending using the sqrt function not yet implemented")
-        elif all:
+        if all:
             return []
-        else:
-            raise ValueError("element is not a square")
+        raise ValueError("element is not a square")
 
     def nth_root(self, n, all=False):
         """

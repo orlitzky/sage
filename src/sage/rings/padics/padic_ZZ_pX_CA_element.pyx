@@ -2249,11 +2249,10 @@ cdef class pAdicZZpXCAElement(pAdicZZpXElement):
             if minval <= self.absprec:
                 return minval
             return self.absprec
-        else:
-            val = minval * self.prime_pow.e + mini
-            if val <= self.absprec:
-                return val
-            return self.absprec
+        val = minval * self.prime_pow.e + mini
+        if val <= self.absprec:
+            return val
+        return self.absprec
 
     cpdef pAdicZZpXCAElement unit_part(self):
         """

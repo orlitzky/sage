@@ -208,7 +208,7 @@ class MumfordDivisorClassField(AdditiveGroupElement, SchemeMorphism):
         r"""
         Compute the hash value of this element.
 
-        EXAMPLES::
+        TESTS::
 
             sage: R.<x> = GF(23)[]
             sage: H = HyperellipticCurve(x^5 + x + 1, x^2 + x +  1)
@@ -340,7 +340,7 @@ class MumfordDivisorClassField(AdditiveGroupElement, SchemeMorphism):
         r"""
         Multiply the divisor by `[-1]`.
 
-        TESTS::
+        EXAMPLES::
 
             sage: R.<x> = QQ[]
             sage: H = HyperellipticCurve(x^5 + 2*x^4 + 3*x^3 + 2*x^2 + x, 1)

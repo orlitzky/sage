@@ -5120,10 +5120,9 @@ cdef class Matroid(SageObject):
             if certificate:
                 return True, None
             return True
-        else:
-            if certificate:
-                return False, components[0]
-            return False
+        if certificate:
+            return False, components[0]
+        return False
 
     cpdef connectivity(self, S, T=None):
         r"""

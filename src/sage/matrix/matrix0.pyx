@@ -5139,7 +5139,7 @@ cdef class Matrix(sage.structure.element.Matrix):
             sage: def val(i, j):
             ....:     if i < j:
             ....:         return 0
-            ....:     elif i == j:
+            ....:     if i == j:
             ....:         return 1
             ....:     return ZZ.random_element(-100,100)
             sage: rnd = matrix(ZZ, 8, 8, val)
@@ -5198,7 +5198,7 @@ cdef class Matrix(sage.structure.element.Matrix):
             if ppart < a:
                 ppart *= p
             return res * ppart
-        elif K is ZZ:
+        if K is ZZ:
             from sage.rings.infinity import Infinity
 
             # two small odd prime numbers
@@ -5225,9 +5225,8 @@ cdef class Matrix(sage.structure.element.Matrix):
             if x**o1 % P == 1:  # or (x % P)**o1 == 1 ? maybe faster
                 return o1
             return Infinity
-        else:
-            raise NotImplementedError("multiplicative order is only implemented"
-                                      " for matrices over finite fields or ZZ")
+        raise NotImplementedError("multiplicative order is only implemented"
+                                  " for matrices over finite fields or ZZ")
 
     ###################################################
     # Arithmetic
@@ -5916,38 +5915,37 @@ cdef class Matrix(sage.structure.element.Matrix):
             if R in _IntegralDomains:
                 return ~self.matrix_over_field()
             return self.inverse_of_unit()
-        else:
-            A = self.augment(self.parent().identity_matrix())
-            A.echelonize()
 
-            # Now we want to make sure that B is of the form [I|X], in
-            # which case X is the inverse of self. We can simply look at
-            # the lower right entry of the left half of B, and make sure
-            # that it's 1.
-            #
-            # However, doing this naively causes trouble over inexact
-            # fields -- see Issue #2256. The *right* thing to do would
-            # probably be to make sure that self.det() is nonzero. That
-            # doesn't work here, because our det over an arbitrary field
-            # just does expansion by minors and is unusable for even 10x10
-            # matrices over CC. Instead, we choose a different band-aid:
-            # we check to make sure that the lower right entry isn't
-            # 0. Since we're over a field, we know that it *should* be
-            # either 1 or 0. This can still cause trouble, but it's
-            # significantly better than it was before.
-            #
-            # Over exact rings, of course, we still want the old
-            # behavior.
+        A = self.augment(self.parent().identity_matrix())
+        A.echelonize()
 
-            if R.is_exact():
-                if not A[self._nrows-1, self._ncols-1].is_one():
-                    raise ZeroDivisionError("input matrix must be nonsingular")
-                if self.is_sparse():
-                    return self.build_inverse_from_augmented_sparse(A)
-            else:
-                if not A[self._nrows-1, self._ncols-1]:
-                    raise ZeroDivisionError("input matrix must be nonsingular")
-            return A.matrix_from_columns(list(range(self._ncols, 2 * self._ncols)))
+        # Now we want to make sure that B is of the form [I|X], in
+        # which case X is the inverse of self. We can simply look at
+        # the lower right entry of the left half of B, and make sure
+        # that it's 1.
+        #
+        # However, doing this naively causes trouble over inexact
+        # fields -- see Issue #2256. The *right* thing to do would
+        # probably be to make sure that self.det() is nonzero. That
+        # doesn't work here, because our det over an arbitrary field
+        # just does expansion by minors and is unusable for even 10x10
+        # matrices over CC. Instead, we choose a different band-aid:
+        # we check to make sure that the lower right entry isn't
+        # 0. Since we're over a field, we know that it *should* be
+        # either 1 or 0. This can still cause trouble, but it's
+        # significantly better than it was before.
+        #
+        # Over exact rings, of course, we still want the old
+        # behavior.
+
+        if R.is_exact():
+            if not A[self._nrows-1, self._ncols-1].is_one():
+                raise ZeroDivisionError("input matrix must be nonsingular")
+            if self.is_sparse():
+                return self.build_inverse_from_augmented_sparse(A)
+        elif not A[self._nrows-1, self._ncols-1]:
+            raise ZeroDivisionError("input matrix must be nonsingular")
+        return A.matrix_from_columns(list(range(self._ncols, 2 * self._ncols)))
 
     cdef build_inverse_from_augmented_sparse(self, A):
         # We can directly use the dict entries of A

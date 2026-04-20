@@ -1758,8 +1758,7 @@ cdef class ETuple:
             if self._nonzero:
                 return '(%d,)' % self._data[1]
             return '(0,)'
-        else:
-            return '(' + ', '.join(map(str, self)) + ')'
+        return '(' + ', '.join(map(str, self)) + ')'
 
     def __reduce__(self):
         """

@@ -2282,10 +2282,9 @@ cdef class QuaternaryMatrix(LeanMatrix):
             if bitset_in(self._M1[r], c):
                 return self._x_one
             return self._one
-        else:
-            if bitset_in(self._M1[r], c):
-                return self._x_zero
-            return self._zero
+        if bitset_in(self._M1[r], c):
+            return self._x_zero
+        return self._zero
 
     cdef inline int set(self, long r, long c, x) except -1:   # Not a Sage matrix operation
         if x == self._zero:
@@ -2430,10 +2429,9 @@ cdef class QuaternaryMatrix(LeanMatrix):
             if b:
                 return self._x_one
             return self._one
-        else:
-            if b:
-                return self._x_zero
-            return self._zero
+        if b:
+            return self._x_zero
+        return self._zero
 
     cdef int add_multiple_of_row_c(self, long x, long y, s, bint col_start) except -1:
         """

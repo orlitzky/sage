@@ -1240,13 +1240,12 @@ cdef class LinearConstraintsParent_class(Parent):
             if left.parent() is self and left.is_equation() == equality:
                 return left
             return LinearConstraint(self, (<LinearConstraint>left).constraints,
-                                        equality=equality)
+                                    equality=equality)
         if right is None:
             if isinstance(left, (list, tuple)):
                 return LinearConstraint(self, left, equality=equality)
             return LinearConstraint(self, [left], equality=equality)
-        else:
-            return LinearConstraint(self, [left, right], equality=equality)
+        return LinearConstraint(self, [left, right], equality=equality)
 
     cpdef _coerce_map_from_(self, R):
         """

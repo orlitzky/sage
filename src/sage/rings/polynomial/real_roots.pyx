@@ -3581,8 +3581,7 @@ cdef class island:
             if isinstance(bp, interval_bernstein_polynomial_float):
                 return (ancestors, bp)
             return (ancestors + [bp], bp.as_float())
-        else:
-            return (ancestors + [bp], bp.downscale(bp.bitsize // 2))
+        return (ancestors + [bp], bp.downscale(bp.bitsize // 2))
 
     def more_bits(self, context ctx, ancestors, interval_bernstein_polynomial bp, rightmost):
         """

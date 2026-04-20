@@ -12082,7 +12082,7 @@ cdef class Matrix(Matrix1):
             if not transformation:
                 return self
             return self, self
-        elif n == 1:
+        if n == 1:
             if not transformation:
                 return self
             return self, self.parent().identity_matrix()

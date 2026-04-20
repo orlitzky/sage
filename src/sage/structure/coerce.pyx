@@ -359,9 +359,8 @@ cpdef bint parent_is_integers(P) except -1:
         if issubclass(P, gmpy2.mpz):
             return True
         return False
-    else:
-        from sage.rings.integer_ring import ZZ
-        return P is ZZ
+    from sage.rings.integer_ring import ZZ
+    return P is ZZ
 
 
 def parent_is_numerical(P):

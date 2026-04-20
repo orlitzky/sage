@@ -431,15 +431,15 @@ cdef cl_object python_to_ecl(pyobj, bint read_strings) except NULL:
         if pyobj:
             return ECL_T
         return ECL_NIL
-    elif pyobj is None:
+    if pyobj is None:
         return ECL_NIL
-    elif isinstance(pyobj, int):
+    if isinstance(pyobj, int):
         if MOST_NEGATIVE_FIXNUM <= pyobj <= MOST_POSITIVE_FIXNUM:
             return ecl_make_integer(pyobj)
         return python_to_ecl(Integer(pyobj), read_strings)
-    elif isinstance(pyobj, float):
+    if isinstance(pyobj, float):
         return ecl_make_doublefloat(pyobj)
-    elif isinstance(pyobj, unicode):
+    if isinstance(pyobj, unicode):
         try:
             s = str_to_bytes(pyobj, 'ascii')
         except UnicodeEncodeError:
@@ -452,36 +452,34 @@ cdef cl_object python_to_ecl(pyobj, bint read_strings) except NULL:
         if read_strings:
             return ecl_safe_funcall(read_from_string_clobj, o)
         return o
-    elif isinstance(pyobj, bytes):
+    if isinstance(pyobj, bytes):
         s = <bytes>pyobj
         if read_strings:
             return ecl_safe_read_string(s)
         return ecl_cstring_to_base_string_or_nil(s)
-    elif isinstance(pyobj, Integer):
+    if isinstance(pyobj, Integer):
         if pyobj >= MOST_NEGATIVE_FIXNUM and pyobj <= MOST_POSITIVE_FIXNUM:
             return ecl_make_integer(pyobj)
         return ecl_bignum_from_mpz((<Integer>pyobj).value)
-    elif isinstance(pyobj, Rational):
+    if isinstance(pyobj, Rational):
         return ecl_make_ratio(
             python_to_ecl((<Rational>pyobj).numerator(), read_strings),
             python_to_ecl((<Rational>pyobj).denominator(), read_strings))
-    elif isinstance(pyobj, EclObject):
+    if isinstance(pyobj, EclObject):
         return (<EclObject>pyobj).obj
-    elif isinstance(pyobj, list):
+    if isinstance(pyobj, list):
         L = ECL_NIL
         for i in range(len(pyobj) - 1, -1, -1):
             L = cl_cons(python_to_ecl(pyobj[i], read_strings), L)
         return L
-    elif isinstance(pyobj, tuple):
+    if isinstance(pyobj, tuple):
         if not pyobj:
             return ECL_NIL
-        else:
-            L = python_to_ecl(pyobj[-1], read_strings)
-            for i in range(len(pyobj) - 2, -1, -1):
-                L = cl_cons(python_to_ecl(pyobj[i], read_strings), L)
-            return L
-    else:
-        raise TypeError("Unimplemented type for python_to_ecl")
+        L = python_to_ecl(pyobj[-1], read_strings)
+        for i in range(len(pyobj) - 2, -1, -1):
+            L = cl_cons(python_to_ecl(pyobj[i], read_strings), L)
+        return L
+    raise TypeError("Unimplemented type for python_to_ecl")
 
 
 cdef ecl_to_python(cl_object o):
@@ -848,7 +846,7 @@ cdef class EclObject:
             if not(isinstance(left, EclObject) and isinstance(right, EclObject)):
                 return False
             return bint_equal((<EclObject>left).obj, (<EclObject>right).obj)
-        elif op == Py_NE:
+        if op == Py_NE:
             if not(isinstance(left, EclObject) and isinstance(right, EclObject)):
                 return True
             return not(bint_equal((<EclObject>left).obj, (<EclObject>right).obj))

@@ -667,8 +667,7 @@ cdef class CVXPYBackend:
             if self.prob_name is not None:
                 return self.prob_name
             return ""
-        else:
-            self.prob_name = str(name)
+        self.prob_name = str(name)
 
     cpdef row(self, int i):
         """

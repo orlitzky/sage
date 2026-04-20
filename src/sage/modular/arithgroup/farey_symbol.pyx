@@ -508,8 +508,8 @@ cdef class Farey:
             return tuple(tietze)
         if output == 'syllables':
             return tuple((a-1, len(list(g))) if a > 0 else (-a-1, -len(list(g))) for a, g in groupby(tietze))
-        else:  # output == 'gens'
-            return tuple((gens[a-1], len(list(g))) if a > 0 else (gens[-a-1], -len(list(g))) for a, g in groupby(tietze))
+        # output == 'gens'
+        return tuple((gens[a-1], len(list(g))) if a > 0 else (gens[-a-1], -len(list(g))) for a, g in groupby(tietze))
 
     def __contains__(self, M) -> bool:
         r"""

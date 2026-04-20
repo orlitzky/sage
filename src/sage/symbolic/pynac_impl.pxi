@@ -1905,14 +1905,12 @@ cdef py_atan2(x, y):
             else:
                 res = P(pi)/2
             return res if y > 0 else -res
-        else:
-            return -I*py_log((x + I*y)/py_sqrt(x**2 + y**2))
-    else:
-        if x > 0:
-            return P(0)
-        if x < 0:
-            return P(pi)
-        return P(NaN)
+        return -I*py_log((x + I*y)/py_sqrt(x**2 + y**2))
+    if x > 0:
+        return P(0)
+    if x < 0:
+        return P(pi)
+    return P(NaN)
 
 
 def py_atan2_for_doctests(x, y):

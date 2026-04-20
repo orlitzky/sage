@@ -1019,18 +1019,18 @@ cdef class Polynomial(CommutativePolynomial):
         cdef Py_ssize_t d2 = pol.degree()
 
         # Special case constant polynomials
-        if d1 == -1: # self is the 0 polynomial
+        if d1 == -1:  # self is the 0 polynomial
             if d2 == -1:
-                return rich_to_bool(op, 0) # both polynomials are 0
+                return rich_to_bool(op, 0)  # both polynomials are 0
             if d2 == 0:
                 return richcmp(self._parent._base.zero(), pol.get_unsafe(0), op)
-            return rich_to_bool_sgn(op, -1) # we have d2 > 0
-        elif d1 == 0: # self is a nonzero constant
+            return rich_to_bool_sgn(op, -1)  # we have d2 > 0
+        if d1 == 0:  # self is a nonzero constant
             if d2 == -1:
                 return richcmp(self.get_unsafe(0), pol._parent._base.zero(), op)
             if d2 == 0:
                 return richcmp(self.get_unsafe(0), pol.get_unsafe(0), op)
-            return rich_to_bool_sgn(op, -1) # we have d2 > d1 == 0
+            return rich_to_bool_sgn(op, -1)  # we have d2 > d1 == 0
 
         # For different degrees, compare the degree
         if d1 != d2:

@@ -699,7 +699,7 @@ cdef class EdgesView:
             if start >= 0 and stop >= 0 and step >= 0:
                 return list(islice(self, start, stop, step))
             return list(self)[i]
-        elif i < 0:
+        if i < 0:
             return list(self)[i]
         try:
             return next(islice(self, i, i + 1, 1))
