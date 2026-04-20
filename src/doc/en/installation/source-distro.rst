@@ -90,22 +90,6 @@ missing or have unsuitable versions. **Please read the messages that
 you can install to avoid having to build them from source. This can save a lot of
 time.
 
-If you prefer a fully self-contained installation that does not depend on
-any system packages (for example, on shared servers where system updates
-should not affect Sage), you can use::
-
-    $ ./configure --with-system-standard-packages=no
-
-This tells ``configure`` to build all standard dependencies from source.
-Individual packages can still be overridden, for example::
-
-    $ ./configure --with-system-standard-packages=no --with-system-gmp=yes
-
-Conversely, if you want to require that all standard packages come from the
-system (and error out if any are missing), use::
-
-    $ ./configure --with-system-standard-packages=force
-
 The following sections provide the commands to install a large
 recommended set of packages on various systems, which will minimize
 the time it takes to build Sage. This is intended as a convenient

@@ -554,20 +554,6 @@ AC_ARG_ENABLE([download-from-upstream-url],
     [disallow downloading packages from their upstream URL if they cannot be found on the Sage mirrors])], [],
     [AS_VAR_SET([enable_download_from_upstream_url], [yes])])
 
-AC_ARG_WITH(
-  [system-standard-packages], [AS_HELP_STRING(
-    [--with-system-standard-packages={yes (default),no,force}],
-    [set the default for using system packages for all standard SPKGs:
-     yes = use system packages when suitable (default),
-     no = build everything from source,
-     force = require system packages (error if not found).
-     Individual --with-system-SPKG flags override this setting.]
-  )], [
-    AS_CASE([$withval],
-      [yes|no|force], [],
-      [AC_MSG_ERROR([Invalid value '$withval' for --with-system-standard-packages (use yes, no, or force)])])
-  ], [with_system_standard_packages=yes])
-
 AC_ARG_ENABLE(
   [system-site-packages], [AS_HELP_STRING(
     [--enable-system-site-packages],
