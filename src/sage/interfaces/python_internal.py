@@ -319,11 +319,10 @@ class PythonInternalInterface(ExtraTabCompletion, Interface):
                 res = name(args[0])
             else:
                 res = name(args[0], **kwds)
+        elif len(kwds) == 0:
+            res = name(*args)
         else:
-            if len(kwds) == 0:
-                res = name(*args)
-            else:
-                res = name(*args, **kwds)
+            res = name(*args, **kwds)
 
         # read back new values of the arguments and keywords
         def read_back(arg):
@@ -678,7 +677,7 @@ class PythonInternalElement(ExtraTabCompletion, InterfaceElement):
                 if operation == '*':
                     return P(sinst * oinst)
                 return P(sinst + oinst)
-            if type(sinst) == type(oinst):
+            if type(sinst) is type(oinst):
                 if hasattr(self, 'addTermsLast'):
                     new = self.__deepcopy__()
                     new.addTermsLast(other)

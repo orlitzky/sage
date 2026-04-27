@@ -192,7 +192,7 @@ class SnapPy(PythonInternalInterface):
             else:
                 d = snappy.SnapPy.__dict__
             e = spherogram.__dict__
-            D = {k: v for k, v in d.items()}
+            D = dict(d.items())
             D.update(e)
             self._namespace = type('snappy_names', (object,), D)
             # set up the globals
