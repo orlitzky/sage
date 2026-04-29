@@ -1506,14 +1506,15 @@ class Braid(FiniteTypeArtinGroupElement):
         return self.annular_khovanov_complex(qagrad, ring).homology()
 
     @cached_method
-    def left_normal_form(self, algorithm='libbraiding'):
+    def left_normal_form(self, algorithm=None):
         r"""
         Return the left normal form of the braid.
 
         INPUT:
 
-        - ``algorithm`` -- string (default: ``'artin'``); must be one of the following:
+        - ``algorithm`` -- string (default: None); must be one of the following:
 
+          * ``None`` -- use 'libbraiding' if available, and 'artin' otherwise
           * ``'artin'`` -- the general method for Artin groups is used
           * ``'libbraiding'`` -- the algorithm from the ``libbraiding`` package
 
@@ -1546,6 +1547,11 @@ class Braid(FiniteTypeArtinGroupElement):
             sage: B([1,2,1]).left_normal_form()
             (s0*s1*s0,)
         """
+        if algorithm is None:
+            algorithm = 'artin'
+            if Libbraiding().is_present():
+                algorithm = 'libbraiding'
+
         if algorithm == 'libbraiding':
             lnf = leftnormalform(self)
             B = self.parent()
