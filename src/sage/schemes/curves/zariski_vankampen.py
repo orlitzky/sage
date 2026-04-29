@@ -1416,6 +1416,7 @@ def conjugate_positive_form(braid) -> list[list]:
 
     EXAMPLES::
 
+        sage: # needs libbraiding
         sage: from sage.schemes.curves.zariski_vankampen import conjugate_positive_form
         sage: B = BraidGroup(4)
         sage: t = B((1, 3, 2, -3, 1, 1))
@@ -1503,6 +1504,7 @@ def braid2rels(L) -> list:
 
     EXAMPLES::
 
+        sage: # needs libbraiding
         sage: from sage.schemes.curves.zariski_vankampen import braid2rels
         sage: B.<s0, s1, s2> = BraidGroup(4)
         sage: L = ((s1*s0)^2, [s2])
