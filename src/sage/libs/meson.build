@@ -76,7 +76,7 @@ endif
 braiding = dependency(
   'libbraiding',
   version: '>=1.3.1',
-  required: false,
+  required: get_option('libbraiding'),
   disabler: true,
 )
 
