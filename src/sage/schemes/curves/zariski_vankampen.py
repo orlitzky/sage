@@ -68,8 +68,6 @@ from sage.rings.rational_field import QQ
 from sage.rings.real_mpfr import RealField
 from sage.schemes.curves.constructor import Curve
 
-lazy_import('sage.libs.braiding', ['leftnormalform', 'rightnormalform'])
-
 roots_interval_cache: dict[tuple, Any] = {}
 
 
@@ -1435,6 +1433,10 @@ def conjugate_positive_form(braid) -> list[list]:
         sage: conjugate_positive_form(s1)
         [[s1^3, []]]
     """
+    from sage.features.libbraiding import Libbraiding
+    Libbraiding().require()
+    from sage.libs.braiding import rightnormalform
+
     B = braid.parent()
     d = B.strands()
     rnf = rightnormalform(braid)
@@ -1507,6 +1509,10 @@ def braid2rels(L) -> list:
         sage: braid2rels(L)
         [(4, 1, -2, -1), (2, -4, -2, 1)]
     """
+    from sage.features.libbraiding import Libbraiding
+    Libbraiding().require()
+    from sage.libs.braiding import leftnormalform
+
     br = L[0]
     L1 = L[1]
     B = br.parent()
@@ -1653,6 +1659,11 @@ def fundamental_group_from_braid_mon(bm, degree=None,
         a1 = tuple([-j for j in reversed(a)])
         cnjdelta.append(a + (d - j,) + a1)
     homcnjdelta = F.hom(codomain=F, im_gens=cnjdelta)
+
+    from sage.features.libbraiding import Libbraiding
+    Libbraiding().require()
+    from sage.libs.braiding import rightnormalform
+
     for j, k in enumerate(vertical0):
         l1 = d + j + 1
         br = bm[k]
