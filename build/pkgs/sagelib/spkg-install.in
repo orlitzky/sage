@@ -47,6 +47,12 @@ unset SAGE_PKG_CONFIG_PATH
 
 SITEPACKAGESDIR=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
 
+# HACK: temporarily fix the upgrade path by cleaning out the build
+# directory. We've added (and used, in the commands below) a new meson
+# option, but the reconfiguration that this triggers is not thorough
+# enough to pick up the new option.
+rm -rf build/sage-distro
+
 # Make sure that an installed old version of sagelib in which sage is an ordinary package
 # does not shadow the namespace package sage during the build.
 (cd "$SITEPACKAGESDIR" && rm -f sage/__init__.py)
