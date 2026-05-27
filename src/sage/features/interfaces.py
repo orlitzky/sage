@@ -104,7 +104,10 @@ class Mathics(InterfaceFeature):
 
     @staticmethod
     def __classcall__(cls):
-        return InterfaceFeature.__classcall__(cls, 'mathics', 'sage.interfaces.mathics')
+        from sage.features.join_feature import JoinFeature
+        interface = 'sage.interfaces.mathics'
+        mod = JoinFeature(interface, (PythonModule('mathics'), PythonModule(interface)))
+        return InterfaceFeature.__classcall__(cls, 'mathics', mod)
 
 
 class Regina(InterfaceFeature):
