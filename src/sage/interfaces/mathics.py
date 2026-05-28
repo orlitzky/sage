@@ -513,6 +513,8 @@ class Mathics(Interface):
             <class 'mathics.session.MathicsSession'>
         """
         if not self._session:
+            from sage.features.interfaces import Mathics
+            Mathics().module.require()
             from mathics.session import MathicsSession
             from mathics.core.load_builtin import import_and_load_builtins
             import_and_load_builtins()
