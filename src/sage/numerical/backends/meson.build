@@ -21,8 +21,6 @@ py.install_sources(
   'glpk_exact_backend.pxd',
   'glpk_exact_backend.pyx',
   'glpk_exact_backend_test.py',
-  'glpk_graph_backend.pxd',
-  'glpk_graph_backend.pyx',
   'highs_backend.pxd',
   'highs_backend.pyx',
   'interactivelp_backend.pxd',
@@ -47,7 +45,6 @@ extension_data = {
   'generic_sdp_backend': files('generic_sdp_backend.pyx'),
   'glpk_backend': files('glpk_backend.pyx'),
   'glpk_exact_backend': files('glpk_exact_backend.pyx'),
-  'glpk_graph_backend': files('glpk_graph_backend.pyx'),
   'highs_backend': files('highs_backend.pyx'),
   'interactivelp_backend': files('interactivelp_backend.pyx'),
   'matrix_sdp_backend': files('matrix_sdp_backend.pyx'),
@@ -56,7 +53,7 @@ extension_data = {
 
 foreach name, pyx : extension_data
   deps = [py_dep, cysignals, gmp]
-  if name in ['glpk_backend', 'glpk_exact_backend', 'glpk_graph_backend']
+  if name in ['glpk_backend', 'glpk_exact_backend']
     deps += [glpk]
   elif name == 'highs_backend'
     deps += [highs]
