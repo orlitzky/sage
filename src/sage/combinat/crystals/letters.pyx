@@ -892,7 +892,7 @@ cdef class Crystal_of_letters_type_B_element(Letter):
             return 0
         if i == n and self.value == n:
             return 2
-        if self.value == i or self.value == - i - 1:
+        if self.value == i or self.value == -i - 1:
             return 1
         return 0
 
