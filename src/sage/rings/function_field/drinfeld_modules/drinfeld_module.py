@@ -30,6 +30,7 @@ from sage.arith.misc import gcd
 from sage.categories.drinfeld_modules import DrinfeldModules
 from sage.categories.homset import Hom
 from sage.geometry.polyhedron.constructor import Polyhedron
+from sage.misc.functional import log
 from sage.misc.latex import latex
 from sage.misc.latex import latex_variable_name
 from sage.misc.lazy_import import lazy_import
@@ -904,6 +905,30 @@ class DrinfeldModule(Parent, UniqueRepresentation):
         """
         from sage.rings.function_field.drinfeld_modules.action import DrinfeldModuleAction
         return DrinfeldModuleAction(self)
+
+def automorphism_group_order(self, level = False, absolute=False, extension_degree=1):
+    if not absolute:
+        if not self.is_finite():
+            raise ValueError('Drinfeld module must be over a finite field for not absolute automorphism group computations')
+    if absolute:
+        if extension_degree!=1:
+            raise ValueError('Extension degree does nothing on absolute automorphism groups')
+    coef = self.coefficients(sparse=False)
+    level_ = self.rank()
+    for i in range(1,len(coef)):
+        if coef[i] != 0:
+            level_ = gcd(level_,i)
+    q = self.function_ring().base_ring().order()
+    if not absolute:
+        K = self.base()
+        n = log(K.order()**extension_degree, q)
+        level_ = gcd(level_, n)
+    if level:
+        return level_
+    else:
+        return q^level_ - 1
+
+
 
     def basic_j_invariant_parameters(self, coeff_indices=None, nonzero=False):
         r"""
