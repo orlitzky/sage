@@ -925,7 +925,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
         if level:
             return level_
         else:
-            return q^level_ - 1
+            return q**level_ - 1
 
 
 
