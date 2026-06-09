@@ -2937,7 +2937,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
 
         self.__set_post_isomorphism(codomain, isom)
 
-    def dual(self):
+    def dual(self, pushforward=False, fast_Elkies=False):
         r"""
         Return the isogeny dual to this isogeny.
 
@@ -3106,6 +3106,68 @@ class EllipticCurveIsogeny(EllipticCurveHom):
         F = self.__base_field
         d = self._degree
 
+        if pushforward:
+            #If the flag to try pushforward method is True
+            #TODO: Optimize, implement more cases
+            """
+            Original Author: William E. Mahaney and Travis Morrison
+            Released under TO_DO License
+            """
+            if F(d) == 0:
+                raise NotImplementedError("Method not implemented for inseparable isogenies.")
+            if not d.is_prime():
+                raise NotImplementedError("Method not implemented for composite degree isogenies.")
+            """
+            Construct the dual isogeny of a prime-degree isogeny phi: E -> E'.
+
+            Strategy:
+                - Compute the quotient of the l-division polynomial by the kernel polynomial.
+                - Pick an x-coordinate of an l-torsion point not in Ker(phi).
+                - Use Sage's native lift_x to recover a point on E.
+                - Push that point forward to generate Ker(phi_dual).
+            """
+            E = self.domain()
+            E_prime = self.codomain()
+            R = PolynomialRing(F);
+
+            kernel_poly = R(self.kernel_polynomial())
+            division_poly = R(E.division_polynomial(d))
+            quotient_poly = division_poly / kernel_poly
+
+            roots = quotient_poly.roots(multiplicities=False)
+            if not roots:
+                raise ValueError(
+                    "The dual isogeny is not defined over the current ground field."
+                    "Extension of the base field is not implemented."
+                )
+
+            x0 = roots[0]
+
+            try:
+                pts = E.lift_x(x0, all=True)
+            except (AttributeError, NotImplementedError, TypeError):
+                pts = []
+
+            if not pts:
+                raise ValueError("Could not lift the chosen x-coordinate to a point on E.")
+
+            P = pts[0]
+            Q = self(P)
+
+            return E_prime.isogeny(Q)
+            
+            
+        if fast_Elkies:
+            #If the flag to try fastElkies method is set to true
+            """
+            Original Author: Travis Morrison
+            Released under TO_DO License
+            """
+            raise NotImplementedError("Not implemented yet. Need to do FastElkies first.")
+
+
+        #After this is the old code
+        
         if F(d) == 0:   # inseparable dual!
             p = F.characteristic()
             k = d.valuation(p)
