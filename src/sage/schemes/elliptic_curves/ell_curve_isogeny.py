@@ -2937,7 +2937,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
 
         self.__set_post_isomorphism(codomain, isom)
 
-    def dual(self, pushforward=False, fast_Elkies=False):
+    def dual(self, pushforward=False):
         r"""
         Return the isogeny dual to this isogeny.
 
