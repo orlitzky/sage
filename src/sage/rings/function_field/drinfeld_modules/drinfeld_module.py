@@ -906,6 +906,49 @@ class DrinfeldModule(Parent, UniqueRepresentation):
         return DrinfeldModuleAction(self)
 
     def automorphism_group_order(self, level = False, absolute=False, extension_degree=1):
+        r"""
+        Returns the order of the automorphism group of the Drinfeld module.
+        If level is set to true, it returns M where the order is q^M-1. 
+        If absolute is set to true, it returns the size of the absolute automorphism group.
+        If absolute is set to false, it returns the size of the automorphism group in the degree extension_degree of K. 
+        The defaults are level=False, absolute=False and extension_degree=1.
+
+        INPUT:
+
+        - ``level`` -- boolean
+        - ``absolute`` -- boolean
+        - ``extension_degree`` -- integer
+
+
+        EXAMPLES::
+            
+            sage: Fq = GF(25)
+            sage: A.<T> = Fq[]
+            sage: K.<z12> = Fq.extension(6)
+            sage: p_root = 2*z12^11 + 2*z12^10 + z12^9 + 3*z12^8 + z12^7 + 2*z12^5 + 2*z12^4 + 3*z12^3 + z12^2 + 2*z12
+            sage: phi = DrinfeldModule(A, [p_root, z12^3, z12^5])
+            sage: phi.automorphism_group_order()
+            24
+
+        ::
+
+            sage: Fq = GF(3^2)
+            sage: A.<T> = Fq[]
+            sage: K.<z> = Fq.extension(3)
+            sage: t = DrinfeldModule(A, [z, 1]).ore_variable() 
+            sage: phi = DrinfeldModule(A, z+t^12) 
+            sage: phi.automorphism_group_order()
+            728
+            sage: phi.automorphism_group_order(absolute=True)
+            282429536480
+            sage: phi.automorphism_group_order(level=True)
+            3
+            sage: phi.automorphism_group_order(level=True, absolute=True)
+            12
+            sage: phi.automorphism_group_order(level=True, extension_degree=2)
+            6
+        """
+        
         if not absolute:
             if not self.is_finite():
                 raise ValueError('Drinfeld module must be over a finite field for not absolute automorphism group computations')
