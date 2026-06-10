@@ -14,6 +14,7 @@ AUTHORS:
 - Antoine Leudière (2022-04): initial version
 - Xavier Caruso (2022-06): initial version
 - David Ayotte (2023-03): added basic `j`-invariants
+- Arix Eggink (2026-06): added automorphism_group_order
 """
 
 # *****************************************************************************
@@ -912,6 +913,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
         If absolute is set to true, it returns the size of the absolute automorphism group.
         If absolute is set to false, it returns the size of the automorphism group in the degree extension_degree of K. 
         The defaults are level=False, absolute=False and extension_degree=1.
+        This code is based on Lemma 3.8.2 of [Pap2023]_.
 
         INPUT:
 
@@ -947,11 +949,68 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             12
             sage: phi.automorphism_group_order(level=True, extension_degree=2)
             6
+        
+        ::
+
+            sage: Fq = GF(7)
+            sage: A.<T> = Fq[]
+            sage: K.<S> = FractionField(A)
+            sage: psi = DrinfeldModule(A, [S, 1, 3, 0, S+1])
+            sage: psi.automorphism_group_order(level=True, absolute=True)
+            1
+            sage: psi.automorphism_group_order(absolute=True)
+            6
+        
+        TESTS::
+
+            sage: Fq = GF(7)
+            sage: A.<T> = Fq[]
+            sage: K.<S> = FractionField(A)
+            sage: psi = DrinfeldModule(A, [S, 1, 3, 0, S+1])
+            sage: psi.automorphism_group_order()
+            Traceback (most recent call last):
+            ...
+            ValueError: Drinfeld module must be over a finite field for non absolute automorphism group computations
+        
+        ::
+        
+            sage: Fq = GF(3^2)
+            sage: A.<T> = Fq[]
+            sage: K.<z> = Fq.extension(3)
+            sage: t = DrinfeldModule(A, [z, 1]).ore_variable() 
+            sage: phi = DrinfeldModule(A, z+t^12) 
+            sage: phi.automorphism_group_order(absolute=True, extension_degree=2)
+            Traceback (most recent call last):
+            ...
+            ValueError: Extension degree does nothing on absolute automorphism groups
+        
+        ::
+
+            sage: Fq = GF(2^7)
+            sage: A.<T> = Fq[]
+            sage: K.<z> = Fq.extension(1)
+            sage: phi = DrinfeldModule(A, [z, 1])
+            sage: phi.automorphism_group_order(absolute=True)
+            127
+            sage: phi.automorphism_group_order()
+            127
+            sage: phi.automorphism_group_order(extension_degree=2)
+            127
+        
+        ::
+
+            sage: Fq = GF(3)
+            sage: A.<T> = Fq[]
+            sage: K.<S> = FractionField(A)
+            sage: psi = DrinfeldModule(A,[S,1])
+            sage: psi.automorphism_group_order(absolute=True)
+            2
+        
         """
         
         if not absolute:
             if not self.is_finite():
-                raise ValueError('Drinfeld module must be over a finite field for not absolute automorphism group computations')
+                raise ValueError('Drinfeld module must be over a finite field for non absolute automorphism group computations')
         if absolute:
             if extension_degree!=1:
                 raise ValueError('Extension degree does nothing on absolute automorphism groups')
@@ -969,6 +1028,8 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             return level_
         else:
             return q**level_ - 1
+    
+    
 
 
 
