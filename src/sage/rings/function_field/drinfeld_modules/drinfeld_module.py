@@ -906,21 +906,27 @@ class DrinfeldModule(Parent, UniqueRepresentation):
         from sage.rings.function_field.drinfeld_modules.action import DrinfeldModuleAction
         return DrinfeldModuleAction(self)
 
-    def automorphism_group_order(self, level = False, absolute=False, extension_degree=1):
+    def automorphism_group_order(self, level=False, absolute=False, extension_degree=1):
         r"""
-        Returns the order of the automorphism group of the Drinfeld module.
-        If level is set to true, it returns M where the order is q^M-1. 
-        If absolute is set to true, it returns the size of the absolute automorphism group.
-        If absolute is set to false, it returns the size of the automorphism group in the degree extension_degree of K. 
-        The defaults are level=False, absolute=False and extension_degree=1.
+        Return the order of the automorphism group of the Drinfeld module.
+
+        The automorphism group of a Drinfeld module is of the form `(\GF{q^M})^\times`
+        for some integer `M`.
+        - If ``level`` is set to ``True``, the method returns this `M`, otherwise it
+        returns the order `q^M-1`.
+        - If ``absolute`` is set to ``True``, the method returns the size or level
+        (depending on the input ``level``) of the absolute automorphism group.
+        Otherwise, the method returns the size or level (depending on the input
+        ``level``) of the automorphism group in the extension of degree
+        ``extension_degree`` of the base field.
+
         This code is based on Lemma 3.8.2 of [Pap2023]_.
 
         INPUT:
 
-        - ``level`` -- boolean
-        - ``absolute`` -- boolean
-        - ``extension_degree`` -- integer
-
+        - ``level`` (default: ``False``) -- boolean
+        - ``absolute`` (default: ``False``) -- boolean
+        - ``extension_degree`` (default: ``1``) -- integer
 
         EXAMPLES::
             
@@ -955,10 +961,10 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             sage: Fq = GF(7)
             sage: A.<T> = Fq[]
             sage: K.<S> = FractionField(A)
-            sage: psi = DrinfeldModule(A, [S, 1, 3, 0, S+1])
-            sage: psi.automorphism_group_order(level=True, absolute=True)
+            sage: phi = DrinfeldModule(A, [S, 1, 3, 0, S+1])
+            sage: phi.automorphism_group_order(level=True, absolute=True)
             1
-            sage: psi.automorphism_group_order(absolute=True)
+            sage: phi.automorphism_group_order(absolute=True)
             6
         
         TESTS::
@@ -966,11 +972,11 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             sage: Fq = GF(7)
             sage: A.<T> = Fq[]
             sage: K.<S> = FractionField(A)
-            sage: psi = DrinfeldModule(A, [S, 1, 3, 0, S+1])
-            sage: psi.automorphism_group_order()
+            sage: phi = DrinfeldModule(A, [S, 1, 3, 0, S+1])
+            sage: phi.automorphism_group_order()
             Traceback (most recent call last):
             ...
-            ValueError: Drinfeld module must be over a finite field for non absolute automorphism group computations
+            NotImplementedError: Drinfeld module must be over a finite field for non absolute automorphism group computations
         
         ::
         
@@ -1002,15 +1008,14 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             sage: Fq = GF(3)
             sage: A.<T> = Fq[]
             sage: K.<S> = FractionField(A)
-            sage: psi = DrinfeldModule(A,[S,1])
-            sage: psi.automorphism_group_order(absolute=True)
+            sage: phi = DrinfeldModule(A,[S,1])
+            sage: phi.automorphism_group_order(absolute=True)
             2
-        
         """
         
         if not absolute:
             if not self.is_finite():
-                raise ValueError('Drinfeld module must be over a finite field for non absolute automorphism group computations')
+                raise NotImplementedError('Drinfeld module must be over a finite field for non absolute automorphism group computations')
         if absolute:
             if extension_degree!=1:
                 raise ValueError('Extension degree does nothing on absolute automorphism groups')
