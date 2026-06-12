@@ -456,7 +456,11 @@ class EllipticCurveHom(Morphism):
         """
         if self.parent() != psi.parent():
             raise ValueError('given morphism must have the same domain and codomain as this morphism')
-        return (self.dual() * psi).trace()
+        if self.degree() < psi.degree():
+            pair = self.dual() * psi
+        else:
+            pair = self * psi.dual()
+        return pair.trace()
 
     def characteristic_polynomial(self):
         r"""
