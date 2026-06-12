@@ -128,7 +128,6 @@ class BuildFeature(Feature):
         """
         if self.is_runtime_detectable():
             return self.is_present_at_runtime()
-        import sage.config
         # Wrap with bool() so that we can be lazy and use meson's
         # set10() rather than painstakingly writing "True" and
         # "False" to the config file.
