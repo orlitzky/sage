@@ -94,10 +94,11 @@ cdef class GabowEdgeConnectivity:
         sage: D = DiGraph(dig6_string)
         sage: GabowEdgeConnectivity(D).edge_connectivity()
         5
-        sage: GabowEdgeConnectivity(D).edge_disjoint_spanning_trees()
-        Traceback (most recent call last):
-        ...
-        NotImplementedError: this method has not been implemented yet
+        sage: trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees()
+        sage: len(trees)
+        5
+        sage: all(T.num_edges() == D.order() - 1 for T in trees)
+        True
 
     Corner cases::
 
@@ -2248,17 +2249,123 @@ cdef class GabowEdgeConnectivity:
 
         return self.A_size == self.n
 
-    def edge_disjoint_spanning_trees(self):
+    def edge_disjoint_spanning_trees(self, k=None, root=None):
         r"""
-        Iterator over the edge disjoint spanning trees.
+        Return a list of ``k`` edge-disjoint spanning out-arborescences
+        rooted at ``root``.
 
-        EXAMPLES::
+        Following [Gabow1995]_ and Edmonds' branching theorem, the maximum
+        number of edge-disjoint spanning out-arborescences rooted at a
+        vertex ``r`` equals the minimum ``r``-cut of the digraph. When the
+        digraph is strongly connected, this is at least the edge
+        connectivity ``ec`` of the digraph.
+
+        INPUT:
+
+        - ``k`` -- integer or ``None`` (default: ``None``); the number of
+          edge-disjoint spanning arborescences to return. If ``None``, the
+          method returns ``self.ec`` arborescences (the value computed by
+          :meth:`edge_connectivity`).
+
+        - ``root`` -- vertex of the input digraph or ``None``
+          (default: ``None``); the common root of the returned
+          arborescences. If ``None``, defaults to the first vertex of the
+          digraph (the same convention used by the MILP backend in
+          :meth:`~sage.graphs.generic_graph.GenericGraph.edge_disjoint_spanning_trees`).
+
+        OUTPUT:
+
+        A list of :class:`~sage.graphs.digraph.DiGraph`, each on the same
+        vertex set as the input. Every returned arborescence is rooted at
+        ``root``: the root has indegree 0, every other vertex has
+        indegree 1, and every vertex is reachable from ``root``. The
+        returned arborescences are pairwise edge-disjoint.
+
+        EXAMPLES:
+
+        On a complete digraph, the algorithm returns ``n-1`` arborescences::
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: GabowEdgeConnectivity(D).edge_disjoint_spanning_trees()
-            Traceback (most recent call last):
-            ...
-            NotImplementedError: this method has not been implemented yet
+            sage: trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4)
+            sage: len(trees)
+            4
+            sage: all(T.num_edges() == 4 for T in trees)
+            True
+
+        The returned arborescences are pairwise edge-disjoint::
+
+            sage: D = digraphs.Complete(5)
+            sage: trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4)
+            sage: all_edges = sum((T.edges(labels=False, sort=False) for T in trees), [])
+            sage: len(all_edges) == len(set(all_edges))
+            True
+
+        Trivial case::
+
+            sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
+            sage: D = digraphs.Complete(5)
+            sage: GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=0)
+            []
+
+        Asking for more arborescences than the digraph can support raises
+        :class:`~sage.categories.sets_cat.EmptySetError`::
+
+            sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
+            sage: from sage.categories.sets_cat import EmptySetError
+            sage: D = digraphs.Complete(5)
+            sage: try:
+            ....:     _ = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=5)
+            ....: except EmptySetError:
+            ....:     print("EmptySetError")
+            EmptySetError
         """
-        raise NotImplementedError('this method has not been implemented yet')
+        from sage.graphs.digraph import DiGraph
+        from sage.categories.sets_cat import EmptySetError
+
+        # Default k to the edge connectivity
+        if k is None:
+            if not self.ec_checked:
+                self.compute_edge_connectivity()
+            k = self.ec
+
+        # Trivial / empty packing
+        if k <= 0:
+            return []
+
+        # Empty or non-strongly-connected digraphs are not handled by the
+        # Gabow machinery: __init__ returns early without building the
+        # compact data structures, leaving ``int_to_vertex`` unset. No
+        # spanning arborescence packing of size k >= 1 exists in that case
+        # via this backend (the public API may fall back to MILP).
+        if self.int_to_vertex is None:
+            raise EmptySetError(
+                "this digraph does not contain {} edge-disjoint spanning "
+                "arborescences".format(k))
+
+        # Resolve the root vertex (default: first vertex of the graph)
+        cdef int root_idx = 0
+        if root is not None:
+            if root not in self.int_to_vertex:
+                raise ValueError("vertex {!r} is not a vertex of the graph".format(root))
+            root_idx = self.int_to_vertex.index(root)
+
+        # Run the packing
+        if not self.compute_arborescence_packing(k, root_idx):
+            raise EmptySetError(
+                "this digraph does not contain {} edge-disjoint spanning "
+                "arborescences rooted at {!r}".format(k, self.int_to_vertex[root_idx]))
+
+        # Build DiGraphs from the saved arborescence edge sets
+        cdef int i, e_id
+        vertices = list(self.int_to_vertex)
+        result = []
+        for i in range(k):
+            edges = []
+            for e_id in self.arborescence_F[i]:
+                u = self.int_to_vertex[self.tail[e_id]]
+                v = self.int_to_vertex[self.head[e_id]]
+                edges.append((u, v))
+            result.append(DiGraph([vertices, edges], format='vertices_and_edges'))
+
+        return result
