@@ -91,6 +91,10 @@
                 and T. Yalcin, *Block ciphers - focus on the linear layer
                 (feat. PRIDE)*; in CRYPTO, (2014), pp. 57-76.
 
+.. [ADMNT2025] Ilani Axelrod-Freed, Colin Defant, Hanna Mularczyk,
+               Son Nguyen and Katherine Tung, *Chute Move Posets are
+               Lattices*. :arxiv:`2507.13214`
+
 .. [AE1993] \A. Apostolico, A. Ehrenfeucht, *Efficient detection of
             quasiperiodicities in strings*,
             Theoret. Comput. Sci. 119 (1993) 247--265.
@@ -248,6 +252,11 @@
 .. [AN2023] Alex Abreu and Antonio Nigro. *Splitting the cohomology of Hessenberg
             varieties and e-positivity of chromatic symmetric functions*.
             Preprint (2023). :arxiv:`2304.10644`.
+
+.. [AndHonk97] Ian Anderson and Iiro Honkala,
+               *A short course in Combinatorial Designs*,
+               Internet Editions, Spring 1997.
+               http://www.utu.fi/~honkala/designs.ps
 
 .. [Ang1997] \B. Anglès. 1997. *On some characteristic polynomials attached to
              finite Drinfeld modules.* manuscripta mathematica 93, 1 (01 Aug 1997),
@@ -465,6 +474,10 @@
              Beitr Algebra Geom (2013) 54: 471,
              :arxiv:`1110.4275`,
              :doi:`10.1007/s13366-011-0084-0`.
+
+.. [BB1993] Nantel Bergeron and Sara Billey, *RC-graphs and Schubert
+            polynomials*. Experiment. Math. **2** (1993), no. 4,
+            257-269.
 
 .. [BB1997] Mladen Bestvina and Noel Brady. *Morse theory and
             finiteness properties of groups*. Invent. Math. **129**
@@ -1132,6 +1145,10 @@
                 *The number of intervals in the m-Tamari lattices*.
                 Electronic Journal of Combinatorics 18(2), 2011.
                 :doi:`10.37236/2027`
+
+.. [BMM2025] Sara Billey, Connor McCausland and Clare Minnerath, *A
+             Proof of Rubey's Lattice Conjecture*.
+             :arxiv:`2507.18852`.
 
 .. [BMP2007] \S. Brlek, G. Melançon, G. Paquin, Properties of the
              extremal infinite smooth words, Discrete
@@ -1827,6 +1844,11 @@
 .. [CL2023] Xavier Caruso and Antoine Leudière.
             *Algorithms for computing norms and characteristic polynomials on general Drinfeld modules*, (2023) :arxiv:`2307.02879`.
 
+.. [ClaytonSmith] Clayton Smith,
+                  *On the existence of* `(v,5,1)`\ -*BIBD*.
+                  http://www.argilo.net/files/bibd.pdf
+
+
 .. [Cle1872] Alfred Clebsch, *Theorie der binären algebraischen Formen*,
              Teubner, 1872.
 
@@ -2274,6 +2296,11 @@
 .. [Den2012] Tom Denton. Canonical Decompositions of Affine Permutations,
              Affine Codes, and Split `k`-Schur Functions.  Electronic Journal of
              Combinatorics, 2012.
+
+.. [Denniston69] \R. H. F. Denniston,
+                 *Some maximal arcs in finite projective planes*.
+                 Journal of Combinatorial Theory 6, no. 3 (1969): 317-319.
+                 :doi:`10.1016/S0021-9800(69)80095-5`
 
 .. [Deo1987a] \V. Deodhar, A splitting criterion for the Bruhat
               orderings on Coxeter groups. Comm. Algebra,
@@ -4444,6 +4471,11 @@
 .. [Kre2002] \V. Kreps. *Social Network Analysis* (2002).
              [Online] Available: http://www.orgnet.com/sna.html
 
+.. [KreherStinson98] Donald L. Kreher and Douglas R. Stinson,
+                     *Combinatorial Designs: Generation, Enumeration, and Search*,
+                     1998.
+                     :doi:`10.1201/9781003068006`
+
 .. [KRG1996] \S. Klavzar, A. Rajapakse, and I. Gutman. *The Szeged and the
              Wiener index of graphs*. Applied Mathematics Letters, 9(5):45--49,
              1996. :doi:`10.1016/0893-9659(96)00071-7`.
@@ -4501,6 +4533,11 @@
 .. [KT1986] \N. Kerzman and M. R. Trummer. *Numerical Conformal
             Mapping via the Szego kernel*. Journal of Computational
             and Applied Mathematics, 14(1-2): 111--123, 1986.
+
+.. [KT1997] Daniel Krob and Jean-Yves Thibon.
+            *Noncommutative symmetric functions IV: Quantum linear groups and Hecke
+            algebras at q = 0*, Journal of Algebraic Combinatorics 6 (1997),
+            no. 4, 339--376.
 
 .. [KT2013] \K. Tsukazaki, Explicit Isogenies of Elliptic Curves,
             Ph.D. thesis, University of Warwick, 2013.
@@ -5630,6 +5667,9 @@
               :doi:`10.1016/j.aim.2010.01.006`,
               :arxiv:`0804.0995v3`.
 
+.. [Nov2000] Jean-Christophe Novelli, *On the hypoplactic monoid*,
+             Discrete Mathematics 217 (2000), no. 1--3, 315--336.
+
 .. [NovThi06] Jean-Christophe Novelli, Jean-Yves Thibon,
               *Polynomial realizations of some trialgebras*, FPSAC 2006.
               :arxiv:`math/0605061v1`.
@@ -6219,6 +6259,11 @@
              imaginary quadratic fields. Invent. Math. 103 (1991),
              no. 1, 25--68.
 
+.. [Rub2011] Martin Rubey, *Maximal 0–1-fillings of moon polyominoes
+             with restricted chain lengths and RC-graphs*. Adv. in
+             Appl. Math. **48** (2012), no. 2,
+             290-305. :arxiv:`1009.3919`
+
 .. [Rud1958] \M. E. Rudin. *An unshellable triangulation of a
              tetrahedron*. Bull. Amer. Math. Soc. 64 (1958), 90-91.
 
@@ -6694,6 +6739,10 @@
 
 .. [Stich2009] Stichtenoth, Henning. *Algebraic function fields and codes*.
                Vol. 254. Springer Science & Business Media, 2009.
+
+.. [Stinson2004] Douglas R. Stinson,
+                 *Combinatorial designs: construction and analysis*,
+                 Springer, 2004.
 
 .. [Sto1998] \A. Storjohann, An O(n^3) algorithm for Frobenius normal
              form. Proceedings of the International Symposium on
