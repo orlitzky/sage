@@ -8,8 +8,3 @@ sdh_cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
           -DCMAKE_INSTALL_PREFIX=$SAGE_LOCAL \
           .. \
     && sdh_make_install
-
-
-[mcqd-1.0.p0] [spkg-install]     BUILD_STATIC_LIBS
-[mcqd-1.0.p0] [spkg-install]     CMAKE_FIND_ROOT_PATH_MODE_LIBRARY
-[mcqd-1.0.p0] [spkg-install]     CMAKE_INSTALL_LIBDIR
