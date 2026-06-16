@@ -99,6 +99,9 @@ cdef class GabowEdgeConnectivity:
         5
         sage: all(T.num_edges() == D.order() - 1 for T in trees)
         True
+        sage: all_edges = sum((T.edges(labels=False, sort=False) for T in trees), [])
+        sage: len(all_edges) == len(set(all_edges))  # the trees are edge disjoint
+        True
 
     Corner cases::
 
@@ -1256,10 +1259,9 @@ cdef class GabowEdgeConnectivity:
             sage: D = digraphs.Complete(5)
             sage: _ = GabowEdgeConnectivity(D)
         """
-        cdef int e, u
-        for u in range(self.n):
-            self.g_in[u].clear()
-            self.g_out[u].clear()
+        cdef int e
+        self.g_in = vector[vector[int]](self.n)
+        self.g_out = vector[vector[int]](self.n)
         for e in range(self.m):
             if self.in_union[e] and not self.extracted_edge[e]:
                 self.g_out[self.tail[e]].push_back(e)
