@@ -4956,11 +4956,14 @@ cdef class Matrix(Matrix1):
         if basis == 'computed':
             return M
         elif basis == 'echelon':
+            if format == 'pivot-nmod-ring':
+                from sage.matrix.constructor import matrix
+                if M.nrows() < M.ncols():
+                    pad = M.nrows() - M.ncols()
+                    M = M.stack(matrix([[0] * M.ncols()] * pad))
             if not format[:7] == 'echelon':
                 M.echelonize()
-                return M
-            else:
-                return M
+            return M
         elif basis == 'pivot':
             # cannot get here unless over a field
             if not format[:5] == 'pivot':

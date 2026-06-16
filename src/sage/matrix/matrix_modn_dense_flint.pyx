@@ -1658,7 +1658,7 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
         sig_off()
         return M
 
-    def _right_kernel_matrix(self, algorithm=None, proof=None, zero_divisors_are_pivots=False):
+    def _right_kernel_matrix(self, algorithm=None, proof=None):
         r"""
         A matrix whose rows form a basis for the right kernel of this matrix.
 
@@ -1667,8 +1667,6 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
         - ``algorithm`` -- either ``flint`` or ``linbox``.
 
         - ``proof`` -- ignored, for compatibility with :meth:`sage.matrix.matrix2.Matrix.right_kernel_matrix`.
-
-        - ``zero_divisors_are_pivots`` -- great zero divisors as pivots
 
         OUTPUT:
 
@@ -1723,7 +1721,7 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
             else:
                 algorithm = "flint"
         if algorithm == "linbox":
-            K = self._change_implementation("linbox").right_kernel_matrix("linbox-noefd", basis="pivot")
+            K = self._change_implementation("linbox").right_kernel_matrix("linbox_noefd", basis="pivot")
             return "pivot-linboxed", K._change_implementation("flint")
         cdef Py_ssize_t i, j, k, l, cur_row, pivl
         cdef mp_limb_t s, x, y, N, xinv, yinv, Ninv
@@ -1739,7 +1737,6 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
             sig_off()
             return "pivot-nmod-field", ans
         else:
-            # We need to have a square matrix so that it's possible to echelonize.
             ans = self._new(self._ncols - self.rank(), self._ncols)
             N = mpz_get_si(self._modulus.sageInteger.value)
             Ninv = n_preinvert_limb(N)
@@ -1759,8 +1756,6 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
                 i = k
                 if j in zdp:
                     k += 1
-                    if zero_divisors_are_pivots:
-                        continue
                     # v[j] = N // E[i,j]
                     nmod_mat_set_entry(ans._matrix, cur_row, j, N // nmod_mat_get_entry(E._matrix, i, j))
                 else:
