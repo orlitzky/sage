@@ -2937,7 +2937,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
 
         self.__set_post_isomorphism(codomain, isom)
 
-    def dual(self, pushforward=False):
+    def dual(self, algorithm=None):
         r"""
         Return the isogeny dual to this isogeny.
 
@@ -3099,44 +3099,32 @@ class EllipticCurveIsogeny(EllipticCurveHom):
 
         Example for :issue:`42335`::
 
-            ....: p = 13;
-            ....: k.<w> = GF(p^8); #need to take a large enough field extensi
-            ....: on so E1[5] has all its points
-            ....: l = 5;
-            ....: E1 = EllipticCurve(k, [1,4]);
-            ....: E2 = EllipticCurve(k, [12,7]);
-            ....: R.<x> = k[];
-            ....: f1=x^2 + (w^7 + 5*w^6 + 9*w^5 + 3*w^4 + 9*w^3 + 3*w^2 + 10*
+            sage: p = 13
+            sage: k.<w> = GF(p^8); #need to take a large enough field extension so E1[5] has all its points
+            sage: l = 5
+            sage: E1 = EllipticCurve(k, [1,4])
+            sage: E2 = EllipticCurve(k, [12,7])
+            sage: R.<x> = k[]
+            sage: f1 = x^2 + (w^7 + 5*w^6 + 9*w^5 + 3*w^4 + 9*w^3 + 3*w^2 + 10*
             ....: w + 2)*x + 5*w^7 + 12*w^6 + 6*w^5 + 2*w^4 + 6*w^3 + 2*w^2 +
-            ....:  11*w + 12;
-            ....: f1 = R(f1);
-            ....: f2=x^2 + (12*w^7 + 8*w^6 + 4*w^5 + 10*w^4 + 4*w^3 + 10*w^2
+            ....:  11*w + 12
+            sage: f1 = R(f1)
+            sage: f2 = x^2 + (12*w^7 + 8*w^6 + 4*w^5 + 10*w^4 + 4*w^3 + 10*w^2
             ....: + 3*w + 8)*x + 8*w^7 + w^6 + 7*w^5 + 11*w^4 + 7*w^3 + 11*w^
-            ....: 2 + 2*w + 3;
-            ....: f2 = R(f2);
-            ....: phi1=E1.isogeny(f1);
-            ....: phi2=E1.isogeny(f2);
-            ....: phi1_hat=phi1.dual();
-            ....: phi2_hat=phi2.dual();
-            ....: print("phi_1: ", phi1, "\n");
-            ....: print("phi_2: ", phi2, "\n");
-            ....: # print(phi1.dual());
-            ....: # print(phi2.dual());
-            ....: print("phi1 == phi2:", phi1 == phi2);
-            ....: print("phi1.dual()==phi2.dual():", phi1.dual()==phi2.dual()
-            ....: ); #same dual, but this curve has trivial reduced automorph
-            ....: ism group
-            ....: #show my method fixes the issue
-            ....: phi1_dual = phi1.dual(pushforward=True);
-            ....: phi2_dual = phi2.dual(pushforward=True);
-            ....: print("phi1_dual == phi2_dual:", phi1_dual == phi2_dual);
-            phi_1:  Isogeny of degree 5 from Elliptic Curve defined by y^2 = x^3 + x + 4 over Finite Field in w of size 13^8 to Elliptic Curve defined by y^2 = x^3 + 12*x + 7 over Finite Field in w of size 13^8
-
-            phi_2:  Isogeny of degree 5 from Elliptic Curve defined by y^2 = x^3 + x + 4 over Finite Field in w of size 13^8 to Elliptic Curve defined by y^2 = x^3 + 12*x + 7 over Finite Field in w of size 13^8
-
-            phi1 == phi2: False
-            phi1.dual()==phi2.dual(): True
-            phi1_dual == phi2_dual: False
+            ....: 2 + 2*w + 3
+            sage: f2 = R(f2)
+            sage: phi1 = E1.isogeny(f1)
+            sage: phi2 = E1.isogeny(f2)
+            sage: phi1_hat = phi1.dual()
+            sage: phi2_hat = phi2.dual()
+            sage: print("phi_1: ", phi1, "\n")
+            sage: print("phi_2: ", phi2, "\n")
+            sage: assert phi1 != phi2
+            sage: assert phi1.dual() == phi2.dual(); #same dual, but this curve has trivial reduced automorphism group
+            sage: #show the method fixes the issue
+            sage: phi1_dual = phi1.dual(algorithm='pushforward')
+            sage: phi2_dual = phi2.dual(algorithm='pushforward')
+            sage: assert phi1_dual == phi2_dual
         """
         if self.__base_field.characteristic() in (2, 3):
             raise NotImplementedError("computation of dual isogenies not yet implemented in characteristics 2 and 3")
@@ -3147,16 +3135,22 @@ class EllipticCurveIsogeny(EllipticCurveHom):
         F = self.__base_field
         d = self._degree
 
-        if pushforward:
-            #If the flag to try pushforward method is True
-            #TODO: Optimize, implement non-prime degree cases and inseparable case
+        if algorithm == 'pushforward':
+        #TODO:
+            #Extra Features:
+                #Implement inseparable case.
+                #Implement composite degree cyclic case.
+                #Implement non-cyclic case.
+            #Optimizations:
+                #Faster root-finding for the quotient of the division polynomial by the kernel polynomial.
+                #x-only arithmetic when evaluating the preimage of a generator of the dual kernel.
             """
             Original Author: William E. Mahaney
             """
             if F(d) == 0:
-                raise NotImplementedError("Method not implemented for inseparable isogenies.")
+                raise NotImplementedError("``pushforward`` method not implemented for inseparable isogenies")
             if not d.is_prime():
-                raise NotImplementedError("Method not implemented for composite degree isogenies.")
+                raise NotImplementedError("``pushforward`` method not implemented for composite degree isogenies")
             """
             Construct the dual isogeny of a prime-degree isogeny phi: E -> E'.
 
@@ -3168,36 +3162,32 @@ class EllipticCurveIsogeny(EllipticCurveHom):
             """
             E = self.domain()
             E_prime = self.codomain()
-            R = PolynomialRing(F, 'x');
 
-            kernel_poly = R(self.kernel_polynomial())
-            division_poly = R(E.division_polynomial(d))
-            quotient_poly = R(division_poly / kernel_poly)
+            kernel_poly = self.kernel_polynomial()
+            division_poly = E.division_polynomial(d)
+            quotient_poly = division_poly //kernel_poly
 
             roots = quotient_poly.roots(multiplicities=False)
             if not roots:
                 raise ValueError(
-                    "The dual isogeny is not defined over the current ground field."
-                    "Extension of the base field is not implemented."
+                    "the dual isogeny is not defined over the current ground field"
                 )
 
             x0 = roots[0]
-
             try:
                 pts = E.lift_x(x0, all=True)
             except (AttributeError, NotImplementedError, TypeError):
                 pts = []
 
             if not pts:
-                raise ValueError("Could not lift the chosen x-coordinate to a point on E.")
+                raise ValueError("could not lift the chosen x-coordinate to a point on E")
 
             P = pts[0]
             Q = self(P)
 
             return E_prime.isogeny(Q)
 
-        #After this is the old code
-
+        #General case:
         if F(d) == 0:   # inseparable dual!
             p = F.characteristic()
             k = d.valuation(p)
@@ -4021,5 +4011,3 @@ def unfill_isogeny_matrix(M):
                 M1[i,j] = zero
                 M1[j,i] = zero
     return M1
-
-
