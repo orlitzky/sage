@@ -254,28 +254,44 @@ def get_matrix_class(R, nrows, ncols, sparse, implementation):
                         pass
 
             if isinstance(R, sage.rings.abc.IntegerModRing):
-                # FLINT performs better for small dimensions; the following are approximate crossovers
-                # for square matrices against modn_dense_double
-                # 100 for echelon form
-                # 20 for charpoly
-                # 1000 for inverses
-                # 2 for right_kernel
-                # 250 for multiplication
+                # FLINT performs better for small dimensions and for some operations for composite moduli.
+
+                # The following are approximate crossovers for square matrices against modn_dense_float:
+                # 25 for multiplication
+                # 75 for inverses
+
+                # The following are approximate crossovers for square matrices against modn_dense_double
+                # 100 for multiplication for n <= 24 bits
+                # 25 for multiplication for n = 25 bits (this is weird)
+                # Could not find cutoff where LinBox multiplication is better for n >= 26 bits
+                # Could not find cutoff where LinBox is better for inverses
+
+
                 try:
                     from . import matrix_modn_dense_double, matrix_modn_dense_float, matrix_modn_dense_flint, matrix_mod2_dense
                 except ImportError:
                     pass
-                if R.order() <= matrix_modn_dense_flint.MAX_MODULUS:
+                if R.order() < matrix_modn_dense_flint.MAX_MODULUS:
                     if R.order() == 2:
                         return matrix_mod2_dense.Matrix_mod2_dense
-                    if max(nrows, ncols) <= 100:
-                        return matrix_modn_dense_flint.Matrix_modn_dense_flint
-                    if R.order() < matrix_modn_dense_float.MAX_MODULUS:
-                        return matrix_modn_dense_float.Matrix_modn_dense_float
-                    if R.order() < matrix_modn_dense_double.MAX_MODULUS:
-                        return matrix_modn_dense_double.Matrix_modn_dense_double
-                    return matrix_modn_dense_flint.Matrix_modn_dense_flint
 
+                    if R.order() < matrix_modn_dense_float.MAX_MODULUS:
+                        if max(nrows, ncols) <= 50:
+                            return matrix_modn_dense_flint.Matrix_modn_dense_flint
+                        return matrix_modn_dense_float.Matrix_modn_dense_float
+
+                    if R.order() < matrix_modn_dense_double.MAX_MODULUS:
+                        if R.order().nbits() <= 24:
+                            if max(nrows, ncols) <= 100:
+                                return matrix_modn_dense_flint.Matrix_modn_dense_flint
+                            return matrix_modn_dense_double.Matrix_modn_dense_double
+
+                        if R.order().nbits() == 25:
+                            if max(nrows, ncols) <= 20:
+                                return matrix_modn_dense_flint.Matrix_modn_dense_flint
+                            return matrix_modn_dense_double.Matrix_modn_dense_double
+
+                    return matrix_modn_dense_flint.Matrix_modn_dense_flint
 
             if isinstance(R, sage.rings.abc.NumberField_cyclotomic):
                 from . import matrix_cyclo_dense
@@ -353,7 +369,7 @@ def get_matrix_class(R, nrows, ncols, sparse, implementation):
                 return matrix_rational_dense.Matrix_rational_dense
 
             from . import matrix_modn_dense_flint
-            if R.order() <= matrix_modn_dense_flint.MAX_MODULUS:
+            if R.order() < matrix_modn_dense_flint.MAX_MODULUS:
                 return matrix_modn_dense_flint.Matrix_modn_dense_flint
             raise ValueError("'flint' matrices are only available over the integers, the rationals and Z/N with N < 2^64")
 

@@ -68,7 +68,7 @@ from sage.libs.flint.ulong_extras cimport (
 )
 from sage.libs.gmp.mpz cimport mpz_sgn,  mpz_fits_ulong_p, mpz_get_ui, mpz_get_si
 
-MAX_MODULUS = (sys.maxsize << 1) + 1
+MAX_MODULUS = (sys.maxsize + 1) << 1
 
 cdef class Matrix_modn_dense_flint(Matrix_dense):
     r"""
