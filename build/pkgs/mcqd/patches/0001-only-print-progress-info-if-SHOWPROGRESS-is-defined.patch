@@ -1,0 +1,74 @@
+From d2aa3679f2577a32149e2ac760a8aeb8afac89ac Mon Sep 17 00:00:00 2001
+From: Dima Pasechnik <dima@pasechnik.info>
+Date: Mon, 15 Jun 2026 12:46:00 -0500
+Subject: [PATCH] only print progress info if SHOWPROGRESS is defined
+
+also adjust readme
+---
+ README.md | 20 +++++++++++++++++---
+ mcqd.h    |  8 ++++++--
+ 2 files changed, 23 insertions(+), 5 deletions(-)
+
+diff --git a/README.md b/README.md
+index 8b58276..ca157fb 100644
+--- a/README.md
++++ b/README.md
+@@ -4,12 +4,26 @@ MaxCliqueDyn is a fast exact algorithm for finding a maximum clique in an undire
+ More information about this project at [MaxCliqueDyn Website](http://insilab.org/maxclique)
+ 
+ Install
+-======= 
+-Compile with: g++ -O3 mcqd.cpp -o mcqd
++=======
++mkdir build
++cd build
++cmake ..
++cmake --build .
++sudo cmake --install .
++
++In case you need to see the progress of the program, add -DSHOWPROGRESS to "cmake .." above.
+ 
+ How to Run
+ ==========
+-Run with: mcqd test.clq
++Run with: mcqdexe test.clq
++
++How to use in a cmake project
++=============================
++add the line
++
++find_package(Mcqd REQUIRED)
++
++to your CMakeLists.txt
+ 
+ Notes
+ =====
+diff --git a/mcqd.h b/mcqd.h
+index 8fb1915..9f1a8f9 100644
+--- a/mcqd.h
++++ b/mcqd.h
+@@ -247,7 +247,9 @@ void Maxclique::expand(Vertices R) {
+         expand(Rp);
+       }
+       else if (Q.size() > QMAX.size()) { 
+-        std::cout << "step = " << pk << " current max. clique size = " << Q.size() << std::endl; 
++      #ifdef SHOWPROGRESS
++        std::cout << "step = " << pk << " current max. clique size = " << Q.size() << std::endl;
++      #endif
+ 	QMAX = Q;
+       }    
+       Rp.dispose();
+@@ -279,7 +281,9 @@ void Maxclique::expand_dyn(Vertices R) {
+ 	level--;
+       }
+       else if (Q.size() > QMAX.size()) { 
+-        std::cout << "step = " << pk << " current max. clique size = " << Q.size() << std::endl; 
++      #ifdef SHOWPROGRESS
++        std::cout << "step = " << pk << " current max. clique size = " << Q.size() << std::endl;
++      #endif
+ 	QMAX = Q;
+       }    
+       Rp.dispose();
+-- 
+2.54.0
+

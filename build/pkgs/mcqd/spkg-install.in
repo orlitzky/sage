@@ -1,6 +1,4 @@
 cd src
-grep -v "std..cout.*current max" mcqd.h > mcqd2.h
-mv mcqd2.h mcqd.h
 mkdir build && cd build
 sdh_cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
           -DBUILD_SHARED_LIBS=ON \
