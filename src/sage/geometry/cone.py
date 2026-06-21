@@ -5499,6 +5499,66 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         # explicit conversion, we return ``0`` when we have no rays.
         return L(sum(terms))
 
+    def _positive_operators_dual(self, K2):
+        r"""
+        Return the dual cone of the positive operators from
+        ``self`` to ``K2`` under the matrix <-> long-vector
+        isometry.
+
+        In :meth:`positive_operators_gens` we compute the cone of
+        positive operators from ``self`` to ``K2`` by taking the
+        dual of a dual. This method computes the latter dual. Matrices
+        cannot generate cones in Sage, so long vectors are used as
+        proxies in this step. The matrix <-> long-vector map is an
+        isometry, so everything works out the same in the end.
+
+        The intermediate dual cone of long vectors turns out to be
+        useful in at least one doctest, so it has been factored out
+        for efficiency.
+
+        REFERENCES:
+
+        - [Or2018b]_
+
+        EXAMPLES:
+
+        On the nonnegative orthant, the positive operators are the
+        (self-dual) cone of nonnegative matrices, which in long-vector
+        form is just a (bigger) nonnegative orthant::
+
+            sage: K = cones.nonnegative_orthant(3)
+            sage: J = K._positive_operators_dual(K)
+            sage: J.is_equivalent(cones.nonnegative_orthant(9))
+            True
+
+        """
+        # Matrices are not vectors in Sage, so we have to convert them
+        # to vectors explicitly before we can find a basis. We need these
+        # two values to construct the appropriate "long vector" space.
+        F = self.lattice().base_field()
+        n = self.lattice_dim()
+        m = K2.lattice_dim()
+
+        tensor_products = ( s.tensor_product(x) for x in self
+                                                for s in K2.dual() )
+
+        # Convert those tensor products to long vectors.
+        W = VectorSpace(F, n*m)
+        vectors = ( W(tp.list()) for tp in tensor_products )
+
+        check = True
+        if self.is_proper() and K2.is_proper():
+            # All of the generators involved are extreme vectors and
+            # therefore minimal. If this cone is neither solid nor
+            # strictly convex, then the tensor product of ``s`` and ``x``
+            # is the same as that of ``-s`` and ``-x``. However, as a
+            # /set/, ``tensor_products`` may still be minimal.
+            check = False
+
+        # Create the dual cone of the positive operators, expressed as
+        # long vectors.
+        return Cone(vectors, ToricLattice(W.dimension()), check=check)
+
     def positive_operators_gens(self, K2=None):
         r"""
         Compute minimal generators of the positive operators on this cone.
@@ -5877,37 +5937,14 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         if K2 is None:
             K2 = self
 
-        # Matrices are not vectors in Sage, so we have to convert them
-        # to vectors explicitly before we can find a basis. We need these
-        # two values to construct the appropriate "long vector" space.
+        # Create cone of positive operators, expressed as long
+        # vectors.
+        pi_cone = self._positive_operators_dual(K2).dual()
+
+        # And finally convert its rays back to matrix representations.
         F = self.lattice().base_field()
         n = self.lattice_dim()
         m = K2.lattice_dim()
-
-        tensor_products = ( s.tensor_product(x) for x in self
-                                                for s in K2.dual() )
-
-        # Convert those tensor products to long vectors.
-        W = VectorSpace(F, n*m)
-        vectors = ( W(tp.list()) for tp in tensor_products )
-
-        check = True
-        if self.is_proper() and K2.is_proper():
-            # All of the generators involved are extreme vectors and
-            # therefore minimal. If this cone is neither solid nor
-            # strictly convex, then the tensor product of ``s`` and ``x``
-            # is the same as that of ``-s`` and ``-x``. However, as a
-            # /set/, ``tensor_products`` may still be minimal.
-            check = False
-
-        # Create the dual cone of the positive operators, expressed as
-        # long vectors.
-        pi_dual = Cone(vectors, ToricLattice(W.dimension()), check=check)
-
-        # Now compute the desired cone from its dual...
-        pi_cone = pi_dual.dual()
-
-        # And finally convert its rays back to matrix representations.
         M = MatrixSpace(F, m, n)
         return [ M(v.list()) for v in pi_cone ]
 
@@ -6118,20 +6155,17 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         operator cone are equal [Or2018b]_::
 
             sage: K = random_cone(max_ambient_dim=3)
-            sage: pi_gens = K.positive_operators_gens()
+            sage: pi_dual = K._positive_operators_dual(K)
+            sage: pi_cone = pi_dual.dual()
             sage: cp_gens = K.cross_positive_operators_gens()
             sage: L = ToricLattice(K.lattice_dim()**2)
-            sage: pi_cone = Cone((g.list() for g in pi_gens),
-            ....:                lattice=L,
-            ....:                check=False)
             sage: cp_cone = Cone((g.list() for g in cp_gens),
             ....:                lattice=L,
             ....:                check=False)
             sage: pi_cone.dim() == cp_cone.dim()
             True
-            sage: pi_star = pi_cone.dual()
-            sage: cp_star = cp_cone.dual()
-            sage: pi_star.linear_subspace() == cp_star.linear_subspace()
+            sage: cp_dual = cp_cone.dual()
+            sage: pi_dual.linear_subspace() == cp_dual.linear_subspace()
             True
 
         The trivial cone, full space, and half-plane all give rise to
