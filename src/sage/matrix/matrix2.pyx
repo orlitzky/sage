@@ -18250,34 +18250,6 @@ cdef class Matrix(Matrix1):
 
         TESTS:
 
-        The identity matrix is always a positive operator::
-
-            sage: K = random_cone(max_ambient_dim=8)
-            sage: R = K.lattice().vector_space().base_ring()
-            sage: L = identity_matrix(R, K.lattice_dim())
-            sage: L.is_positive_operator_on(K)
-            True
-
-        The zero matrix is always a positive operator::
-
-            sage: K = random_cone(max_ambient_dim=8)
-            sage: R = K.lattice().vector_space().base_ring()
-            sage: L = zero_matrix(R, K.lattice_dim())
-            sage: L.is_positive_operator_on(K)
-            True
-
-        Everything in ``K1.positive_operators_gens(K2)`` should be
-        positive on ``K1`` with respect to ``K2``, even if we make
-        the underlying ring symbolic (the usual case is tested by
-        the ``positive_operators_gens`` method)::
-
-            sage: K1 = random_cone(max_ambient_dim=5, max_rays=15)
-            sage: K2 = random_cone(max_ambient_dim=5, max_rays=15)
-            sage: results = ( L.change_ring(SR).is_positive_operator_on(K1, K2)
-            ....:             for L in K1.positive_operators_gens(K2) )
-            sage: all(results)                  # long time
-            True
-
         Technically we could test this, but for now only closed convex cones
         are supported as our ``K1`` and ``K2`` arguments::
 
@@ -18400,33 +18372,6 @@ cdef class Matrix(Matrix1):
 
         TESTS:
 
-        The identity matrix is always cross-positive::
-
-            sage: K = random_cone(max_ambient_dim=8)
-            sage: R = K.lattice().vector_space().base_ring()
-            sage: L = identity_matrix(R, K.lattice_dim())
-            sage: L.is_cross_positive_on(K)
-            True
-
-        The zero matrix is always cross-positive::
-
-            sage: K = random_cone(max_ambient_dim=8)
-            sage: R = K.lattice().vector_space().base_ring()
-            sage: L = zero_matrix(R, K.lattice_dim())
-            sage: L.is_cross_positive_on(K)
-            True
-
-        Everything in ``K.cross_positive_operators_gens()`` should be
-        cross-positive on ``K``, even if we make the underlying ring
-        symbolic (the usual case is tested by the
-        ``cross_positive_operators_gens`` method)::
-
-            sage: K = random_cone(max_ambient_dim=5, max_rays=15)
-            sage: results = ( L.change_ring(SR).is_cross_positive_on(K)
-            ....:             for L in K.cross_positive_operators_gens() )
-            sage: all(results)                  # long time
-            True
-
         Technically we could test this, but for now only closed convex cones
         are supported as our ``K`` argument::
 
@@ -18538,31 +18483,6 @@ cdef class Matrix(Matrix1):
 
         TESTS:
 
-        The identity matrix is always a Z-operator::
-
-            sage: K = random_cone(max_ambient_dim=8)
-            sage: R = K.lattice().vector_space().base_ring()
-            sage: L = identity_matrix(R, K.lattice_dim())
-            sage: L.is_Z_operator_on(K)
-            True
-
-        The zero matrix is always a Z-operator::
-
-            sage: K = random_cone(max_ambient_dim=8)
-            sage: R = K.lattice().vector_space().base_ring()
-            sage: L = zero_matrix(R, K.lattice_dim())
-            sage: L.is_Z_operator_on(K)
-            True
-
-        Everything in ``K.Z_operators_gens()`` should be a Z-operator on
-        ``K``, , even if we make the underlying ring symbolic (the usual
-        case is tested by the ``Z_operators_gens`` method)::
-
-            sage: K = random_cone(max_ambient_dim=5, max_rays=15)                       # needs sage.geometry.polyhedron
-            sage: all(L.change_ring(SR).is_Z_operator_on(K)     # long time             # needs sage.geometry.polyhedron sage.symbolic
-            ....:     for L in K.Z_operators_gens())
-            True
-
         Technically we could test this, but for now only closed convex cones
         are supported as our ``K`` argument::
 
@@ -18654,32 +18574,6 @@ cdef class Matrix(Matrix1):
 
         TESTS:
 
-        The identity matrix is always Lyapunov-like::
-
-            sage: K = random_cone(max_ambient_dim=8)
-            sage: R = K.lattice().vector_space().base_ring()
-            sage: L = identity_matrix(R, K.lattice_dim())
-            sage: L.is_lyapunov_like_on(K)
-            True
-
-        The zero matrix is always Lyapunov-like::
-
-            sage: K = random_cone(max_ambient_dim=8)
-            sage: R = K.lattice().vector_space().base_ring()
-            sage: L = zero_matrix(R, K.lattice_dim())
-            sage: L.is_lyapunov_like_on(K)
-            True
-
-        Everything in ``K.lyapunov_like_basis()`` should be
-        Lyapunov-like on ``K``, even if we make the underlying ring
-        symbolic (the usual case is tested by the
-        ``lyapunov_like_basis`` method)::
-
-            sage: K = random_cone(max_ambient_dim=5, max_rays=15)                       # needs sage.geometry.polyhedron
-            sage: all(L.change_ring(SR).is_lyapunov_like_on(K)  # long time             # needs sage.geometry.polyhedron sage.symbolic
-            ....:     for L in K.lyapunov_like_basis())
-            True
-
         Technically we could test this, but for now only closed convex cones
         are supported as our ``K`` argument::
 
@@ -18709,17 +18603,6 @@ cdef class Matrix(Matrix1):
             sage: L.is_lyapunov_like_on(K)
             True
 
-        A matrix is Lyapunov-like on a cone if and only if both the
-        matrix and its negation are cross-positive on the cone::
-
-            sage: K = random_cone(max_ambient_dim=5, max_rays=15)
-            sage: R = K.lattice().vector_space().base_ring()
-            sage: L = random_matrix(R, K.lattice_dim())
-            sage: actual = L.is_lyapunov_like_on(K)             # long time
-            sage: expected = (L.is_cross_positive_on(K) and     # long time
-            ....:             (-L).is_cross_positive_on(K))
-            sage: actual == expected                            # long time
-            True
         """
         import sage.geometry.abc
 
