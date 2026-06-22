@@ -10,3 +10,6 @@ from sage.monoids.string_ops import (
     frequency_distribution,
     coincidence_index,
     coincidence_discriminant)
+
+#Hypoplactic monoid
+from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
