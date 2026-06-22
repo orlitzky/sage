@@ -2,6 +2,7 @@
 # distutils: library_dirs = M4RI_LIBDIR LIBPNG_LIBDIR
 # distutils: include_dirs = M4RI_INCDIR LIBPNG_INCDIR
 # distutils: extra_compile_args = M4RI_CFLAGS
+# sage.doctest: needs brial
 r"""
 Boolean Polynomials
 
