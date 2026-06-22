@@ -186,10 +186,12 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
         - ``n`` -- a positive integer; the size of the alphabet
 
         EXAMPLES::
+
             sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
             sage: H = HypoplacticMonoid(4)
             sage: H.rank()
             4
+
             sage: TestSuite(H).run()
         """
         from sage.categories.monoids import Monoids
@@ -315,6 +317,67 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             sage: parent(x)
             Hypoplactic monoid of rank 4
         """
+        def __init__(self, parent, value):
+            """
+            Initialize ``self``.
+
+            INPUT:
+
+            - ``parent`` -- a hypoplactic monoid
+            - ``value`` -- a word, given as a list or tuple of letters in the
+              alphabet of ``parent``
+
+            TESTS::
+
+                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+                sage: H = HypoplacticMonoid(4)
+                sage: x = H([3, 2, 2, 1]); x
+                3221
+                sage: H([1, 2.5])
+                Traceback (most recent call last):
+                ...
+                ValueError: letters must be integers from 1 to 4
+            """
+            r = parent.rank()
+            try:
+                value = tuple(map(ZZ, value))
+            except TypeError:
+                raise ValueError("letters must be integers from 1 to %s" % r)
+            if not all(1 <= i <= r for i in value):
+                raise ValueError("letters must be integers from 1 to %s" % r)
+            ElementWrapper.__init__(self, parent, value)
+
+        def _repr_(self):
+            """
+            Return a string representation of ``self``.
+
+            EXAMPLES::
+
+                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+                sage: H = HypoplacticMonoid(4)
+                sage: H([2, 1, 3])
+                213
+            """
+            if not self.value:
+                return ''
+            return ''.join(str(x) for x in self.value)
+
+        def __len__(self):
+            """
+            Return the length of ``self`` as a word.
+
+            This is also the grade of ``self``.
+
+            EXAMPLES::
+
+                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+                sage: H = HypoplacticMonoid(4)
+                sage: len(H([2, 1, 3]))
+                3
+            """
+            return len(self.value)
+
+        grade = __len__
 
         def to_quasiribbon_tableau(self):
             """
