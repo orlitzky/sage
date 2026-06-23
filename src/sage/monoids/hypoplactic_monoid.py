@@ -8,8 +8,7 @@ Krob--Thibon insertion. Multiplication is induced by concatenation of
 words, followed by replacing the product with its quasi-ribbon reading word
 representative.
 
-This file depends on the implementations of plactic monoids and
-quasi-ribbon tableaux.
+This file depends on the implementations of quasi-ribbon tableaux.
 
 The main functionality includes constructing hypoplactic monoid elements,
 computing their quasi-ribbon insertion tableaux, converting elements to
@@ -67,6 +66,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
     reading word representative obtained from hypoplactic insertion.
 
     EXAMPLES::
+
         sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
         sage: H = HypoplacticMonoid(4)
         sage: H
@@ -74,7 +74,8 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
         sage: H.rank()
         4
 
-    Elements are constructed from words::
+    Elements are constructed from tuples::
+
         sage: x = H([3, 2, 2, 1])
         sage: x
         3221
@@ -100,8 +101,8 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
         43
 
     TESTS::
-        sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
 
+        sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
         sage: H = HypoplacticMonoid(4)
         sage: H([]) == H.one()
         True
@@ -157,14 +158,14 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
         The unique hypoplactic monoid of rank ``n``.
 
         EXAMPLES::
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
 
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
             sage: HypoplacticMonoid(4) is HypoplacticMonoid(ZZ(4))
             True
 
         TESTS::
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
 
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
             sage: HypoplacticMonoid(-1)
             Traceback (most recent call last):
             ...
@@ -191,7 +192,6 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             sage: H = HypoplacticMonoid(4)
             sage: H.rank()
             4
-
             sage: TestSuite(H).run()
         """
         from sage.categories.monoids import Monoids
@@ -204,6 +204,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
         Return a string representation of ``self``.
 
         EXAMPLES::
+
             sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
             sage: HypoplacticMonoid(4)
             Hypoplactic monoid of rank 4
@@ -391,8 +392,8 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             representing ``self``.
 
             EXAMPLES::
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
 
+                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: H([3, 2, 2, 1]).to_quasiribbon_tableau()
                 [[1], [2, 2], [None, 3]]
@@ -410,10 +411,10 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
 
         def __hash__(self):
             r"""
-
             Return the hash of ``self``.
 
             TESTS::
+
                 sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: x = H([2, 3, 1, 2])
@@ -427,13 +428,13 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             Iterate over the letters of ``self``.
 
             EXAMPLES::
+
                 sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: list(H([3, 2, 2, 1]))
                 [3, 2, 2, 1]
             """
             return iter(self.value)
-
 
         def __eq__(self, other):
             r"""
@@ -472,6 +473,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             A tuple containing the quasi-ribbon reading word of ``self``.
 
             EXAMPLES::
+
                 sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: H([3, 2, 2, 1]).to_word()
@@ -505,6 +507,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             The product of ``self`` and ``other``.
 
             EXAMPLES::
+
                 sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: a = H([3])
@@ -518,6 +521,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
                 43
 
             TESTS::
+
                 sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: H([]) * H([3, 2, 2, 1]) == H([3, 2, 2, 1])
@@ -537,6 +541,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             Return whether ``self`` is its row reading word representative.
 
             EXAMPLES::
+
                 sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: H([3, 2, 2, 1]).is_canonical()
@@ -557,6 +562,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             short words in parent classes on small alphabets.
 
             EXAMPLES::
+
                 sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(3)
                 sage: H([2, 1, 3]).equivalence_class()
