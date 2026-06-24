@@ -911,7 +911,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
         Return the order of the automorphism group of the Drinfeld module.
 
         The automorphism group of a Drinfeld module is of the form `(\GF{q^M})^\times`
-        for some integer `M`.
+        for some integer `M`. Note that this always is a cyclic group.
         - If ``level`` is set to ``True``, the method returns this `M`, otherwise it
         returns the order `q^M-1`.
         - If ``absolute`` is set to ``True``, the method returns the size or level
@@ -1012,32 +1012,24 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             sage: phi.automorphism_group_order(absolute=True)
             2
         """
-        
         if not absolute:
             if not self.is_finite():
                 raise NotImplementedError('Drinfeld module must be over a finite field for non absolute automorphism group computations')
         if absolute:
             if extension_degree!=1:
                 raise ValueError('Extension degree does nothing on absolute automorphism groups')
-        coef = self.coefficients(sparse=False)
-        level_ = self.rank()
-        for i in range(1,len(coef)):
-            if coef[i] != 0:
-                level_ = gcd(level_,i)
+        r = self.rank()
+        level_ = gcd([r] + [i for i in range(1, r) if self._gen[i] != 0])
         q = self.function_ring().base_ring().order()
         if not absolute:
             K = self.base()
-            n = log(K.order()**extension_degree, q)
+            n = log(K.order(), q)*extension_degree
             level_ = gcd(level_, n)
         if level:
             return level_
         else:
             return q**level_ - 1
     
-    
-
-
-
     def basic_j_invariant_parameters(self, coeff_indices=None, nonzero=False):
         r"""
         Return the list of basic `j`-invariant parameters.
