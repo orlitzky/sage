@@ -21,11 +21,10 @@ Parent classes:
 
 * :class:`QuasiRibbonTableaux`
 
-The main functionality includes constructing quasi-ribbon tableaux from
-row data, computing their composition shapes, checking the row, column, and
-shape conditions, computing reading words, generating finite families of
-fixed composition shape, and performing Krob--Thibon-style insertion of
-letters and words.
+The main functionality includes constructing quasi-ribbon tableaux,
+computing their associated compositions, computing column-reading words,
+generating finite families of fixed composition shape, and performing
+Krob--Thibon insertion of letters and words.
 
 REFERENCES:
 
@@ -71,12 +70,12 @@ class QuasiRibbonTableau(SkewTableau):
         sage: Q
         [[1, 2, 3], [None, None, 4, 5]]
         sage: Q.pp()
-        1  2  3
         .  .  4  5
+        1  2  3
         sage: print(Q)
         1  2  3
               4  5
-        sage: Q.shape()
+        sage: Q.to_composition()
         [3, 2]
 
     The entries labeled by ``None`` correspond to shifted positions before the
@@ -85,9 +84,9 @@ class QuasiRibbonTableau(SkewTableau):
 
         sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
         sage: Q = QuasiRibbonTableau([[1, 2, 3], [4, 5]])
-        sage: Q.pp()
+        sage: print(Q)
         1  2  3
-        .  .  4  5
+              4  5
 
     TESTS::
 
@@ -185,11 +184,7 @@ class QuasiRibbonTableau(SkewTableau):
             for i in range(len(col) - 1):
                 if col[i] >= col[i + 1]:
                     raise ValueError("columns must be strictly increasing")
-        self._quasi_rows = shifted_rows
-
-        skew_rows = list(reversed(self._quasi_rows))
-
-        SkewTableau.__init__(self, parent, skew_rows)
+        SkewTableau.__init__(self, parent, shifted_rows[::-1])
 
     def rows(self):
         """
@@ -206,9 +201,9 @@ class QuasiRibbonTableau(SkewTableau):
             sage: Q.rows()
             [[1, 2, 3], [None, None, 4, 5]]
         """
-        return [list(row) for row in self._quasi_rows]
+        return [list(row) for row in self[::-1]]
 
-    def shape(self):
+    def to_composition(self):
         """
         Return the composition shape of ``self``.
 
@@ -219,28 +214,13 @@ class QuasiRibbonTableau(SkewTableau):
             sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
             sage: Q = QuasiRibbonTableau([[1, 2, 3],
             ....:                         [None, None, 4, 5]])
-            sage: Q.shape()
+            sage: Q.to_composition()
             [3, 2]
         """
         # Each row length in the composition is the number of non-None entries
         # in that row.
-        return Composition([sum(1 for entry in row if entry is not None)
-                for row in self._quasi_rows])
-
-    def height(self):
-        """
-        Return the number of rows of ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
-            sage: Q = QuasiRibbonTableau([[1, 2, 3],
-            ....:                         [None, None, 4, 5]])
-            sage: Q.height()
-            2
-        """
-        # Height is just the number of user-facing rows.
-        return len(self._quasi_rows)
+        return Composition(
+            [sum(entry is not None for entry in row) for row in self.rows()])
 
     def width(self):
         """
@@ -255,175 +235,11 @@ class QuasiRibbonTableau(SkewTableau):
             4
         """
         # The empty tableau has width 0.
-        if not self._quasi_rows:
+        if not self.rows():
             return 0
 
         # We include None entries because they represent shifted positions.
-        return max(len(row) for row in self._quasi_rows)
-
-    def pp(self):
-        r"""
-        Pretty print ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
-            sage: Q = QuasiRibbonTableau([[1, 2, 3], [4, 5]])
-            sage: Q.pp()
-            1  2  3
-            .  .  4  5
-        """
-        for row in self._quasi_rows:
-            print("  ".join("." if entry is None else str(entry) for entry in row))
-
-    def has_valid_row_format(self):
-        """
-        Return whether each row has all ``None`` entries before actual entries.
-
-        Since this class inherits from ``SkewTableau``, some badly formatted
-        row lists may already be rejected by Sage before this method is called.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
-            sage: Q = QuasiRibbonTableau([[1, 2, 3],
-            ....:                         [None, None, 4, 5]])
-            sage: Q.has_valid_row_format()
-            True
-        """
-        # A row may start with some None entries.
-        # But once actual entries begin, there should not be another None.
-        for row in self._quasi_rows:
-            seen_entry = False
-            for entry in row:
-                if entry is None:
-                    # If we already saw an actual entry, then this None is
-                    # in the middle/end of a row, which is not allowed.
-                    if seen_entry:
-                        return False
-                else:
-                    seen_entry = True
-        return True
-
-    def has_valid_shape(self):
-        """
-        Return whether the stored rows match our quasi-ribbon shift convention.
-
-        Since the constructor normalizes input by removing any user-given
-        ``None`` entries and rebuilding the shifts, this method should
-        return ``True`` for tableaux made through the constructor.
-
-        This is still useful as a consistency check, especially later when
-        insertion methods start constructing new tableaux.
-
-        Our convention is:
-        - the top row starts with shift 0;
-        - each lower row starts under the last cell of the row above.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
-            sage: Q = QuasiRibbonTableau([[1, 2, 3],
-            ....:                         [4, 5],
-            ....:                         [6]])
-            sage: Q
-            [[1, 2, 3], [None, None, 4, 5], [None, None, None, 6]]
-            sage: Q.has_valid_shape()
-            True
-            sage: B = QuasiRibbonTableau([[1, 2, 3],
-            ....:                         [None, 4, 5]])
-            sage: B
-            [[1, 2, 3], [None, None, 4, 5]]
-            sage: B.has_valid_shape()
-            True
-        """
-        # The empty tableau is allowed.
-        if not self._quasi_rows:
-            return True
-
-        # First check that each row has all None entries before actual entries.
-        if not self.has_valid_row_format():
-            return False
-
-        expected_shift = 0
-
-        for row in self._quasi_rows:
-            # Count the number of leading None entries.
-            shift = 0
-            while shift < len(row) and row[shift] is None:
-                shift += 1
-
-            # Count the actual tableau entries in this row.
-            entries = [entry for entry in row if entry is not None]
-
-            # A nonempty tableau should not have a row with only None entries.
-            if not entries:
-                return False
-
-            # The row must begin in the expected shifted position.
-            if shift != expected_shift:
-                return False
-
-            # The next row starts under the last cell of the current row.
-            expected_shift += len(entries) - 1
-
-        return True
-
-    def rows_weakly_increase(self):
-        """
-        Return whether each row weakly increases from left to right.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
-            sage: Q = QuasiRibbonTableau([[1, 2, 2],
-            ....:                         [None, None, 3, 4]])
-            sage: Q.rows_weakly_increase()
-            True
-            sage: B = QuasiRibbonTableau([[1, 2, 3]])
-            sage: B.rows_weakly_increase()
-            True
-        """
-        # Rows are weakly increasing, so repeats are allowed
-        for row in self._quasi_rows:
-            entries = [entry for entry in row if entry is not None]
-            for i in range(len(entries) - 1):
-                if entries[i] > entries[i + 1]:
-                    return False
-        return True
-
-    def columns_strictly_increase(self):
-        """
-        Return whether each column strictly increases from top to bottom.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
-            sage: Q = QuasiRibbonTableau([[1, 2, 3],
-            ....:                         [None, None, 4, 5]])
-            sage: Q.columns_strictly_increase()
-            True
-            sage: B = QuasiRibbonTableau([[1, 3],
-            ....:                         [None, 4]])
-            sage: B.columns_strictly_increase()
-            True
-        """
-        # Columns are strictly increasing, so repeats are not allowed
-        # in the same column.
-        for col in range(self.width()):
-            entries = []
-
-            # Collect actual entries in this column from top to bottom.
-            for row in self._quasi_rows:
-                if col < len(row) and row[col] is not None:
-                    entries.append(row[col])
-
-            # Check strict increase
-            for i in range(len(entries) - 1):
-                if entries[i] >= entries[i + 1]:
-                    return False
-
-        return True
+        return max(len(row) for row in self.rows())
 
     def __hash__(self):
         r"""
@@ -438,7 +254,7 @@ class QuasiRibbonTableau(SkewTableau):
         """
         return hash(tuple(self))
 
-    def reading_word(self):
+    def to_word_by_column(self):
         """
         Return the reading word of ``self``.
 
@@ -450,19 +266,21 @@ class QuasiRibbonTableau(SkewTableau):
             sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
             sage: Q = QuasiRibbonTableau([[1, 2, 3],
             ....:                         [None, None, 4, 5]])
-            sage: Q.reading_word()
+            sage: Q.to_word_by_column()
             word: 12435
 
             sage: T = QuasiRibbonTableau([[1], [2, 2], [None, 3, 3], [None, None, 4]])
-            sage: T.reading_word()
+            sage: T.to_word_by_column()
             word: 213243
         """
+        rows = self.rows()
         word = []
+
         for col in range(self.width()):
-            for row_index in reversed(range(self.height())):
-                row = self._quasi_rows[row_index]
+            for row in rows[::-1]:
                 if col < len(row) and row[col] is not None:
                     word.append(row[col])
+
         return Words(PositiveIntegers())(word)
 
     def _repr_(self):
@@ -480,7 +298,7 @@ class QuasiRibbonTableau(SkewTableau):
         """
         # Keep the raw row-list output for debugging because it shows None
         # entries explicitly.
-        return repr(self._quasi_rows)
+        return repr(self.rows())
 
     def __str__(self):
         """
@@ -496,7 +314,7 @@ class QuasiRibbonTableau(SkewTableau):
                   4  5
         """
         lines = []
-        for row in self._quasi_rows:
+        for row in self.rows():
             # Print None entries as blank spaces rather than the word "None".
             line = "  ".join(" " if entry is None else str(entry) for entry in row)
             lines.append(line)
@@ -556,6 +374,9 @@ class QuasiRibbonTableau(SkewTableau):
             sage: Q = QuasiRibbonTableau([[1, 2, 3], [4, 5]])
             sage: Q._rightmost_bottommost_leq(3)
             (3, 0, 2)
+            sage: Q = QuasiRibbonTableau([[1, 2, 2], [3, 3]])
+            sage: Q._rightmost_bottommost_leq(3)
+            (3, 1, 1)
         """
         candidates = []
         for entry, row_index, col_index in self._entries_with_positions():
@@ -600,7 +421,7 @@ class QuasiRibbonTableau(SkewTableau):
         rows = self._clean_rows()
         ## Edge case: rows has fewer rows than row_index
         if len(rows) <= row_index:
-            return Q, QuasiRibbonTableau([])
+            return self, QuasiRibbonTableau([])
         top_rows = rows[:row_index] + [rows[row_index][:col_index+1]]
         ## Prepare for edge case: column_index exceeds the number
         ## of integers in the desired row
@@ -682,12 +503,49 @@ class QuasiRibbonTableau(SkewTableau):
             sage: Q.insert_word([4,1,2])
             [[1, 1], [None, 2, 2], [None, None, 3, 4]]
         """
-        Q = QuasiRibbonTableau(self._quasi_rows)
+        Q = QuasiRibbonTableau(self.rows())
         for a in word:
             if not isinstance(a, (int, Integer)) or a <= 0:
                 raise ValueError("the inserted letters must be positive integers")
             Q = Q.insert_letter(a)
         return Q
+
+    def _test_quasi_ribbon(self, **options):
+        r"""
+        Test that ``self`` satisfies the quasi-ribbon conditions.
+        """
+        tester = self._tester(**options)
+        rows = self.rows()
+
+        expected_shift = 0
+        for row in rows:
+            shift = 0
+            while shift < len(row) and row[shift] is None:
+                shift += 1
+
+            entries = row[shift:]
+
+            tester.assertTrue(entries)
+            tester.assertTrue(all(entry is not None for entry in entries))
+            tester.assertEqual(shift, expected_shift)
+            tester.assertTrue(
+                all(entries[i] <= entries[i + 1]
+                    for i in range(len(entries) - 1))
+            )
+
+            expected_shift += len(entries) - 1
+
+        width = max((len(row) for row in rows), default=0)
+        for col in range(width):
+            entries = [
+                row[col]
+                for row in rows
+                if col < len(row) and row[col] is not None
+            ]
+            tester.assertTrue(
+                all(entries[i] < entries[i + 1]
+                    for i in range(len(entries) - 1))
+            )
 
 class QuasiRibbonTableaux(SkewTableaux):
     r"""
@@ -798,10 +656,7 @@ class QuasiRibbonTableaux(SkewTableaux):
 
         # If shape is None, this represents quasiribbon tableaux in general.
         # If shape is given, this represents a fixed-shape family.
-        if shape is None:
-            self._shape = None
-        else:
-            self._shape = list(shape)
+        self._shape = None if shape is None else Composition(shape)
 
         # max_entry is only used when generating finite examples.
         # Without this cutoff, there are infinitely many possible fillings.
@@ -869,7 +724,9 @@ class QuasiRibbonTableaux(SkewTableaux):
 
     def shape(self):
         """
-        Return the fixed shape of this family, if one was given.
+        Return the fixed composition shape of ``self``.
+
+        Raise an error if this family does not have a fixed shape.
 
         EXAMPLES::
 
@@ -879,30 +736,13 @@ class QuasiRibbonTableaux(SkewTableaux):
             [3, 2]
             sage: QRT = QuasiRibbonTableaux(3)
             sage: QRT.shape()
-            ([1, 1, 1], [1, 2], [2, 1], [3])
+            Traceback (most recent call last):
+            ...
+            ValueError: this family does not have a fixed shape
         """
-        if self._shape is not None:
-            return self._shape
-
-        if self._size is not None:
-            return tuple(Compositions(self._size))
-
-        raise NotImplementedError("the infinite family of all quasi-ribbon tableaux is not implemented")
-
-    def composition_shapes(self, n):
-        """
-        Return all composition shapes of size ``n``.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableaux
-            sage: QRT = QuasiRibbonTableaux()
-            sage: QRT.composition_shapes(3)
-            [[1, 1, 1], [1, 2], [2, 1], [3]]
-        """
-        # Use Sage's built-in Compositions(n), then convert each composition
-        # to a plain Python list for consistency with the rest of our code.
-        return [list(c) for c in Compositions(n)]
+        if self._shape is None:
+            raise ValueError("this family does not have a fixed shape")
+        return self._shape
 
     def tableaux_of_shape(self, shape=None, max_entry=None):
         """
@@ -1050,7 +890,8 @@ class QuasiRibbonTableaux(SkewTableaux):
             except (TypeError, ValueError):
                 return False
 
-        if self._shape is not None and Q.shape() != self._shape:
+        if (self._shape is not None
+                and Q.to_composition() != self._shape):
             return False
 
         if self._max_entry is not None:
@@ -1075,7 +916,9 @@ class QuasiRibbonTableaux(SkewTableaux):
             sage: QuasiRibbonTableaux(shape=[2, 1], max_entry=2).cardinality()
             1
         """
-        if self._max_entry is None or (self._shape is None and self._size is None):
+        if self._max_entry is None:
+            return infinity
+        elif self._shape is None and self._size is None:
             return infinity
         return Integer(len(list(self)))
 

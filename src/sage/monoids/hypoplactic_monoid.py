@@ -298,7 +298,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
         quasiribbontableaux = QuasiRibbonTableaux(size=k, max_entry=self.rank())
 
         def to_word(t):
-            return self(t.reading_word())
+            return self(t.to_word_by_column())
 
         return Family(quasiribbontableaux, to_word, lazy=True)
 
@@ -487,7 +487,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
                 sage: H([]).to_word()
                 word:
             """
-            return self.to_quasiribbon_tableau().reading_word()
+            return self.to_quasiribbon_tableau().to_word_by_column()
 
         def _mul_(self, other):
             """
@@ -533,7 +533,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             word = self.value + other.value
             product_word = self.__class__(parent, word)
             T = product_word.to_quasiribbon_tableau()
-            canonical_word = T.reading_word()
+            canonical_word = T.to_word_by_column()
             return self.__class__(parent, canonical_word)
 
         def is_canonical(self):
