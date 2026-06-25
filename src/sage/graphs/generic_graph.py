@@ -7367,6 +7367,10 @@ class GenericGraph(GenericGraph_pyx):
           * ``'MILP'`` -- use a mixed integer linear programming
             formulation. This is the default method for directed graphs.
 
+          * ``'Gabow'`` -- use the combinatorial algorithm of Gabow
+            [Gabow1995]_ for packing edge-disjoint spanning arborescences.
+            Only available for directed simple graphs.
+
           * ``None`` -- use ``'Roskind-Tarjan'`` for undirected graphs and
             ``'MILP'`` for directed graphs.
 
@@ -7512,7 +7516,22 @@ class GenericGraph(GenericGraph_pyx):
             sage: DiGraph().edge_disjoint_spanning_trees(0, algorithm='foo')
             Traceback (most recent call last):
             ...
-            ValueError: algorithm must be None or "MILP" for directed graphs
+            ValueError: algorithm must be None, "MILP" or "Gabow" for directed graphs
+            sage: DiGraph().edge_disjoint_spanning_trees(0, algorithm='Gabow')
+            []
+
+        The ``'Gabow'`` algorithm packs edge-disjoint spanning arborescences
+        in directed graphs::
+
+            sage: D = digraphs.Complete(4)
+            sage: trees = D.edge_disjoint_spanning_trees(3, algorithm='Gabow')
+            sage: len(trees)
+            3
+            sage: all(t.num_edges() == 3 for t in trees)
+            True
+            sage: all_edges = sum((t.edges(labels=False, sort=False) for t in trees), [])
+            sage: len(all_edges) == len(set(all_edges))
+            True
         """
         self._scream_if_not_simple()
         from sage.categories.sets_cat import EmptySetError
@@ -7521,8 +7540,9 @@ class GenericGraph(GenericGraph_pyx):
         from sage.numerical.mip import MIPSolverException, MixedIntegerLinearProgram
 
         if self.is_directed():
-            if algorithm is not None and algorithm != "MILP":
-                raise ValueError('algorithm must be None or "MILP" for directed graphs')
+            if algorithm is not None and algorithm not in ("MILP", "Gabow"):
+                raise ValueError('algorithm must be None, "MILP" or "Gabow" '
+                                 'for directed graphs')
         elif algorithm is None or algorithm == "Roskind-Tarjan":
             from sage.graphs.spanning_tree import edge_disjoint_spanning_trees
             return edge_disjoint_spanning_trees(self, k)
@@ -7535,6 +7555,10 @@ class GenericGraph(GenericGraph_pyx):
 
         if not n or not k:
             return []
+
+        if self.is_directed() and algorithm == "Gabow":
+            from sage.graphs.edge_connectivity import GabowEdgeConnectivity
+            return GabowEdgeConnectivity(self).edge_disjoint_spanning_trees(k, root=root)
 
         if root is None:
             root = next(G.vertex_iterator())
