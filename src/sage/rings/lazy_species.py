@@ -1783,6 +1783,45 @@ class ArithmeticProductSpeciesElement(LazyCombinatorialSpeciesElement):
 
         return f.parent()(coefficient)
 
+    def structures(self, labels):
+        r"""
+        Iterate over the structures on the given set of labels.
+
+        This uses the rectangle description of the arithmetic product [MM2005]_.
+
+        EXAMPLES::
+
+            sage: L.<X> = LazyCombinatorialSpecies(QQ)
+            sage: E = L.Sets()
+            sage: C = L.Cycles()
+            sage: A = E.arithmetic_product(C)
+            sage: list(A.structures([1, 2, 3]))
+            [((((1, 2, 3),),), ((1,), (2,), (3,))),
+             ((((1, 2, 3),),), ((1,), (3,), (2,))),
+             ((((1,), (2,), (3,)),), ((1, 2, 3),))]
+        """
+        labels = _label_sets(self.parent()._arity, [labels])[0]
+        n = len(labels)
+        if not n:
+            return
+        position = {u: i for i, u in enumerate(labels)}
+
+        def ordered_block(block):
+            return tuple(sorted(block, key=lambda u: position[u]))
+
+        def rectangles(k):
+            l = n // k
+            for row_partition in SetPartitions(labels, [l] * k):
+                rows = tuple(sorted((ordered_block(row) for row in row_partition), key=lambda row: position[row[0]]))
+                first_row = rows[0]
+                for permuted_rows in itertools.product( *(itertools.permutations(row) for row in rows[1:])):
+                    columns = tuple((u,) + tuple(row[j] for row in permuted_rows) for j, u in enumerate(first_row))
+                    yield rows, columns
+
+        for k in divisors(n):
+            for rows, columns in rectangles(k):
+                yield from itertools.product(self._left.structures(rows), self._other.structures(columns))
+
 
 class HadamardProductSpeciesElement(LazyCombinatorialSpeciesElement):
     def __init__(self, left, other):
@@ -1833,6 +1872,21 @@ class HadamardProductSpeciesElement(LazyCombinatorialSpeciesElement):
             return factorial(n) * f[n] * g[n]
 
         return f.parent()(coefficient)
+
+    def structures(self, *labels):
+        r"""
+        Iterate over the structures on the given set of labels.
+
+        EXAMPLES::
+
+            sage: L.<X> = LazyCombinatorialSpecies(QQ)
+            sage: E = L.Sets()
+            sage: C = L.Cycles()
+            sage: sorted(E.hadamard_product(C).structures([1,2,3]))
+            [((1, 2, 3), (1, 2, 3)), ((1, 2, 3), (1, 3, 2))]
+        """
+        labels = _label_sets(self.parent()._arity, labels)
+        yield from itertools.product(self._left.structures(*labels), self._other.structures(*labels))
 
 
 class LazyCombinatorialSpecies(LazyCompletionGradedAlgebra):
