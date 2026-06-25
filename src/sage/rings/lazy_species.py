@@ -1787,7 +1787,7 @@ class ArithmeticProductSpeciesElement(LazyCombinatorialSpeciesElement):
         r"""
         Iterate over the structures on the given set of labels.
 
-        This uses the rectangle description of the arithmetic product [MM2005]_.
+        This uses the rectangle description of the arithmetic product [MM2008]_.
 
         EXAMPLES::
 
