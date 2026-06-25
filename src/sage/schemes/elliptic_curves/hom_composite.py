@@ -851,7 +851,7 @@ class EllipticCurveHom_composite(EllipticCurveHom):
         """
         if not self._phis:
             return self
-        return prod(phi.dual() for phi in self._phis)
+        return prod(phi.dual(algorithm=None) for phi in self._phis)
 
     def formal(self, prec=20):
         """

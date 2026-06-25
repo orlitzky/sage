@@ -440,12 +440,12 @@ class EllipticCurveHom_sum(EllipticCurveHom):
                 except ValueError:
                     continue   # supersingular and l == p
 
-                Q = self.dual()._eval(self._eval(P))
+                Q = self.dual(algorithm=None)._eval(self._eval(P))
                 d = discrete_log(Q, P, ord=l, operation='+')
                 rem = rem.crt(Mod(d-lo, l))
 
             self._degree = lo + rem.lift()
-            self.dual()._degree = self._degree
+            self.dual(algorithm=None)._degree = self._degree
 
     @staticmethod
     def _comparison_impl(left, right, op):
@@ -624,7 +624,7 @@ class EllipticCurveHom_sum(EllipticCurveHom):
 
         ALGORITHM: Taking the dual distributes over addition.
         """
-        psi = EllipticCurveHom_sum((phi.dual() for phi in self._phis),
+        psi = EllipticCurveHom_sum((phi.dual(algorithm=None) for phi in self._phis),
                                    domain=self._codomain, codomain=self._domain)
         psi._degree = self._degree
         if self.trace.is_in_cache():

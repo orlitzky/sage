@@ -1153,7 +1153,7 @@ class EllipticCurveHom_velusqrt(EllipticCurveHom):
         if self.base_ring().characteristic().divides(self.degree()):
             # The dual is inseparable.
             #TODO: This is a lazy workaround; it could be optimized more.
-            return self.as_EllipticCurveIsogeny().dual()
+            return self.as_EllipticCurveIsogeny().dual(algorithm=None)
 
         # The dual is separable.
         F = self._raw_domain.base_ring()

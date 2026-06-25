@@ -481,7 +481,7 @@ class EllipticCurveHom_fractional(EllipticCurveHom):
             sage: ((phi + phi) / 2).dual() == phi.dual()
             True
         """
-        psi = EllipticCurveHom_fractional(self._phi.dual(), self._d)
+        psi = EllipticCurveHom_fractional(self._phi.dual(algorithm=None), self._d)
         psi.dual.set_cache(self)
         return psi
 

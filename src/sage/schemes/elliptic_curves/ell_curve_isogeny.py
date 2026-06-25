@@ -72,6 +72,9 @@ AUTHORS:
 - Lorenz Panny (2022): inseparable duals
 
 - Rémy Oudompheng (2023): implementation of the BMSS algorithm
+
+- William E. Mahaney (2026): computing duals of prime degree separable isogenies via pushforward.
+
 """
 
 # ****************************************************************************
@@ -3144,9 +3147,6 @@ class EllipticCurveIsogeny(EllipticCurveHom):
             #Optimizations:
                 #Faster root-finding for the quotient of the division polynomial by the kernel polynomial.
                 #x-only arithmetic when evaluating the preimage of a generator of the dual kernel.
-            """
-            Original Author: William E. Mahaney
-            """
             if F(d) == 0:
                 raise NotImplementedError("``pushforward`` method not implemented for inseparable isogenies")
             if not d.is_prime():
@@ -3165,13 +3165,11 @@ class EllipticCurveIsogeny(EllipticCurveHom):
 
             kernel_poly = self.kernel_polynomial()
             division_poly = E.division_polynomial(d)
-            quotient_poly = division_poly //kernel_poly
+            quotient_poly = division_poly // kernel_poly
 
             roots = quotient_poly.roots(multiplicities=False)
             if not roots:
-                raise ValueError(
-                    "the dual isogeny is not defined over the current ground field"
-                )
+                raise ValueError("the dual isogeny is not defined over the current ground field")
 
             x0 = roots[0]
             try:
@@ -3215,7 +3213,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
                     mu = S(mu_num) / S(mu_den)
                     f = mu.minpoly()
 
-                sep = self._domain.isogeny(f, codomain=frob.codomain()).dual()
+                sep = self._domain.isogeny(f, codomain=frob.codomain()).dual(algorithm=None)
 
             else:
                 sep = frob.codomain().isomorphism_to(self._domain)
