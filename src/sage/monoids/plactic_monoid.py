@@ -56,7 +56,7 @@ class WordMonoid(UniqueRepresentation, Parent):
 
     - ``n`` -- a positive integer; the size of the alphabet
 
-    Elements are represented by words in `\{1, 2, \ldots, n\}`. 
+    Elements are represented by words in `\{1, 2, \ldots, n\}`.
     It is assumed that the methods `to_tableau`, `to_word` and `equivalence_class` are
     implemented. Equality is determined by methods `to_tableau`.
     """
