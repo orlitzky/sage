@@ -236,6 +236,9 @@ else:
 
 
 def gap_command(use_workspace_cache=True, local=True):
+    from sage.misc.superseded import deprecation
+    deprecation(42427, 'gap_command() is no longer part of the public interface')
+
     if use_workspace_cache:
         if local:
             return "%s -L %s" % (gap_cmd, WORKSPACE), False
