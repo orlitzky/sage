@@ -11,6 +11,7 @@ py.install_sources(
   'hypoplactic_monoid.py',
   'indexed_free_monoid.py',
   'monoid.py',
+  'plactic_monoid.py',
   'string_monoid.py',
   'string_monoid_element.py',
   'string_ops.py',

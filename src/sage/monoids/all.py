@@ -11,5 +11,8 @@ from sage.monoids.string_ops import (
     coincidence_index,
     coincidence_discriminant)
 
+# Plactic monoid
+from sage.monoids.plactic_monoid import PlacticMonoid
+
 #Hypoplactic monoid
 from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
