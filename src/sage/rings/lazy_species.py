@@ -1809,7 +1809,6 @@ class ArithmeticProductSpeciesElement(LazyCombinatorialSpeciesElement):
              (((1, 3), (2, 4)), ((1, 2), (3, 4))),
              (((1, 3), (2, 4)), ((1, 4), (3, 2))),
              (((1,), (2,), (3,), (4,)), ((1, 2, 3, 4),))]
-             
         A rectangle is a structure in the arithmetic product of
         non-empty sets with itself.  Arranging the blocks of the
         first set partition in rows, and the blocks of the second in
