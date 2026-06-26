@@ -1809,11 +1809,6 @@ class ArithmeticProductSpeciesElement(LazyCombinatorialSpeciesElement):
              (((1, 3), (2, 4)), ((1, 2), (3, 4))),
              (((1, 3), (2, 4)), ((1, 4), (3, 2))),
              (((1,), (2,), (3,), (4,)), ((1, 2, 3, 4),))]
-        A rectangle is a structure in the arithmetic product of
-        non-empty sets with itself.  Arranging the blocks of the
-        first set partition in rows, and the blocks of the second in
-        columns, two rectangles are equal if one can be obtained from
-        the other by permuting rows and columns.
 
         The arithmetic product can be regarded as an assembly of
         cloned structures.  The structures corresponding to the rows
@@ -1824,6 +1819,7 @@ class ArithmeticProductSpeciesElement(LazyCombinatorialSpeciesElement):
             [(((1, 2), (3, 4)), (((1, 3), (2, 4)), 'left')),
              (((1, 2), (3, 4)), ((X^2, (((2, 4),), ((1, 3),))), 'right')),
              (((1, 2), (3, 4)), ((X^2, (((1, 3),), ((2, 4),))), 'right'))]
+
         When the number of labels is prime, the rectangle is either
         a single row or a single column::
 
@@ -1848,7 +1844,7 @@ class ArithmeticProductSpeciesElement(LazyCombinatorialSpeciesElement):
             for row_partition in SetPartitions(labels, [l] * k):
                 rows = tuple(sorted((ordered_block(row) for row in row_partition), key=lambda row: position[row[0]]))
                 first_row = rows[0]
-                for permuted_rows in itertools.product( *(itertools.permutations(row) for row in rows[1:])):
+                for permuted_rows in itertools.product(*(itertools.permutations(row) for row in rows[1:])):
                     columns = tuple((u,) + tuple(row[j] for row in permuted_rows) for j, u in enumerate(first_row))
                     yield rows, columns
 
