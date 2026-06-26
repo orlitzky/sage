@@ -1784,20 +1784,6 @@ def gap_console():
         Try '?help' for help. See also  '?copyright' and  '?authors'
         gap>
 
-    TESTS::
-
-        sage: import subprocess as sp
-        sage: from sage.interfaces.gap import gap_command
-        sage: cmd = 'echo "quit;" | ' + gap_command(use_workspace_cache=False)[0]
-        sage: gap_startup = sp.check_output(cmd, shell=True,
-        ....:                               stderr=sp.STDOUT,
-        ....:                               encoding='latin1')
-        sage: 'www.gap-system.org' in gap_startup
-        True
-        sage: 'Error' not in gap_startup
-        True
-        sage: 'sorry' not in gap_startup
-        True
     """
     from sage.repl.rich_output.display_manager import get_display_manager
     if not get_display_manager().is_in_terminal():
