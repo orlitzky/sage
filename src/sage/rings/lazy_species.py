@@ -1824,7 +1824,6 @@ class ArithmeticProductSpeciesElement(LazyCombinatorialSpeciesElement):
             [(((1, 2), (3, 4)), (((1, 3), (2, 4)), 'left')),
              (((1, 2), (3, 4)), ((X^2, (((2, 4),), ((1, 3),))), 'right')),
              (((1, 2), (3, 4)), ((X^2, (((1, 3),), ((2, 4),))), 'right'))]
-         
         When the number of labels is prime, the rectangle is either
         a single row or a single column::
 
