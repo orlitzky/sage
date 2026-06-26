@@ -1088,7 +1088,12 @@ class Gap(Gap_generic):
             True
         """
         self.__use_workspace_cache = use_workspace_cache
-        cmd, _ = gap_command(use_workspace_cache, server is None)
+        cmd = _gap_command()
+
+        # -L: restore a saved workspace (TODO: Use remote workspace)
+        if use_workspace_cache and server is None:
+            cmd += f" -L {WORKSPACE}"
+
         # -b: suppress banner
         # -p: enable "package output mode"; this confusingly named option
         #     causes GAP to output special control characters that are normally
@@ -1788,6 +1793,6 @@ def gap_console():
     from sage.repl.rich_output.display_manager import get_display_manager
     if not get_display_manager().is_in_terminal():
         raise RuntimeError('Can use the console only in the terminal. Try %%gap magics instead.')
-    cmd, _ = gap_command(use_workspace_cache=False)
+    cmd = _gap_command()
     cmd += ' ' + os.path.join(SAGE_EXTCODE, 'gap', 'console.g')
     os.system(cmd)
