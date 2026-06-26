@@ -34,9 +34,15 @@ REFERENCES:
   no. 4, 339--376.
 
 - [Nov2000] Jean-Christophe Novelli, *On the hypoplactic monoid*, Discrete Mathematics 217 (2000), no. 1--3, 315--336.
-
-
 """
+
+# ****************************************************************************
+#       Copyright (C) 2026 Daniel Chen, Lisa Johnston, Junbok Lee, Evuilynn Nguyen, Heather Ross, Anne Schilling, Chenchen Zhao
+#
+#  Distributed under the terms of the GNU General Public License (GPL)
+#              https://www.gnu.org/licenses/
+# ****************************************************************************
+
 from sage.categories.sets_cat import Sets
 from sage.combinat.skew_tableau import SkewTableau, SkewTableaux
 from sage.combinat.composition import Composition, Compositions

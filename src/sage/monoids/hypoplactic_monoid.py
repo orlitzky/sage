@@ -31,6 +31,13 @@ REFERENCES:
   Discrete Mathematics 217 (2000), no. 1--3, 315--336.
 
 """
+
+# ****************************************************************************
+#       Copyright (C) 2026 Daniel Chen, Lisa Johnston, Junbok Lee, Evuilynn Nguyen, Heather Ross, Anne Schilling, Chenchen Zhao
+#
+#  Distributed under the terms of the GNU General Public License (GPL)
+#              https://www.gnu.org/licenses/
+# ****************************************************************************
 from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau, QuasiRibbonTableaux
 
 from sage.structure.parent import Parent
@@ -192,7 +199,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             sage: H = HypoplacticMonoid(4)
             sage: H.rank()
             4
-            sage: TestSuite(H).run()
+            sage: TestSuite(H).run() # long time
         """
         from sage.categories.monoids import Monoids
         self._n = n

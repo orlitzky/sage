@@ -48,8 +48,259 @@ from sage.combinat.rsk import RSK, RSK_inverse
 from sage.combinat.tableau import StandardTableaux, SemistandardTableaux
 from sage.combinat.partition import Partitions
 
+class WordMonoid(UniqueRepresentation, Parent):
+    r"""
+    This class is an ancestor class for the plactic and hypoplactic monoid.
 
-class PlacticMonoid(UniqueRepresentation, Parent):
+    INPUT:
+
+    - ``n`` -- a positive integer; the size of the alphabet
+
+    Elements are represented by words in `\{1, 2, \ldots, n\}`. 
+    It is assumed that the methods `to_tableau`, `to_word` and `equivalence_class` are
+    implemented. Equality is determined by methods `to_tableau`.
+    """
+    def __init__(self, n):
+        """
+        Initialize ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: PlacticMonoid(4).rank()
+            4
+        """
+        from sage.categories.monoids import Monoids
+        self._n = n
+        Parent.__init__(self, category=(Monoids().FinitelyGenerated().Infinite(),
+                                        SetsWithGrading().Infinite()))
+
+    def rank(self):
+        """
+        Return the rank of ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: PlacticMonoid(4).rank()
+            4
+        """
+        return self._n
+
+    @cached_method
+    def monoid_generators(self):
+        """
+        Return the generators of ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(4)
+            sage: G = M.monoid_generators()
+            sage: G[1], G[2], G[3], G[4]
+            (1, 2, 3, 4)
+        """
+        from sage.sets.family import Family
+        return Family({i: self.element_class(self, (i,))
+                       for i in range(1, self._n + 1)})
+
+    @cached_method
+    def one(self):
+        """
+        Return the identity element of ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(3)
+            sage: M.one() == M([])
+            True
+            sage: len(M.one())
+            0
+        """
+        return self.element_class(self, ())
+
+    @cached_method
+    def an_element(self):
+        """
+        Return an element of ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(3)
+            sage: M.an_element()
+            1
+        """
+        return self.monoid_generators()[1]
+
+class WordMonoidElement(ElementWrapper):
+    r"""
+    An element of a word monoid, represented by a word.
+
+    EXAMPLES::
+
+        sage: from sage.monoids.plactic_monoid import PlacticMonoid
+        sage: M = PlacticMonoid(4)
+        sage: M([2, 1, 3])
+        213
+    """
+    def __init__(self, parent, value):
+        """
+        Initialize ``self``.
+
+        INPUT:
+
+        - ``parent`` -- a word monoid
+        - ``value`` -- a word, given as a list or tuple of letters in the
+          alphabet of ``parent``
+
+        TESTS::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(4)
+            sage: M([1, 2, 4])
+            124
+            sage: M([1, 2.5])
+            Traceback (most recent call last):
+            ...
+            ValueError: letters must be integers from 1 to 4
+        """
+        r = parent.rank()
+        try:
+            value = tuple(map(ZZ, value))
+        except TypeError:
+            raise ValueError("letters must be integers from 1 to %s" % r)
+        if not all(1 <= i <= r for i in value):
+            raise ValueError("letters must be integers from 1 to %s" % r)
+        ElementWrapper.__init__(self, parent, value)
+
+    def _repr_(self):
+        """
+        Return a string representation of ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(4)
+            sage: M([2, 1, 3])
+            213
+        """
+        if not self.value:
+            return ''
+        return ''.join(str(x) for x in self.value)
+
+    def __len__(self):
+        """
+        Return the length of ``self`` as a word.
+
+        This is also the grade of ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(4)
+            sage: len(M([3, 1, 2]))
+            3
+        """
+        return len(self.value)
+
+    grade = __len__
+
+    def __hash__(self):
+        """
+        TESTS::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(4)
+            sage: x = M([3, 1, 2])
+            sage: hash(x) == hash(M([3,1,2]))
+            True
+        """
+        return hash(self.to_tableau())
+
+    def __iter__(self):
+        """
+        Iterate over the letters of ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(4)
+            sage: list(M([3, 1, 2]))
+            [3, 1, 2]
+        """
+        return iter(self.value)
+
+    def _mul_(self, other):
+        """
+        Multiply ``self`` by ``other``.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(4)
+            sage: a = M([2, 1]); b = M([3, 2])
+            sage: a * b
+            2132
+            sage: (a * b).to_word()
+            2312
+        """
+        parent = self.parent()
+        word = self.value + other.value
+        return self.__class__(parent, word)
+
+    def __eq__(self, other):
+        """
+        Return whether ``self`` and ``other`` are equal.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(4)
+            sage: M([2, 1, 3]) == M([2, 3, 1])
+            True
+            sage: M([2, 1, 3]) == M([3, 2, 1])
+            False
+            sage: M3 = PlacticMonoid(3)
+            sage: M([2, 1, 3]) == M3([2, 1, 3])
+            False
+        """
+        return (isinstance(other, self.parent().Element)
+                and self.parent() == other.parent()
+                and self.to_tableau() == other.to_tableau())
+
+    def shape(self):
+        """
+        Return the shape of the insertion tableau of ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(4)
+            sage: M([2, 1, 3]).shape()
+            [2, 1]
+            sage: M([]).shape()
+            []
+        """
+        return self.to_tableau().shape()
+
+    def is_canonical(self):
+        """
+        Return whether ``self`` is its row reading word representative.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.plactic_monoid import PlacticMonoid
+            sage: M = PlacticMonoid(3)
+            sage: M([3, 2, 1]).is_canonical()
+            True
+            sage: M([1, 3, 2]).is_canonical()
+            False
+        """
+        return self.value == self.to_word().value
+
+class PlacticMonoid(WordMonoid):
     r"""
     The plactic monoid on the alphabet `\{1, 2, \ldots, n\}`.
 
@@ -120,21 +371,6 @@ class PlacticMonoid(UniqueRepresentation, Parent):
             raise ValueError("the rank must be a positive integer")
         return super().__classcall__(cls, n)
 
-    def __init__(self, n):
-        """
-        Initialize ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
-            sage: PlacticMonoid(4).rank()
-            4
-        """
-        from sage.categories.monoids import Monoids
-        self._n = n
-        Parent.__init__(self, category=(Monoids().FinitelyGenerated().Infinite(),
-                                        SetsWithGrading().Infinite()))
-
     def _repr_(self):
         """
         Return a string representation of ``self``.
@@ -146,65 +382,6 @@ class PlacticMonoid(UniqueRepresentation, Parent):
             Plactic monoid of rank 4
         """
         return f"Plactic monoid of rank {self._n}"
-
-    def rank(self):
-        """
-        Return the rank of ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
-            sage: PlacticMonoid(4).rank()
-            4
-        """
-        return self._n
-
-    @cached_method
-    def monoid_generators(self):
-        """
-        Return the generators of ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
-            sage: M = PlacticMonoid(4)
-            sage: G = M.monoid_generators()
-            sage: G[1], G[2], G[3], G[4]
-            (1, 2, 3, 4)
-        """
-        from sage.sets.family import Family
-        return Family({i: self.element_class(self, (i,))
-                       for i in range(1, self._n + 1)})
-
-    @cached_method
-    def one(self):
-        """
-        Return the identity element of ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
-            sage: M = PlacticMonoid(3)
-            sage: M.one() == M([])
-            True
-            sage: len(M.one())
-            0
-        """
-        return self.element_class(self, ())
-
-    @cached_method
-    def an_element(self):
-        """
-        Return an element of ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
-            sage: M = PlacticMonoid(3)
-            sage: M.an_element()
-            1
-        """
-        return self.monoid_generators()[1]
 
     def subset(self, k):
         r"""
@@ -237,7 +414,7 @@ class PlacticMonoid(UniqueRepresentation, Parent):
         tableaux = SemistandardTableaux(k, max_entry=self.rank())
         return Family(tableaux, to_word, lazy=True)
 
-    class Element(ElementWrapper):
+    class Element(WordMonoidElement):
         r"""
         An element of a plactic monoid, represented by a word.
 
@@ -248,131 +425,6 @@ class PlacticMonoid(UniqueRepresentation, Parent):
             sage: M([2, 1, 3])
             213
         """
-        def __init__(self, parent, value):
-            """
-            Initialize ``self``.
-
-            INPUT:
-
-            - ``parent`` -- a plactic monoid
-            - ``value`` -- a word, given as a list or tuple of letters in the
-              alphabet of ``parent``
-
-            TESTS::
-
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
-                sage: M = PlacticMonoid(4)
-                sage: M([1, 2, 4])
-                124
-                sage: M([1, 2.5])
-                Traceback (most recent call last):
-                ...
-                ValueError: letters must be integers from 1 to 4
-            """
-            r = parent.rank()
-            try:
-                value = tuple(map(ZZ, value))
-            except TypeError:
-                raise ValueError("letters must be integers from 1 to %s" % r)
-            if not all(1 <= i <= r for i in value):
-                raise ValueError("letters must be integers from 1 to %s" % r)
-            ElementWrapper.__init__(self, parent, value)
-
-        def _repr_(self):
-            """
-            Return a string representation of ``self``.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
-                sage: M = PlacticMonoid(4)
-                sage: M([2, 1, 3])
-                213
-            """
-            if not self.value:
-                return ''
-            return ''.join(str(x) for x in self.value)
-
-        def __len__(self):
-            """
-            Return the length of ``self`` as a word.
-
-            This is also the grade of ``self``.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
-                sage: M = PlacticMonoid(4)
-                sage: len(M([3, 1, 2]))
-                3
-            """
-            return len(self.value)
-
-        grade = __len__
-
-        def __hash__(self):
-            """
-            TESTS::
-
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
-                sage: M = PlacticMonoid(4)
-                sage: x = M([3, 1, 2])
-                sage: hash(x) == hash(M([3,1,2]))
-                True
-            """
-            return hash(self.to_tableau())
-
-        def __iter__(self):
-            """
-            Iterate over the letters of ``self``.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
-                sage: M = PlacticMonoid(4)
-                sage: list(M([3, 1, 2]))
-                [3, 1, 2]
-            """
-            return iter(self.value)
-
-        def _mul_(self, other):
-            """
-            Multiply ``self`` by ``other``.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
-                sage: M = PlacticMonoid(4)
-                sage: a = M([2, 1]); b = M([3, 2])
-                sage: a * b
-                2132
-                sage: (a * b).to_word()
-                2312
-            """
-            parent = self.parent()
-            word = self.value + other.value
-            return self.__class__(parent, word)
-
-        def __eq__(self, other):
-            """
-            Return whether ``self`` and ``other`` are equal.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
-                sage: M = PlacticMonoid(4)
-                sage: M([2, 1, 3]) == M([2, 3, 1])
-                True
-                sage: M([2, 1, 3]) == M([3, 2, 1])
-                False
-                sage: M3 = PlacticMonoid(3)
-                sage: M([2, 1, 3]) == M3([2, 1, 3])
-                False
-            """
-            return (isinstance(other, PlacticMonoid.Element)
-                    and self.parent() == other.parent()
-                    and self.to_tableau() == other.to_tableau())
-
         def to_word(self):
             """
             Return the row reading word representative of ``self``.
@@ -422,33 +474,3 @@ class PlacticMonoid(UniqueRepresentation, Parent):
             P = self.to_tableau()
             shape = P.shape()
             return [parent(RSK_inverse(P, Q)[1]) for Q in StandardTableaux(shape)]
-
-        def shape(self):
-            """
-            Return the shape of the insertion tableau of ``self``.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
-                sage: M = PlacticMonoid(4)
-                sage: M([2, 1, 3]).shape()
-                [2, 1]
-                sage: M([]).shape()
-                []
-            """
-            return self.to_tableau().shape()
-
-        def is_canonical(self):
-            """
-            Return whether ``self`` is its row reading word representative.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
-                sage: M = PlacticMonoid(3)
-                sage: M([3, 2, 1]).is_canonical()
-                True
-                sage: M([1, 3, 2]).is_canonical()
-                False
-            """
-            return self.value == self.to_word().value
