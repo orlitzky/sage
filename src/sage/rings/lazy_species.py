@@ -1789,10 +1789,46 @@ class ArithmeticProductSpeciesElement(LazyCombinatorialSpeciesElement):
 
         This uses the rectangle description of the arithmetic product [MM2008]_.
 
-        EXAMPLES::
+        EXAMPLES:
+
+        A rectangle is a structure in the arithmetic product of
+        non-empty sets with itself.  Arranging the blocks of the
+        first set partition in rows, and the blocks of the second in
+        columns, two rectangles are equal if one can be obtained from
+        the other by permuting rows and columns.::
 
             sage: L.<X> = LazyCombinatorialSpecies(QQ)
             sage: E = L.Sets()
+            sage: R = E.arithmetic_product(E)
+            sage: list(R.structures([1, 2, 3, 4]))
+            [(((1, 2, 3, 4),), ((1,), (2,), (3,), (4,))),
+             (((1, 2), (3, 4)), ((1, 3), (2, 4))),
+             (((1, 2), (3, 4)), ((1, 4), (2, 3))),
+             (((1, 4), (2, 3)), ((1, 2), (4, 3))),
+             (((1, 4), (2, 3)), ((1, 3), (4, 2))),
+             (((1, 3), (2, 4)), ((1, 2), (3, 4))),
+             (((1, 3), (2, 4)), ((1, 4), (3, 2))),
+             (((1,), (2,), (3,), (4,)), ((1, 2, 3, 4),))]
+             
+        A rectangle is a structure in the arithmetic product of
+        non-empty sets with itself.  Arranging the blocks of the
+        first set partition in rows, and the blocks of the second in
+        columns, two rectangles are equal if one can be obtained from
+        the other by permuting rows and columns.
+
+        The arithmetic product can be regarded as an assembly of
+        cloned structures.  The structures corresponding to the rows
+        are all isomorphic::
+
+            sage: E2 = E.restrict(2,2)
+            sage: list(E2.arithmetic_product(E2+X^2).structures([1, 2, 3, 4]))[:3]
+            [(((1, 2), (3, 4)), (((1, 3), (2, 4)), 'left')),
+             (((1, 2), (3, 4)), ((X^2, (((2, 4),), ((1, 3),))), 'right')),
+             (((1, 2), (3, 4)), ((X^2, (((1, 3),), ((2, 4),))), 'right'))]
+         
+        When the number of labels is prime, the rectangle is either
+        a single row or a single column::
+
             sage: C = L.Cycles()
             sage: A = E.arithmetic_product(C)
             sage: list(A.structures([1, 2, 3]))
