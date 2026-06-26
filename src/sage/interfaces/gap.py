@@ -224,20 +224,30 @@ WORKSPACE = gap_workspace_file()
 
 first_try = True
 
-if SAGE_GAP_COMMAND is None:
+
+def _gap_command():
+    r"""
+    Return the baseline GAP command.
+
+    When :func:`gap_command` has been removed, this can be made a
+    private method of the interface class.
+    """
+    if SAGE_GAP_COMMAND is not None:
+        return SAGE_GAP_COMMAND
     # Passing -A allows us to use a minimal GAP installation without
     # producing errors at start-up. The files sage.g and sage.gaprc are
     # used to load any additional packages that may be available.
     gap_cmd = "gap -A"
     if SAGE_GAP_MEMORY is not None:
         gap_cmd += " -s " + SAGE_GAP_MEMORY + " -o " + SAGE_GAP_MEMORY
-else:
-    gap_cmd = SAGE_GAP_COMMAND
+    return gap_cmd
 
 
 def gap_command(use_workspace_cache=True, local=True):
     from sage.misc.superseded import deprecation
     deprecation(42427, 'gap_command() is no longer part of the public interface')
+
+    gap_cmd = _gap_command()
 
     if use_workspace_cache:
         if local:
