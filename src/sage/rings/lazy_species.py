@@ -1832,9 +1832,9 @@ class ArithmeticProductSpeciesElement(LazyCombinatorialSpeciesElement):
             sage: C = L.Cycles()
             sage: A = E.arithmetic_product(C)
             sage: list(A.structures([1, 2, 3]))
-            [((((1, 2, 3),),), ((1,), (2,), (3,))),
-             ((((1, 2, 3),),), ((1,), (3,), (2,))),
-             ((((1,), (2,), (3,)),), ((1, 2, 3),))]
+            [(((1, 2, 3),), ((1,), (2,), (3,))),
+             (((1, 2, 3),), ((1,), (3,), (2,))),
+             (((1,), (2,), (3,)), ((1, 2, 3),))]
         """
         labels = _label_sets(self.parent()._arity, [labels])[0]
         n = len(labels)
