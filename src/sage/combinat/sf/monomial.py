@@ -108,14 +108,6 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
             sage: a^2
             x^2*m[] + 2*x*m[2, 1] + 4*m[2, 2, 1, 1] + 6*m[2, 2, 2] + 2*m[3, 2, 1] + 2*m[3, 3] + 2*m[4, 1, 1] + m[4, 2]
         """
-        # Use symmetrica to do the multiplication
-        # A = left.parent()
-
-        # Hack due to symmetrica crashing when both of the
-        # partitions are the empty partition
-        # if  R is ZZ or R is QQ:
-        #     return symmetrica.mult_monomial_monomial(left, right)
-
         z_elt = {}
         for left_m, left_c in left._monomial_coefficients.items():
             for right_m, right_c in right._monomial_coefficients.items():
