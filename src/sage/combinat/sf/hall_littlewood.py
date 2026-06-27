@@ -25,9 +25,6 @@ from sage.categories.homset import Hom
 from sage.categories.modules_with_basis import ModulesWithBasis
 from sage.categories.morphism import SetMorphism
 from sage.combinat.sf import sfa
-from sage.libs.symmetrica.symmetrica import (
-    hall_littlewood_symmetrica as hall_littlewood,
-)
 from sage.matrix.constructor import matrix
 from sage.rings.rational_field import QQ
 from sage.structure.unique_representation import UniqueRepresentation
@@ -985,7 +982,11 @@ class HallLittlewood_qp(HallLittlewood_generic):
         if not part:
             return lambda part2: QQt.one()
 
-        res = hall_littlewood(part) # call to symmetrica (returns in variable x)
+        from sage.features.symmetrica import Symmetrica
+        Symmetrica().require()
+        from sage.libs.symmetrica.symmetrica import hall_littlewood_symmetrica
+
+        res = hall_littlewood_symmetrica(part) # call to symmetrica (returns in variable x)
         f = lambda part2: res.coefficient(part2).subs(x=t)
         return f
 
