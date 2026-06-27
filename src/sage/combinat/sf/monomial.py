@@ -39,6 +39,7 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
         TESTS::
 
+            sage: # needs symmetrica
             sage: m = SymmetricFunctions(QQ).m()
             sage: m == loads(dumps(m))
             True
@@ -57,6 +58,7 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
         EXAMPLES::
 
+            sage: # needs symmetrica
             sage: m = SymmetricFunctions(QQ).m()
             sage: h = SymmetricFunctions(QQ).h()
             sage: m.dual_basis() == h
@@ -64,6 +66,7 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
         TESTS::
 
+            sage: # needs symmetrica
             sage: m._dual_basis_default() is m.dual_basis()
             True
             sage: zee = lambda x : x.centralizer_size()
@@ -92,6 +95,7 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
         EXAMPLES::
 
+            sage: # needs symmetrica
             sage: m = SymmetricFunctions(QQ).m()
             sage: a = m([2,1])
             sage: a^2
@@ -99,6 +103,7 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
         ::
 
+            sage: # needs symmetrica
             sage: QQx.<x> = QQ['x']
             sage: m = SymmetricFunctions(QQx).m()
             sage: a = m([2,1])+x
@@ -153,6 +158,7 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
         EXAMPLES::
 
+            sage: # needs symmetrica
             sage: m = SymmetricFunctions(QQ).m()
             sage: P = PolynomialRing(QQ, 'x', 3)
             sage: x = P.gens()
@@ -201,26 +207,31 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
         EXAMPLES::
 
+            sage: # needs symmetrica
             sage: m = SymmetricFunctions(QQ).m()
             sage: P = PolynomialRing(QQ,'x',5)
             sage: x = P.gens()
 
         The exponential notation of the partition `(5,5,5,3,1,1)` is::
 
+            sage: # needs symmetrica
             sage: Partition([5,5,5,3,1,1]).to_exp()
             [2, 0, 1, 0, 3]
 
         Therefore, the monomial::
 
+            sage: # needs symmetrica
             sage: f = x[0]^2 * x[2] * x[4]^3
 
         is mapped to::
 
+            sage: # needs symmetrica
             sage: m.from_polynomial_exp(f)
             m[5, 5, 5, 3, 1, 1]
 
         Furthermore, this function is linear::
 
+            sage: # needs symmetrica
             sage: f = 3 * x[3] + 2 * x[0]^2 * x[2] * x[4]^3
             sage: m.from_polynomial_exp(f)
             3*m[4] + 2*m[5, 5, 5, 3, 1, 1]
@@ -245,6 +256,7 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
         EXAMPLES::
 
+            sage: # needs symmetrica
             sage: Sym = SymmetricFunctions(QQ)
             sage: m = Sym.monomial()
             sage: m[3,2].antipode()
@@ -252,6 +264,9 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
             sage: m.antipode_by_coercion(m[3,2])
             m[3, 2] + 2*m[5]
 
+        ::
+
+            sage: # needs symmetrica
             sage: Sym = SymmetricFunctions(ZZ)
             sage: m = Sym.monomial()
             sage: m[3,2].antipode()
@@ -278,7 +293,7 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
         EXAMPLES::
 
-            sage: # optional - magma
+            sage: # needs symmetrica magma
             sage: M = SymmetricFunctions(QQ).m()
             sage: t = 4*M[3,2]+9
             sage: mt = magma(t); mt
@@ -309,6 +324,7 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
             EXAMPLES::
 
+                sage: # needs symmetrica
                 sage: m = SymmetricFunctions(QQ).m()
                 sage: m([2,1]).expand(3)
                 x0^2*x1 + x0*x1^2 + x0^2*x2 + x1^2*x2 + x0*x2^2 + x1*x2^2
@@ -379,17 +395,18 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
             EXAMPLES::
 
+                sage: # needs symmetrica
                 sage: m = SymmetricFunctions(QQ).m()
                 sage: x = m[3,1]
                 sage: x.principal_specialization(3)
                 q^7 + q^6 + q^5 + q^3 + q^2 + q
-
                 sage: x = 5*m[2] + 3*m[1] + 1
                 sage: x.principal_specialization(3, q=var("q"))                         # needs sage.symbolic
                 -10*(q^3 - 1)*q/(q - 1) + 5*(q^3 - 1)^2/(q - 1)^2 + 3*(q^3 - 1)/(q - 1) + 1
 
             TESTS::
 
+                sage: # needs symmetrica
                 sage: m.zero().principal_specialization(3)
                 0
             """
@@ -466,21 +483,23 @@ class SymmetricFunctionAlgebra_monomial(classical.SymmetricFunctionAlgebra_class
 
             EXAMPLES::
 
+                sage: # needs symmetrica
                 sage: m = SymmetricFunctions(QQ).m()
                 sage: (m[3]+m[2,1]+m[1,1,1]).exponential_specialization()
                 1/6*t^3
-
                 sage: x = 5*m[1,1,1] + 3*m[2,1] + 1
                 sage: x.exponential_specialization()
                 5/6*t^3 + 1
 
             We also support the `q`-exponential_specialization::
 
+                sage: # needs symmetrica
                 sage: factor(m[3].exponential_specialization(q=var("q"), t=var("t")))   # needs sage.symbolic
                 (q - 1)^2*t^3/(q^2 + q + 1)
 
             TESTS::
 
+                sage: # needs symmetrica
                 sage: m.zero().exponential_specialization()
                 0
             """
