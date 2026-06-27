@@ -18,6 +18,7 @@ EXAMPLES::
 
 This can be expanded in terms of polynomial variables::
 
+    sage: # needs symmetrica
     sage: X(w).expand()
     x0^2*x1 + x0*x1^2 + x0^2*x2 + 2*x0*x1*x2 + x1^2*x2
      + x0*x2^2 + x1*x2^2 + x0^2*x3 + x0*x1*x3 + x1^2*x3
@@ -27,6 +28,7 @@ We can also convert back from polynomial variables. For example,
 the longest permutation is a single term. In `S_5`, this is the
 element (in one line notation) `w_0 = 54321`::
 
+    sage: # needs symmetrica
     sage: w0 = [5,4,3,2,1]
     sage: R.<x0, x1, x2, x3, x4> = PolynomialRing(ZZ)
     sage: Sw0 = X(x0^4*x1^3*x2^2*x3);  Sw0
@@ -40,11 +42,13 @@ difference operator :meth:`~SchubertPolynomial_class.divided_difference` to
 the polynomial indexed by `w`. For example, applying the divided difference
 operator `\partial_2` to the Schubert polynomial `\mathfrak{S}_{w_0}`::
 
+    sage: # needs symmetrica
     sage: Sw0.divided_difference(2)
     X[5, 3, 4, 2, 1]
 
 We can also check the properties listed in :wikipedia:`Schubert_polynomial`::
 
+    sage: # needs symmetrica
     sage: X([1,2,3,4,5])  # the identity in one-line notation
     X[1]
     sage: X([1,3,2,4,5]).expand()  # the transposition swapping 2 and 3
@@ -52,6 +56,7 @@ We can also check the properties listed in :wikipedia:`Schubert_polynomial`::
     sage: X([2,4,5,3,1]).expand()
     x0^2*x1^2*x2*x3 + x0^2*x1*x2^2*x3 + x0*x1^2*x2^2*x3
 
+    sage: # needs symmetrica
     sage: w = [4,5,1,2,3]
     sage: s = SymmetricFunctions(QQ).schur()
     sage: s[3,3].expand(2)
@@ -96,6 +101,7 @@ def SchubertPolynomialRing(R):
 
     EXAMPLES::
 
+        sage: # needs symmetrica
         sage: X = SchubertPolynomialRing(ZZ); X
         Schubert polynomial ring with X basis over Integer Ring
         sage: TestSuite(X).run()
@@ -119,6 +125,7 @@ class SchubertPolynomial_class(CombinatorialFreeModule.Element):
         """
         EXAMPLES::
 
+            sage: # needs symmetrica
             sage: X = SchubertPolynomialRing(ZZ)
             sage: X([2,1,3]).expand()
             x0
@@ -130,6 +137,7 @@ class SchubertPolynomial_class(CombinatorialFreeModule.Element):
         Calling .expand() should always return an element of an
         MPolynomialRing::
 
+            sage: # needs symmetrica
             sage: X = SchubertPolynomialRing(ZZ)
             sage: f = X([1]); f
             X[1]
@@ -147,6 +155,7 @@ class SchubertPolynomial_class(CombinatorialFreeModule.Element):
         Now we check for correct handling of the empty
         permutation (:issue:`23443`)::
 
+            sage: # needs symmetrica
             sage: X([1]).expand() * X([2,1]).expand()
             x0
         """
@@ -334,6 +343,7 @@ class SchubertPolynomial_class(CombinatorialFreeModule.Element):
 
         EXAMPLES::
 
+            sage: # needs symmetrica
             sage: X = SchubertPolynomialRing(ZZ)
             sage: a = X([3,2,4,1])
             sage: a.scalar_product(a)
@@ -368,6 +378,7 @@ class SchubertPolynomial_class(CombinatorialFreeModule.Element):
 
         EXAMPLES::
 
+            sage: # needs symmetrica
             sage: X = SchubertPolynomialRing(ZZ)
             sage: a = X([3,2,4,1])
             sage: a.multiply_variable(0)
@@ -430,16 +441,19 @@ class SchubertPolynomialRing_xbasis(CombinatorialFreeModule):
             sage: X._element_constructor_(Permutation([2,1,3]))
             X[2, 1]
 
+            sage: # needs symmetrica
             sage: R.<x1, x2, x3> = QQ[]
             sage: X(x1^2*x2)
             X[3, 2, 1]
 
+            sage: # needs symmetrica
             sage: S.<x> = InfinitePolynomialRing(QQ)
             sage: X(x[0]^2*x[1])
             X[3, 2, 1]
             sage: X(x[0]*x[1]^2*x[2]^2*x[3] + x[0]^2*x[1]^2*x[2]*x[3] + x[0]^2*x[1]*x[2]^2*x[3])
             X[2, 4, 5, 3, 1]
 
+            sage: # needs symmetrica
             sage: from sage.combinat.key_polynomial import KeyPolynomialBasis
             sage: k = KeyPolynomialBasis(QQ)
             sage: X(k([3,2,1]))
@@ -463,6 +477,7 @@ class SchubertPolynomialRing_xbasis(CombinatorialFreeModule):
 
         Check the round trip from key polynomials::
 
+            sage: # needs symmetrica
             sage: k = KeyPolynomials(ZZ)
             sage: X = SchubertPolynomialRing(ZZ)
             sage: it = iter(Permutations())
@@ -472,6 +487,7 @@ class SchubertPolynomialRing_xbasis(CombinatorialFreeModule):
 
         Check the round trip from atom polynomials::
 
+            sage: # needs symmetrica
             sage: a = AtomPolynomials(ZZ)
             sage: X = SchubertPolynomialRing(ZZ)
             sage: it = iter(Permutations())
@@ -523,6 +539,7 @@ class SchubertPolynomialRing_xbasis(CombinatorialFreeModule):
         """
         EXAMPLES::
 
+            sage: # needs symmetrica
             sage: p1 = Permutation([3,2,1])
             sage: p2 = Permutation([2,1,3])
             sage: X = SchubertPolynomialRing(QQ)
