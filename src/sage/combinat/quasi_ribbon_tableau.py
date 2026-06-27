@@ -518,25 +518,55 @@ class QuasiRibbonTableau(SkewTableau):
 
     def _test_quasi_ribbon(self, **options):
         r"""
-        Test that ``self`` satisfies the quasi-ribbon conditions.
+        Test that ``self`` satisfies the quasi-ribbon tableau conditions.
+
+        More precisely, test that:
+
+        - every row contains at least one non-``None`` entry;
+        - the entries in each row are weakly increasing;
+        - the entries in each column are strictly increasing; and
+        - each row begins one position before the preceding row ends.
+
+        EXAMPLES::
+
+            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
+            sage: Q = QuasiRibbonTableau([[1, 2, 3],
+            ....:                         [None, None, 4, 5]])
+            sage: Q._test_quasi_ribbon()
+
+        The test is also run as part of the element test suite::
+
+            sage: TestSuite(Q).run()
         """
         tester = self._tester(**options)
         rows = self.rows()
 
         expected_shift = 0
-        for row in rows:
+        for row_index, row in enumerate(rows):
             shift = 0
             while shift < len(row) and row[shift] is None:
                 shift += 1
 
             entries = row[shift:]
 
-            tester.assertTrue(entries)
-            tester.assertTrue(all(entry is not None for entry in entries))
-            tester.assertEqual(shift, expected_shift)
+            tester.assertTrue(
+                entries,
+                f"row {row_index} contains no entries",
+            )
+            tester.assertTrue(
+                all(entry is not None for entry in entries),
+                f"row {row_index} contains None after its first entry",
+            )
+            tester.assertEqual(
+                shift,
+                expected_shift,
+                f"row {row_index} begins in column {shift}, "
+                f"but should begin in column {expected_shift}",
+            )
             tester.assertTrue(
                 all(entries[i] <= entries[i + 1]
-                    for i in range(len(entries) - 1))
+                    for i in range(len(entries) - 1)),
+                f"row {row_index} is not weakly increasing",
             )
 
             expected_shift += len(entries) - 1
@@ -550,7 +580,8 @@ class QuasiRibbonTableau(SkewTableau):
             ]
             tester.assertTrue(
                 all(entries[i] < entries[i + 1]
-                    for i in range(len(entries) - 1))
+                    for i in range(len(entries) - 1)),
+                f"column {col} is not strictly increasing",
             )
 
 class QuasiRibbonTableaux(SkewTableaux):

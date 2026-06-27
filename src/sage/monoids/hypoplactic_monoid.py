@@ -31,14 +31,15 @@ REFERENCES:
   Discrete Mathematics 217 (2000), no. 1--3, 315--336.
 
 """
-
 # ****************************************************************************
 #       Copyright (C) 2026 Daniel Chen, Lisa Johnston, Junbok Lee, Evuilynn Nguyen, Heather Ross, Anne Schilling, Chenchen Zhao
 #
 #  Distributed under the terms of the GNU General Public License (GPL)
 #              https://www.gnu.org/licenses/
 # ****************************************************************************
+
 from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau, QuasiRibbonTableaux
+from sage.monoids.plactic_monoid import WordMonoid, WordMonoidElement
 
 from sage.structure.parent import Parent
 from sage.categories.sets_with_grading import SetsWithGrading
@@ -47,11 +48,10 @@ from sage.structure.unique_representation import UniqueRepresentation
 from sage.rings.integer_ring import ZZ
 from sage.rings.integer import Integer
 from sage.combinat.family import Family
-
+from sage.combinat.permutation import Permutations
 from sage.misc.cachefunc import cached_method
-from itertools import permutations
 
-class HypoplacticMonoid(UniqueRepresentation, Parent):
+class HypoplacticMonoid(WordMonoid):
     r"""
     The hypoplactic monoid on the alphabet `\{1, 2, \ldots, n\}`.
 
@@ -86,10 +86,10 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
         sage: x = H([3, 2, 2, 1])
         sage: x
         3221
-        sage: x.to_quasiribbon_tableau()
+        sage: x.to_tableau()
         [[1], [2, 2], [None, 3]]
         sage: x.to_word()
-        word: 2132
+        2132
 
     Two words represent the same hypoplactic element when they have the same
     quasi-ribbon insertion tableau::
@@ -185,27 +185,6 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             raise ValueError("the rank must be a positive integer")
         return super().__classcall__(cls, n)
 
-    def __init__(self, n):
-        """
-        Initialize ``self``.
-
-        INPUT:
-
-        - ``n`` -- a positive integer; the size of the alphabet
-
-        EXAMPLES::
-
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-            sage: H = HypoplacticMonoid(4)
-            sage: H.rank()
-            4
-            sage: TestSuite(H).run() # long time
-        """
-        from sage.categories.monoids import Monoids
-        self._n = n
-        Parent.__init__(self, category=(Monoids().FinitelyGenerated().Infinite(),
-                                        SetsWithGrading().Infinite()))
-
     def _repr_(self):
         """
         Return a string representation of ``self``.
@@ -217,67 +196,6 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             Hypoplactic monoid of rank 4
         """
         return f"Hypoplactic monoid of rank {self._n}"
-
-    def rank(self):
-        """
-        Return the rank of ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-            sage: HypoplacticMonoid(4).rank()
-            4
-        """
-        return self._n
-
-    @cached_method
-    def monoid_generators(self):
-        """
-        Return the generators of ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-            sage: H = HypoplacticMonoid(4)
-            sage: G = H.monoid_generators()
-            sage: G
-            Finite family {1: 1, 2: 2, 3: 3, 4: 4}
-            sage: G[1], G[2], G[3], G[4]
-            (1, 2, 3, 4)
-        """
-        from sage.sets.family import Family
-        return Family({i: self.element_class(self, (i,))
-                       for i in range(1, self._n + 1)})
-
-    @cached_method
-    def one(self):
-        """
-        Return the identity element of ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-            sage: H = HypoplacticMonoid(3)
-            sage: H.one() == H([])
-            True
-            sage: len(H.one())
-            0
-        """
-        return self.element_class(self, ())
-
-    @cached_method
-    def an_element(self):
-        """
-        Return an element of ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-            sage: H = HypoplacticMonoid(3)
-            sage: H.an_element()
-            1
-        """
-        return self.monoid_generators()[1]
 
     def subset(self, k):
         r"""
@@ -303,13 +221,11 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             raise ValueError("the size must be a nonnegative integer")
 
         quasiribbontableaux = QuasiRibbonTableaux(size=k, max_entry=self.rank())
-
         def to_word(t):
             return self(t.to_word_by_column())
-
         return Family(quasiribbontableaux, to_word, lazy=True)
 
-    class Element(ElementWrapper):
+    class Element(WordMonoidElement):
         r"""
         An element of a hypoplactic monoid.
 
@@ -317,6 +233,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
         `\{1, 2, \ldots, n\}`.
 
         EXAMPLES::
+
             sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
             sage: H = HypoplacticMonoid(4)
             sage: x = H([3, 2, 2, 1])
@@ -325,69 +242,7 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
             sage: parent(x)
             Hypoplactic monoid of rank 4
         """
-        def __init__(self, parent, value):
-            """
-            Initialize ``self``.
-
-            INPUT:
-
-            - ``parent`` -- a hypoplactic monoid
-            - ``value`` -- a word, given as a list or tuple of letters in the
-              alphabet of ``parent``
-
-            TESTS::
-
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-                sage: H = HypoplacticMonoid(4)
-                sage: x = H([3, 2, 2, 1]); x
-                3221
-                sage: H([1, 2.5])
-                Traceback (most recent call last):
-                ...
-                ValueError: letters must be integers from 1 to 4
-            """
-            r = parent.rank()
-            try:
-                value = tuple(map(ZZ, value))
-            except TypeError:
-                raise ValueError("letters must be integers from 1 to %s" % r)
-            if not all(1 <= i <= r for i in value):
-                raise ValueError("letters must be integers from 1 to %s" % r)
-            ElementWrapper.__init__(self, parent, value)
-
-        def _repr_(self):
-            """
-            Return a string representation of ``self``.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-                sage: H = HypoplacticMonoid(4)
-                sage: H([2, 1, 3])
-                213
-            """
-            if not self.value:
-                return ''
-            return ''.join(str(x) for x in self.value)
-
-        def __len__(self):
-            """
-            Return the length of ``self`` as a word.
-
-            This is also the grade of ``self``.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-                sage: H = HypoplacticMonoid(4)
-                sage: len(H([2, 1, 3]))
-                3
-            """
-            return len(self.value)
-
-        grade = __len__
-
-        def to_quasiribbon_tableau(self):
+        def to_tableau(self):
             """
             Return the quasi-ribbon insertion tableau corresponding to ``self``.
 
@@ -402,70 +257,20 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
 
                 sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
-                sage: H([3, 2, 2, 1]).to_quasiribbon_tableau()
+                sage: H([3, 2, 2, 1]).to_tableau()
                 [[1], [2, 2], [None, 3]]
-                sage: H([3, 4, 3, 2, 1, 2]).to_quasiribbon_tableau()
+                sage: H([3, 4, 3, 2, 1, 2]).to_tableau()
                 [[1], [2, 2], [None, 3, 3], [None, None, 4]]
 
             TESTS::
+
                 sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
-                sage: H([]).to_quasiribbon_tableau()
+                sage: H([]).to_tableau()
                 []
             """
             Q = QuasiRibbonTableaux()
             return Q.insert_word(self.value)
-
-        def __hash__(self):
-            r"""
-            Return the hash of ``self``.
-
-            TESTS::
-
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-                sage: H = HypoplacticMonoid(4)
-                sage: x = H([2, 3, 1, 2])
-                sage: hash(x) == hash(H([2, 3, 1, 2]))
-                True
-            """
-            return hash((self.parent(), self.to_quasiribbon_tableau()))
-
-        def __iter__(self):
-            """
-            Iterate over the letters of ``self``.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-                sage: H = HypoplacticMonoid(4)
-                sage: list(H([3, 2, 2, 1]))
-                [3, 2, 2, 1]
-            """
-            return iter(self.value)
-
-        def __eq__(self, other):
-            r"""
-            Return whether ``self`` and ``other`` are equal.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-                sage: H = HypoplacticMonoid(4)
-                sage: H([3, 2, 2, 1]) == H([2, 3, 1, 2])
-                True
-                sage: H([3, 2, 2, 1]) == H([1, 2, 2, 3])
-                False
-                sage: H3 = HypoplacticMonoid(3)
-                sage: H([2, 1, 3]) == H3([2, 1, 3])
-                False
-            """
-            if self is other:
-                return True
-            if not hasattr(other, "parent"):
-                return False
-            if self.parent() != other.parent():
-                return False
-            return self.to_quasiribbon_tableau() == other.to_quasiribbon_tableau()
 
         def to_word(self):
             """
@@ -484,79 +289,18 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
                 sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: H([3, 2, 2, 1]).to_word()
-                word: 2132
+                2132
                 sage: H([3, 4, 3, 2, 1, 2]).to_word()
-                word: 213243
+                213243
 
             TESTS::
 
+                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: H([]).to_word()
-                word:
-            """
-            return self.to_quasiribbon_tableau().to_word_by_column()
-
-        def _mul_(self, other):
-            """
-            Multiply ``self`` by ``other``.
-
-            Multiplication is induced by concatenation of words. The
-            concatenated word is inserted using hypoplactic insertion, and the
-            product is stored using the resulting quasi-ribbon reading word
-            representative.
-
-            INPUT:
-
-            - ``other`` -- an element of the hypoplactic monoid
-
-            OUTPUT:
-
-            The product of ``self`` and ``other``.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-                sage: H = HypoplacticMonoid(4)
-                sage: a = H([3])
-                sage: b = H([4])
-                sage: a * b
-                34
-
-                sage: c = H([4])
-                sage: d = H([3])
-                sage: c * d
-                43
-
-            TESTS::
-
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-                sage: H = HypoplacticMonoid(4)
-                sage: H([]) * H([3, 2, 2, 1]) == H([3, 2, 2, 1])
-                True
-                sage: H([3, 2, 2, 1]) * H([]) == H([3, 2, 2, 1])
-                True
             """
             parent = self.parent()
-            word = self.value + other.value
-            product_word = self.__class__(parent, word)
-            T = product_word.to_quasiribbon_tableau()
-            canonical_word = T.to_word_by_column()
-            return self.__class__(parent, canonical_word)
-
-        def is_canonical(self):
-            """
-            Return whether ``self`` is its row reading word representative.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-                sage: H = HypoplacticMonoid(4)
-                sage: H([3, 2, 2, 1]).is_canonical()
-                False
-                sage: H([2,1,3,2]).is_canonical()
-                True
-            """
-            return list(self.value) == list(self.to_word())
+            return parent(list(self.to_tableau().to_word_by_column()))
 
         def equivalence_class(self):
             r"""
@@ -574,16 +318,12 @@ class HypoplacticMonoid(UniqueRepresentation, Parent):
                 sage: H = HypoplacticMonoid(3)
                 sage: H([2, 1, 3]).equivalence_class()
                 [213, 231]
-
                 sage: H = HypoplacticMonoid(4)
                 sage: H([3, 1, 4, 2]).equivalence_class()
-                [1324, 1342, 3124, 3142, 3412]
+                [3142, 3124, 3412, 1342, 1324]
+                sage: H([3, 1, 1, 2]).equivalence_class()
+                [3112, 1312, 1132]
             """
             parent = self.parent()
-            # Any equivalent word must have the same letters as ``self``, so we
-            # only need to check rearrangements of the current word. The ``set``
-            # removes duplicates when letters repeat.
-            words = sorted(set(permutations(self.value)))
-            # Keep exactly the rearrangements whose quasiribbon insertion tableau agrees
-            # with the original one.
-            return [parent(w) for w in words if parent(w).to_quasiribbon_tableau() == self.to_quasiribbon_tableau()]
+            tab = self.to_tableau()
+            return [parent(w) for w in Permutations(self.value) if parent(w).to_tableau() == tab]

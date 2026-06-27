@@ -64,11 +64,23 @@ class WordMonoid(UniqueRepresentation, Parent):
         """
         Initialize ``self``.
 
+        INPUT:
+
+        - ``n`` -- a positive integer; the size of the alphabet
+
         EXAMPLES::
 
             sage: from sage.monoids.plactic_monoid import PlacticMonoid
-            sage: PlacticMonoid(4).rank()
+            sage: P = PlacticMonoid(4)
+            sage: P.rank()
             4
+            sage: TestSuite(P).run()
+
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(4)
+            sage: H.rank()
+            4
+            sage: TestSuite(H).run() # long time
         """
         from sage.categories.monoids import Monoids
         self._n = n
@@ -84,6 +96,9 @@ class WordMonoid(UniqueRepresentation, Parent):
             sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: PlacticMonoid(4).rank()
             4
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: HypoplacticMonoid(4).rank()
+            4
         """
         return self._n
 
@@ -97,6 +112,13 @@ class WordMonoid(UniqueRepresentation, Parent):
             sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
             sage: G = M.monoid_generators()
+            sage: G[1], G[2], G[3], G[4]
+            (1, 2, 3, 4)
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(4)
+            sage: G = H.monoid_generators()
+            sage: G
+            Finite family {1: 1, 2: 2, 3: 3, 4: 4}
             sage: G[1], G[2], G[3], G[4]
             (1, 2, 3, 4)
         """
@@ -117,6 +139,12 @@ class WordMonoid(UniqueRepresentation, Parent):
             True
             sage: len(M.one())
             0
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(3)
+            sage: H.one() == H([])
+            True
+            sage: len(H.one())
+            0
         """
         return self.element_class(self, ())
 
@@ -131,12 +159,19 @@ class WordMonoid(UniqueRepresentation, Parent):
             sage: M = PlacticMonoid(3)
             sage: M.an_element()
             1
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(3)
+            sage: H.an_element()
+            1
         """
         return self.monoid_generators()[1]
 
 class WordMonoidElement(ElementWrapper):
     r"""
-    An element of a word monoid, represented by a word.
+    An element of a word monoid.
+
+    Elements are represented by words in the alphabet
+    `\{1, 2, \ldots, n\}`.
 
     EXAMPLES::
 
@@ -144,6 +179,14 @@ class WordMonoidElement(ElementWrapper):
         sage: M = PlacticMonoid(4)
         sage: M([2, 1, 3])
         213
+
+        sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+        sage: H = HypoplacticMonoid(4)
+        sage: x = H([3, 2, 2, 1])
+        sage: x
+        3221
+        sage: parent(x)
+        Hypoplactic monoid of rank 4
     """
     def __init__(self, parent, value):
         """
@@ -162,6 +205,15 @@ class WordMonoidElement(ElementWrapper):
             sage: M([1, 2, 4])
             124
             sage: M([1, 2.5])
+            Traceback (most recent call last):
+            ...
+            ValueError: letters must be integers from 1 to 4
+
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(4)
+            sage: x = H([3, 2, 2, 1]); x
+            3221
+            sage: H([1, 2.5])
             Traceback (most recent call last):
             ...
             ValueError: letters must be integers from 1 to 4
@@ -185,6 +237,12 @@ class WordMonoidElement(ElementWrapper):
             sage: M = PlacticMonoid(4)
             sage: M([2, 1, 3])
             213
+            sage: M([2, 3, 1])
+            231
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(4)
+            sage: H([2, 1, 3])
+            213
         """
         if not self.value:
             return ''
@@ -202,6 +260,10 @@ class WordMonoidElement(ElementWrapper):
             sage: M = PlacticMonoid(4)
             sage: len(M([3, 1, 2]))
             3
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(4)
+            sage: len(H([2, 1, 3]))
+            3
         """
         return len(self.value)
 
@@ -216,6 +278,18 @@ class WordMonoidElement(ElementWrapper):
             sage: x = M([3, 1, 2])
             sage: hash(x) == hash(M([3,1,2]))
             True
+            sage: y = M([1, 3, 2])
+            sage: hash(x) == hash(y)
+            True
+            sage: y = M([1, 2, 3])
+            sage: hash(x)==hash(y)
+            False
+
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(4)
+            sage: x = H([2, 3, 1, 2])
+            sage: hash(x) == hash(H([2, 3, 1, 2]))
+            True
         """
         return hash(self.to_tableau())
 
@@ -229,6 +303,11 @@ class WordMonoidElement(ElementWrapper):
             sage: M = PlacticMonoid(4)
             sage: list(M([3, 1, 2]))
             [3, 1, 2]
+
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(4)
+            sage: list(H([3, 2, 2, 1]))
+            [3, 2, 2, 1]
         """
         return iter(self.value)
 
@@ -236,7 +315,32 @@ class WordMonoidElement(ElementWrapper):
         """
         Multiply ``self`` by ``other``.
 
+        Multiplication is induced by concatenation of words. The
+        concatenated word is inserted using the method `to_tableau`,
+        and the product is stored using the resulting representative
+        using the word method.
+
+        INPUT:
+
+        - ``other`` -- an element of the hypoplactic monoid
+
+        OUTPUT:
+
+        The product of ``self`` and ``other``.
+
         EXAMPLES::
+
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(4)
+            sage: a = H([3])
+            sage: b = H([4])
+            sage: a * b
+            34
+
+            sage: c = H([4])
+            sage: d = H([3])
+            sage: c * d
+            43
 
             sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
@@ -245,6 +349,15 @@ class WordMonoidElement(ElementWrapper):
             2132
             sage: (a * b).to_word()
             2312
+
+        TESTS::
+
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(4)
+            sage: H([]) * H([3, 2, 2, 1]) == H([3, 2, 2, 1])
+            True
+            sage: H([3, 2, 2, 1]) * H([]) == H([3, 2, 2, 1])
+            True
         """
         parent = self.parent()
         word = self.value + other.value
@@ -264,6 +377,16 @@ class WordMonoidElement(ElementWrapper):
             False
             sage: M3 = PlacticMonoid(3)
             sage: M([2, 1, 3]) == M3([2, 1, 3])
+            False
+
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(4)
+            sage: H([3, 2, 2, 1]) == H([2, 3, 1, 2])
+            True
+            sage: H([3, 2, 2, 1]) == H([1, 2, 2, 3])
+            False
+            sage: H3 = HypoplacticMonoid(3)
+            sage: H([2, 1, 3]) == H3([2, 1, 3])
             False
         """
         return (isinstance(other, self.parent().Element)
@@ -297,6 +420,13 @@ class WordMonoidElement(ElementWrapper):
             True
             sage: M([1, 3, 2]).is_canonical()
             False
+
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(4)
+            sage: H([3, 2, 2, 1]).is_canonical()
+            False
+            sage: H([2,1,3,2]).is_canonical()
+            True
         """
         return self.value == self.to_word().value
 
