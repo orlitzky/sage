@@ -113,7 +113,6 @@ from sage.structure.unique_representation import UniqueRepresentation
 
 lazy_import('sage.combinat.posets.posets', 'Poset')
 lazy_import('sage.groups.perm_gps.permgroup', 'PermutationGroup')
-lazy_import('sage.libs.symmetrica', 'all', as_='symmetrica')
 
 
 @richcmp_method
@@ -7005,7 +7004,10 @@ class SemistandardTableaux_shape_weight(SemistandardTableaux_shape):
             sage: SemistandardTableaux([3,2,1], [2, 2, 2]).cardinality()
             2
         """
-        return symmetrica.kostka_number(self.shape, self.weight)
+        from sage.features.symmetrica import Symmetrica
+        Symmetrica().require()
+        from sage.libs.symmetrica.symmetrica import kostka_number_symmetrica
+        return kostka_number_symmetrica(self.shape, self.weight)
 
     def __iter__(self):
         """
@@ -7016,8 +7018,12 @@ class SemistandardTableaux_shape_weight(SemistandardTableaux_shape):
             [[[1, 1, 2], [3]], [[1, 1, 3], [2]]]
             sage: sst[0].parent() is sst                                                # needs sage.modules
             True
+
         """
-        for t in symmetrica.kostka_tab(self.shape, self.weight):
+        from sage.features.symmetrica import Symmetrica
+        Symmetrica().require()
+        from sage.libs.symmetrica.symmetrica import kostka_tab_symmetrica
+        for t in kostka_tab_symmetrica(self.shape, self.weight):
             yield self.element_class(self, t)
 
     def list(self):
@@ -7037,7 +7043,10 @@ class SemistandardTableaux_shape_weight(SemistandardTableaux_shape):
             sage: SemistandardTableaux([3,2,1], [2, 2, 2]).list()
             [[[1, 1, 2], [2, 3], [3]], [[1, 1, 3], [2, 2], [3]]]
         """
-        return symmetrica.kostka_tab(self.shape, self.weight)
+        from sage.features.symmetrica import Symmetrica
+        Symmetrica().require()
+        from sage.libs.symmetrica.symmetrica import kostka_tab_symmetrica
+        return kostka_tab_symmetrica(self.shape, self.weight)
 
     random_element = FiniteEnumeratedSets.ParentMethods._random_element_from_unrank
 
