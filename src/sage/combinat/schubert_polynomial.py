@@ -86,7 +86,6 @@ from sage.rings.polynomial.multi_polynomial import MPolynomial
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 
 lazy_import('sage.combinat.key_polynomial', 'OperatorPolynomial')
-lazy_import('sage.libs.symmetrica', 'all', as_='symmetrica')
 
 
 def SchubertPolynomialRing(R):
@@ -151,7 +150,10 @@ class SchubertPolynomial_class(CombinatorialFreeModule.Element):
             sage: X([1]).expand() * X([2,1]).expand()
             x0
         """
-        p = symmetrica.t_SCHUBERT_POLYNOM(self)
+        from sage.features.symmetrica import Symmetrica
+        Symmetrica().require()
+        from sage.libs.symmetrica.symmetrica import t_SCHUBERT_POLYNOM_symmetrica
+        p = t_SCHUBERT_POLYNOM_symmetrica(self)
         if not isinstance(p, MPolynomial):
             R = PolynomialRing(self.parent().base_ring(), 1, 'x0')
             p = R(p)
@@ -293,7 +295,10 @@ class SchubertPolynomial_class(CombinatorialFreeModule.Element):
                     res_dict[pi] = coeff
                 return self.parent()._from_dict(res_dict)
             # if algorithm == "symmetrica":
-            return symmetrica.divdiff_schubert(i, self)
+            from sage.features.symmetrica import Symmetrica
+            Symmetrica().require()
+            from sage.libs.symmetrica.symmetrica import divdiff_schubert_symmetrica
+            return divdiff_schubert_symmetrica(i, self)
         if i in Perms:
             if algorithm == "sage":
                 i = Permutation(i)
@@ -317,7 +322,10 @@ class SchubertPolynomial_class(CombinatorialFreeModule.Element):
                     res_dict[pi] = coeff
                 return self.parent()._from_dict(res_dict)
             # if algorithm == "symmetrica":
-            return symmetrica.divdiff_perm_schubert(i, self)
+            from sage.features.symmetrica import Symmetrica
+            Symmetrica().require()
+            from sage.libs.symmetrica.symmetrica import divdiff_perm_schubert_symmetrica
+            return divdiff_perm_schubert_symmetrica(i, self)
         raise TypeError("i must either be an integer or permutation")
 
     def scalar_product(self, x):
@@ -347,7 +355,10 @@ class SchubertPolynomial_class(CombinatorialFreeModule.Element):
              + x0*x1*x3^2 + x0*x2*x3^2 + x1*x2*x3^2
         """
         if isinstance(x, SchubertPolynomial_class):
-            return symmetrica.scalarproduct_schubert(self, x)
+            from sage.features.symmetrica import Symmetrica
+            Symmetrica().require()
+            from sage.libs.symmetrica.symmetrica import scalarproduct_schubert_symmetrica
+            return scalarproduct_schubert_symmetrica(self, x)
         raise TypeError("x must be a Schubert polynomial")
 
     def multiply_variable(self, i):
@@ -369,7 +380,10 @@ class SchubertPolynomial_class(CombinatorialFreeModule.Element):
             X[3, 2, 4, 5, 1]
         """
         if isinstance(i, Integer):
-            return symmetrica.mult_schubert_variable(self, i)
+            from sage.features.symmetrica import Symmetrica
+            Symmetrica().require()
+            from sage.libs.symmetrica.symmetrica import mult_schubert_variable_symmetrica
+            return mult_schubert_variable_symmetrica(self, i)
         raise TypeError("i must be an integer")
 
 
@@ -475,13 +489,19 @@ class SchubertPolynomialRing_xbasis(CombinatorialFreeModule):
             perm = x.remove_extra_fixed_points()
             return self._from_dict({perm: self.base_ring().one()})
         if isinstance(x, MPolynomial):
-            return symmetrica.t_POLYNOM_SCHUBERT(x)
+            from sage.features.symmetrica import Symmetrica
+            Symmetrica().require()
+            from sage.libs.symmetrica.symmetrica import t_POLYNOM_SCHUBERT_symmetrica
+            return t_POLYNOM_SCHUBERT_symmetrica(x)
         if isinstance(x, InfinitePolynomial):
             R = x.polynomial().parent()
             # massage the term order to be what symmetrica expects
             S = PolynomialRing(R.base_ring(),
                                names=list(map(repr, reversed(R.gens()))))
-            return symmetrica.t_POLYNOM_SCHUBERT(S(x.polynomial()))
+            from sage.features.symmetrica import Symmetrica
+            Symmetrica().require()
+            from sage.libs.symmetrica.symmetrica import t_POLYNOM_SCHUBERT_symmetrica
+            return t_POLYNOM_SCHUBERT_symmetrica(S(x.polynomial()))
         if isinstance(x, OperatorPolynomial):
             return self(x.expand())
         raise TypeError
@@ -509,4 +529,7 @@ class SchubertPolynomialRing_xbasis(CombinatorialFreeModule):
             sage: X.product_on_basis(p1,p2)
             X[4, 2, 1, 3]
         """
-        return symmetrica.mult_schubert_schubert(left, right)
+        from sage.features.symmetrica import Symmetrica
+        Symmetrica().require()
+        from sage.libs.symmetrica.symmetrica import mult_schubert_schubert_symmetrica
+        return mult_schubert_schubert_symmetrica(left, right)
