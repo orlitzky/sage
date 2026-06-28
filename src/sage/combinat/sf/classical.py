@@ -18,6 +18,7 @@ Classical symmetric functions
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 from sage.combinat.partition import _Partitions
+from sage.misc.cachefunc import cached_function
 from sage.rings.integer import Integer
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
@@ -30,39 +31,43 @@ translate = {'monomial': 'MONOMIAL',
              'elementary': 'ELMSYM',
              'Schur': 'SCHUR'}
 
-conversion_functions = {}
-
-
-def init():
-    """
-    Set up the conversion functions between the classical bases.
+@cached_function
+def conversion_functions():
+    r"""
+    Return a dictionary of conversion functions between the
+    classical bases.
 
     EXAMPLES::
 
-        sage: from sage.combinat.sf.classical import init
-        sage: sage.combinat.sf.classical.conversion_functions = {}
-        sage: init()
-        sage: sage.combinat.sf.classical.conversion_functions[('Schur', 'powersum')]
+        sage: # needs symmetrica
+        sage: from sage.combinat.sf.classical import conversion_functions
+        sage: cfs = conversion_functions()
+        sage: cfs[('Schur', 'powersum')]
         <cyfunction t_SCHUR_POWSYM_symmetrica at ...>
 
     The following checks if the bug described in :issue:`15312` is fixed. ::
 
-        sage: change = sage.combinat.sf.classical.conversion_functions[('powersum', 'Schur')]
+        sage: # needs symmetrica
+        sage: change = cfs[('powersum', 'Schur')]
         sage: hideme = change({Partition([1]*47):ZZ(1)}) # long time
         sage: change({Partition([2,2]):QQ(1)})
         s[1, 1, 1, 1] - s[2, 1, 1] + 2*s[2, 2] - s[3, 1] + s[4]
     """
-    import sage.libs.symmetrica.all as symmetrica
+    from sage.features.symmetrica import Symmetrica
+    Symmetrica().require()
+    from sage.libs.symmetrica import symmetrica
+
+    conversion_functions = {}
+
     for other_basis, other_name in translate.items():
         for basis, name in translate.items():
             try:
                 conversion_functions[(other_basis, basis)] = getattr(symmetrica,
-                        f't_{other_name}_{name}')
+                        f't_{other_name}_{name}_symmetrica')
             except AttributeError:
                 pass
 
-
-init()
+    return conversion_functions
 
 
 ###################################
@@ -191,8 +196,9 @@ class SymmetricFunctionAlgebra_classical(sfa.SymmetricFunctionAlgebra_generic):
             m = x.monomial_coefficients()
 
             # determine the conversion function.
+            cfs = conversion_functions()
             try:
-                t = conversion_functions[(P.basis_name(), self.basis_name())]
+                t = cfs[(P.basis_name(), self.basis_name())]
             except AttributeError:
                 raise TypeError("do not know how to convert from %s to %s"
                                 % (P.basis_name(), self.basis_name()))
