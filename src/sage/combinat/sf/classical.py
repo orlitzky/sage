@@ -83,6 +83,7 @@ class SymmetricFunctionAlgebra_classical(sfa.SymmetricFunctionAlgebra_generic):
 
     TESTS::
 
+        sage: # needs symmetrica
         sage: TestSuite(SymmetricFunctions(QQ).s()).run()
         sage: TestSuite(SymmetricFunctions(QQ).h()).run()
         sage: TestSuite(SymmetricFunctions(QQ).m()).run()
@@ -100,12 +101,14 @@ class SymmetricFunctionAlgebra_classical(sfa.SymmetricFunctionAlgebra_generic):
 
         EXAMPLES::
 
+            sage: # needs symmetrica
             sage: s = SymmetricFunctions(QQ).s()
             sage: s(2)
             2*s[]
             sage: s([2,1]) # indirect doctest
             s[2, 1]
 
+            sage: # needs symmetrica
             sage: McdJ = SymmetricFunctions(QQ['q','t'].fraction_field()).macdonald().J()
             sage: s = SymmetricFunctions(McdJ.base_ring()).s()
             sage: s._element_constructor_(McdJ(s[2,1]))
@@ -116,6 +119,7 @@ class SymmetricFunctionAlgebra_classical(sfa.SymmetricFunctionAlgebra_generic):
         Check that non-Schur bases raise an error when given skew partitions
         (:issue:`19218`)::
 
+            sage: # needs symmetrica
             sage: e = SymmetricFunctions(QQ).e()
             sage: e([[2,1],[1]])
             Traceback (most recent call last):
@@ -124,6 +128,7 @@ class SymmetricFunctionAlgebra_classical(sfa.SymmetricFunctionAlgebra_generic):
 
         Check that :issue:`34576` is fixed::
 
+            sage: # needs symmetrica
             sage: s = SymmetricFunctions(ZZ).s()
             sage: f = s(0/2); f
             0
@@ -132,6 +137,7 @@ class SymmetricFunctionAlgebra_classical(sfa.SymmetricFunctionAlgebra_generic):
             sage: f._monomial_coefficients
             {}
 
+            sage: # needs symmetrica
             sage: s2 = SymmetricFunctions(GF(2)).s()
             sage: f = s2(2*s[2,1]); f
             0
