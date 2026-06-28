@@ -5521,7 +5521,7 @@ class Tableaux(UniqueRepresentation, Parent):
         False
     """
     @staticmethod
-    def __classcall_private__(cls, *args, **kwargs):
+    def __classcall_private__(cls, n=None, *args, **kwargs):
         r"""
         This is a factory class which returns the appropriate parent based on
         arguments.  See the documentation for :class:`Tableaux` for more
@@ -5536,13 +5536,6 @@ class Tableaux(UniqueRepresentation, Parent):
             sage: Tableaux(n=3)
             Tableaux of size 3
         """
-        if args:
-            n = args[0]
-        elif 'n' in kwargs:
-            n = kwargs['n']
-        else:
-            n = None
-
         if n is None:
             return Tableaux_all()
         if not isinstance(n, (int, Integer)) or n < 0:
@@ -7209,7 +7202,7 @@ class RowStandardTableaux(Tableaux):
         Standard tableaux with 3-residue sequence (2,0,0,1,2) and multicharge (0)
     """
     @staticmethod
-    def __classcall_private__(cls, *args, **kwargs):
+    def __classcall_private__(cls, n=None, *args, **kwargs):
         r"""
         This is a factory class which returns the appropriate parent based on
         arguments.  See the documentation for :class:`RowStandardTableaux` for
@@ -7237,13 +7230,6 @@ class RowStandardTableaux(Tableaux):
         """
         from sage.combinat.partition import _Partitions
         from sage.combinat.skew_partition import SkewPartitions
-
-        if args:
-            n = args[0]
-        elif 'n' in kwargs:
-            n = kwargs[n]
-        else:
-            n = None
 
         if n is None:
             return RowStandardTableaux_all()
@@ -7606,7 +7592,7 @@ class StandardTableaux(SemistandardTableaux):
         Standard tableaux with 3-residue sequence (0,1,2,2,0) and multicharge (0)
     """
     @staticmethod
-    def __classcall_private__(cls, *args, **kwargs):
+    def __classcall_private__(cls, n=None, *args, **kwargs):
         r"""
         This is a factory class which returns the appropriate parent based on
         arguments.  See the documentation for :class:`StandardTableaux` for
@@ -7636,13 +7622,6 @@ class StandardTableaux(SemistandardTableaux):
         """
         from sage.combinat.partition import _Partitions
         from sage.combinat.skew_partition import SkewPartitions
-
-        if args:
-            n = args[0]
-        elif 'n' in kwargs:
-            n = kwargs['n']
-        else:
-            n = None
 
         if n is None:
             return StandardTableaux_all()
