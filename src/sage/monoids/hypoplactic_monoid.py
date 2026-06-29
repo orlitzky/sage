@@ -48,8 +48,8 @@ from sage.structure.unique_representation import UniqueRepresentation
 from sage.rings.integer_ring import ZZ
 from sage.rings.integer import Integer
 from sage.combinat.family import Family
-from sage.combinat.permutation import Permutations
 from sage.misc.cachefunc import cached_method
+
 
 class HypoplacticMonoid(WordMonoid):
     r"""
@@ -115,6 +115,8 @@ class HypoplacticMonoid(WordMonoid):
         True
         sage: len(H.one())
         0
+        sage: H.rank()
+        4
         sage: H.one() * H([3, 2, 2, 1]) == H([3, 2, 2, 1])
         True
         sage: H([3, 2, 2, 1]) * H.one() == H([3, 2, 2, 1])
@@ -149,6 +151,8 @@ class HypoplacticMonoid(WordMonoid):
         Traceback (most recent call last):
         ...
         ValueError: letters must be integers from 1 to 4
+
+        sage: TestSuite(H).run() # long time
     """
 
     @staticmethod
@@ -221,6 +225,7 @@ class HypoplacticMonoid(WordMonoid):
             raise ValueError("the size must be a nonnegative integer")
 
         quasiribbontableaux = QuasiRibbonTableaux(size=k, max_entry=self.rank())
+
         def to_word(t):
             return self(t.to_word_by_column())
         return Family(quasiribbontableaux, to_word, lazy=True)
@@ -301,29 +306,3 @@ class HypoplacticMonoid(WordMonoid):
             """
             parent = self.parent()
             return parent(list(self.to_tableau().to_word_by_column()))
-
-        def equivalence_class(self):
-            r"""
-            Return the hypoplactic equivalence class of ``self``.
-
-            This is the list of all words with the same quasiribbon insertion tableau
-            as ``self``.
-
-            Because this method relies on brute-force checking, it is suitable mostly for
-            short words in parent classes on small alphabets.
-
-            EXAMPLES::
-
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-                sage: H = HypoplacticMonoid(3)
-                sage: H([2, 1, 3]).equivalence_class()
-                [213, 231]
-                sage: H = HypoplacticMonoid(4)
-                sage: H([3, 1, 4, 2]).equivalence_class()
-                [3142, 3124, 3412, 1342, 1324]
-                sage: H([3, 1, 1, 2]).equivalence_class()
-                [3112, 1312, 1132]
-            """
-            parent = self.parent()
-            tab = self.to_tableau()
-            return [parent(w) for w in Permutations(self.value) if parent(w).to_tableau() == tab]

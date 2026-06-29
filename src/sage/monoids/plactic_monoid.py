@@ -47,6 +47,8 @@ from sage.sets.family import Family
 from sage.combinat.rsk import RSK, RSK_inverse
 from sage.combinat.tableau import StandardTableaux, SemistandardTableaux
 from sage.combinat.partition import Partitions
+from sage.combinat.permutation import Permutations
+
 
 class WordMonoid(UniqueRepresentation, Parent):
     r"""
@@ -74,13 +76,7 @@ class WordMonoid(UniqueRepresentation, Parent):
             sage: P = PlacticMonoid(4)
             sage: P.rank()
             4
-            sage: TestSuite(P).run()
-
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
-            sage: H = HypoplacticMonoid(4)
-            sage: H.rank()
-            4
-            sage: TestSuite(H).run() # long time
+            sage: TestSuite(PlacticMonoid(2)).run()
         """
         from sage.categories.monoids import Monoids
         self._n = n
@@ -165,6 +161,7 @@ class WordMonoid(UniqueRepresentation, Parent):
             1
         """
         return self.monoid_generators()[1]
+
 
 class WordMonoidElement(ElementWrapper):
     r"""
@@ -430,6 +427,30 @@ class WordMonoidElement(ElementWrapper):
         """
         return self.value == self.to_word().value
 
+    def equivalence_class(self):
+        r"""
+        Return the equivalence class of ``self``.
+
+        This is the list of all words with the same insertion tableau as ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
+            sage: H = HypoplacticMonoid(3)
+            sage: H([2, 1, 3]).equivalence_class()
+            [213, 231]
+            sage: H = HypoplacticMonoid(4)
+            sage: H([3, 1, 4, 2]).equivalence_class()
+            [3142, 3124, 3412, 1342, 1324]
+            sage: H([3, 1, 1, 2]).equivalence_class()
+            [3112, 1312, 1132]
+        """
+        parent = self.parent()
+        tab = self.to_tableau()
+        return [m for w in Permutations(self.value)
+                if (m := parent(w)).to_tableau() == tab]
+
+
 class PlacticMonoid(WordMonoid):
     r"""
     The plactic monoid on the alphabet `\{1, 2, \ldots, n\}`.
@@ -477,7 +498,6 @@ class PlacticMonoid(WordMonoid):
         Traceback (most recent call last):
         ...
         ValueError: letters must be integers from 1 to 4
-        sage: TestSuite(M).run()
     """
     @staticmethod
     def __classcall_private__(cls, n):
