@@ -74,7 +74,6 @@ class HypoplacticMonoid(WordMonoid):
 
     EXAMPLES::
 
-        sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
         sage: H = HypoplacticMonoid(4)
         sage: H
         Hypoplactic monoid of rank 4
@@ -109,7 +108,6 @@ class HypoplacticMonoid(WordMonoid):
 
     TESTS::
 
-        sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
         sage: H = HypoplacticMonoid(4)
         sage: H([]) == H.one()
         True
@@ -170,13 +168,11 @@ class HypoplacticMonoid(WordMonoid):
 
         EXAMPLES::
 
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
             sage: HypoplacticMonoid(4) is HypoplacticMonoid(ZZ(4))
             True
 
         TESTS::
 
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
             sage: HypoplacticMonoid(-1)
             Traceback (most recent call last):
             ...
@@ -195,7 +191,6 @@ class HypoplacticMonoid(WordMonoid):
 
         EXAMPLES::
 
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
             sage: HypoplacticMonoid(4)
             Hypoplactic monoid of rank 4
         """
@@ -210,7 +205,6 @@ class HypoplacticMonoid(WordMonoid):
 
         EXAMPLES::
 
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
             sage: H = HypoplacticMonoid(2)
             sage: H.subset(1)
             Lazy family (to_word(i))_{i in Quasi-ribbon tableaux of size 1 with entries at most 2}
@@ -239,7 +233,6 @@ class HypoplacticMonoid(WordMonoid):
 
         EXAMPLES::
 
-            sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
             sage: H = HypoplacticMonoid(4)
             sage: x = H([3, 2, 2, 1])
             sage: x
@@ -260,7 +253,6 @@ class HypoplacticMonoid(WordMonoid):
 
             EXAMPLES::
 
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: H([3, 2, 2, 1]).to_tableau()
                 [[1], [2, 2], [None, 3]]
@@ -269,7 +261,6 @@ class HypoplacticMonoid(WordMonoid):
 
             TESTS::
 
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: H([]).to_tableau()
                 []
@@ -291,7 +282,6 @@ class HypoplacticMonoid(WordMonoid):
 
             EXAMPLES::
 
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: H([3, 2, 2, 1]).to_word()
                 2132
@@ -300,7 +290,6 @@ class HypoplacticMonoid(WordMonoid):
 
             TESTS::
 
-                sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
                 sage: H = HypoplacticMonoid(4)
                 sage: H([]).to_word()
             """

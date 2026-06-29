@@ -51,6 +51,8 @@ from sage.sets.positive_integers import PositiveIntegers
 from sage.combinat.words.words import Words
 from sage.rings.integer_ring import ZZ
 from sage.rings.infinity import infinity
+from sage.functions.other import binomial
+
 
 class QuasiRibbonTableau(SkewTableau):
     r"""
@@ -603,12 +605,12 @@ class QuasiRibbonTableaux(SkewTableaux):
         sage: QRT
         Quasi-ribbon tableaux of shape [2, 1]
         sage: QRT = QuasiRibbonTableaux(shape=[2, 1], max_entry=3)
-        sage: QRT.list()
+        sage: list(QRT)
         [[[1, 1], [None, 2]],
         [[1, 1], [None, 3]],
         [[1, 2], [None, 3]],
         [[2, 2], [None, 3]]]
-        """
+    """
 
     @staticmethod
     def __classcall_private__(cls, shape=None, max_entry=None, size=None, category=None):
@@ -781,75 +783,6 @@ class QuasiRibbonTableaux(SkewTableaux):
             raise ValueError("this family does not have a fixed shape")
         return self._shape
 
-    def tableaux_of_shape(self, shape=None, max_entry=None):
-        """
-        Return quasi-ribbon tableaux of a fixed shape with entries up to ``max_entry``.
-
-        This is a small finite generator for testing.
-
-        IMPORTANT:
-
-        This method currently uses a brute-force approach. It tries every
-        possible filling of the given shape using entries from 1 to
-        the max entry. Then it constructs a tableau from each filling and keeps
-        only the ones that satisfy ``is_quasi_ribbon()``.
-
-        This is useful for small examples, but it is probably not
-        efficient for large shapes or large values of ``max_entry``. In the
-        future, this should probably be replaced with a smarter generation
-        method that only builds fillings satisfying the row and column conditions.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableaux
-            sage: QRT = QuasiRibbonTableaux()
-            sage: QRT.tableaux_of_shape([2, 1], max_entry=2)
-            [[[1, 1], [None, 2]]]
-
-            sage: QRT = QuasiRibbonTableaux(shape=[2, 1])
-            sage: QRT.tableaux_of_shape(max_entry=3)
-            [[[1, 1], [None, 2]],
-            [[1, 1], [None, 3]],
-            [[1, 2], [None, 3]],
-            [[2, 2], [None, 3]]]
-        """
-        from itertools import product
-        # If the user did not pass a shape into the method, use the fixed
-        # shape stored in the family object.
-        if shape is None:
-            shape = self._shape
-
-        # If there is still no shape, then we do not know what fixed-shape
-        # family to generate.
-        if shape is None:
-            raise ValueError("a shape must be specified")
-
-        # If no max_entry is passed into the method, use the cutoff stored in
-        # the family object.
-        if max_entry is None:
-            max_entry = self._max_entry
-
-        if max_entry is None:
-            raise ValueError("a maximum entry must be specified")
-
-        shape = list(shape)
-
-        total_cells = sum(shape)
-        tableaux = []
-
-        # Try every possible filling of the cells
-        for filling in product(range(1, max_entry + 1), repeat=total_cells):
-            pos = 0
-            rows = []
-            for row_length in shape:
-                rows.append(list(filling[pos:pos + row_length]))
-                pos += row_length
-            try:
-                tableaux.append(self.element_class(self,rows))
-            except ValueError:
-                pass
-        return tableaux
-
     def __iter__(self):
         r"""
         Iterate over ``self``.
@@ -866,35 +799,42 @@ class QuasiRibbonTableaux(SkewTableaux):
             raise NotImplementedError("iteration requires max_entry to be specified")
 
         if self._shape is not None:
-            yield from self.tableaux_of_shape(self._shape, self._max_entry)
-            return
+            S = [self._shape]
+        elif self._size is not None:
+            S = Compositions(self._size)
+        else:
+            raise NotImplementedError("iteration requires either shape or size to be specified")
 
-        if self._size is not None:
-            for shape in Compositions(self._size):
-                yield from self.tableaux_of_shape(shape, self._max_entry)
-            return
+        from itertools import accumulate, combinations_with_replacement
 
-        raise NotImplementedError("iteration requires either shape or size to be specified")
+        for shape in S:
+            shape = tuple(shape)
+            r = len(shape)
+            n = sum(shape)
 
-    def list(self):
-        r"""
-        Return the list of quasi-ribbon tableaux in ``self``.
+            M = self._max_entry - (r - 1)
+            if M <= 0:
+                return
 
-        EXAMPLES::
+            descents = set(accumulate(shape[:-1]))
 
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableaux
-            sage: QuasiRibbonTableaux(shape=[2, 1], max_entry=2).list()
-            [[[1, 1], [None, 2]]]
-            sage: QuasiRibbonTableaux(size=2, max_entry=2).list()
-            [[[1], [2]], [[1, 1]], [[1, 2]], [[2, 2]]]
-        """
-        if self._max_entry is None:
-            raise ValueError("a maximum entry must be specified to list the tableaux")
+            offset = [0] * n
+            k = 0
+            for i in range(1, n):
+                if i in descents:
+                    k += 1
+                offset[i] = k
 
-        if self._shape is None and self._size is None:
-            raise ValueError("a shape or size must be specified to list the tableaux")
+            for b in combinations_with_replacement(range(1, M + 1), n):
+                word = [x + off for x, off in zip(b, offset)]
 
-        return list(self)
+                rows = []
+                pos = 0
+                for s in shape:
+                    rows.append(word[pos:pos+s])
+                    pos += s
+
+                yield self.element_class(self, rows)
 
     def __contains__(self, x):
         r"""
@@ -955,7 +895,8 @@ class QuasiRibbonTableaux(SkewTableaux):
         """
         if self._max_entry is None or (self._shape is None and self._size is None):
             return infinity
-        return Integer(len(list(self)))
+        n = self._shape.size()
+        return binomial(self._max_entry + n - len(self._shape), n)
 
     def insert_word(self, word):
         """
