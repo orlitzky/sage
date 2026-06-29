@@ -21,7 +21,12 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 ##############################################################################
 
-from sage.interfaces.interface import Interface, InterfaceElement, InterfaceFunction, InterfaceFunctionElement
+from sage.interfaces.interface import (
+    Interface,
+    InterfaceElement,
+    InterfaceFunction,
+    InterfaceFunctionElement,
+)
 from sage.interfaces.tab_completion import ExtraTabCompletion
 from sage.misc.instancedoc import instancedoc
 
@@ -613,7 +618,7 @@ class PythonInternalElement(ExtraTabCompletion, InterfaceElement):
             sage: fr != fr * cr
             True
         """
-        from sage.structure.richcmp import rich_to_bool, op_EQ, op_NE
+        from sage.structure.richcmp import op_EQ, op_NE, rich_to_bool
         if self._inst == other._inst:
             return rich_to_bool(op, 0)
         if op == op_EQ:

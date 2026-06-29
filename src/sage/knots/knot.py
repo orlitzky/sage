@@ -18,17 +18,20 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 from enum import Enum
-from sage.knots.link import Link
-from sage.knots.knot_table import small_knots_table
-from sage.knots.gauss_code import (recover_orientations, dowker_to_gauss,
-                                   rectangular_diagram)
 
-from sage.structure.parent import Parent
-from sage.structure.element import Element
+from sage.categories.monoids import Monoids
+from sage.knots.gauss_code import (
+    dowker_to_gauss,
+    recover_orientations,
+    rectangular_diagram,
+)
+from sage.knots.knot_table import small_knots_table
+from sage.knots.link import Link
+from sage.misc.cachefunc import cached_method
 from sage.misc.fast_methods import Singleton
 from sage.misc.inherit_comparison import InheritComparisonClasscallMetaclass
-from sage.misc.cachefunc import cached_method
-from sage.categories.monoids import Monoids
+from sage.structure.element import Element
+from sage.structure.parent import Parent
 
 
 class SymmetryType(Enum):
@@ -218,11 +221,10 @@ class Knot(Link, Element, metaclass=InheritComparisonClasscallMetaclass):
                     M[a][b] = "╯"
                 else:
                     M[a][b] = "╮"
+            elif xx < a:
+                M[a][b] = "╰"
             else:
-                if xx < a:
-                    M[a][b] = "╰"
-                else:
-                    M[a][b] = "╭"
+                M[a][b] = "╭"
 
         for ab, cd in graphe.edge_iterator(labels=False):
             a, b = ab
@@ -531,17 +533,16 @@ class Knot(Link, Element, metaclass=InheritComparisonClasscallMetaclass):
         S = set(s)
         if len(S) == 1:
             return SymmetryType.chiral
-        elif len(S) == 4:
+        if len(S) == 4:
             return SymmetryType.ful_amphicheiral
-        elif len(S) != 2:
+        if len(S) != 2:
             return None
 
         if [-1, -1] in [m.diagonal() for m in S]:
             return SymmetryType.reversible
-        elif [-1, 1] in [m.diagonal() for m in S]:
+        if [-1, 1] in [m.diagonal() for m in S]:
             return SymmetryType.pos_amphicheiral
-        else:
-            return SymmetryType.neg_amphicheiral
+        return SymmetryType.neg_amphicheiral
 
     def deconnect_sum(self):
         r"""

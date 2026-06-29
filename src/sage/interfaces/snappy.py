@@ -129,7 +129,10 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 ##############################################################################
 
-from sage.interfaces.python_internal import PythonInternalInterface, PythonInternalElement
+from sage.interfaces.python_internal import (
+    PythonInternalElement,
+    PythonInternalInterface,
+)
 from sage.misc.instancedoc import instancedoc
 
 
@@ -334,9 +337,9 @@ class SnapPyElement(PythonInternalElement):
         inst = self._inst
         if hasattr(inst, 'sage'):
             return inst.sage()
-        elif hasattr(inst, 'sage_link'):
+        if hasattr(inst, 'sage_link'):
             return inst.sage_link()
-        elif locals:
+        if locals:
             # if locals are given we use `_sage_repr`
             # surely this only covers simple cases
             from sage.misc.sage_eval import sage_eval

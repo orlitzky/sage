@@ -156,7 +156,11 @@ AUTHORS:
 ##############################################################################
 
 from enum import Enum
-from sage.interfaces.python_internal import PythonInternalInterface, PythonInternalElement
+
+from sage.interfaces.python_internal import (
+    PythonInternalElement,
+    PythonInternalInterface,
+)
 from sage.misc.instancedoc import instancedoc
 
 
@@ -398,13 +402,17 @@ class ReginaElement(PythonInternalElement):
                 new_var_names = R.variable_names()
                 lc = {old_var_names[i]: R.gens_dict()[new_var_names[i]] for i in range(len(new_var_names))}
             elif isinstance(inst, nspc.Polynomial):
-                from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
                 from sage.rings.integer_ring import ZZ
+                from sage.rings.polynomial.polynomial_ring_constructor import (
+                    PolynomialRing,
+                )
                 R = PolynomialRing(ZZ, 'x')
                 lc = R.gens_dict()
             else:
-                from sage.rings.polynomial.laurent_polynomial_ring import LaurentPolynomialRing
                 from sage.rings.integer_ring import ZZ
+                from sage.rings.polynomial.laurent_polynomial_ring import (
+                    LaurentPolynomialRing,
+                )
                 if isinstance(inst, nspc.Laurent):
                     R = LaurentPolynomialRing(ZZ, 'x')
                 else:
