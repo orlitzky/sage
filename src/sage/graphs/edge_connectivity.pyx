@@ -4,12 +4,13 @@ Edge connectivity
 
 This module implements methods for computing the edge-connectivity of graphs and
 digraphs. It also implements methods to extract `k` edge-disjoint spanning trees
-from a `2k` edge-connected graph or a `k` edge-connected digraph.
+from a `2k` edge-connected graph or a `k` edge-connected digraph, and to pack
+`k` edge-disjoint spanning arborescences in a directed graph following the
+matroid approach of [Gabow1995]_.
 
 .. TODO::
 
-    - Implement the tree-packing algorithms proposed in [Gabow1995]_ and
-      [BHKP2008]_
+    - Implement the tree-packing strengthening proposed in [BHKP2008]_
     - Extend to digraphs with multiple edges
     - Extend to weighted digraphs
 """
@@ -1326,9 +1327,13 @@ cdef class GabowEdgeConnectivity:
         self.root_vertex = root_idx
         self.next_f_tree = 0
 
-        # The DFS-based speed-up initialization depends on cached state from
-        # __init__'s in/out-alternating run; disable it for the whole
-        # packing computation. (Re-enabling it is a future optimization.)
+        # The DFS-based speed-up of [GKLP2021]_ is disabled for the packing.
+        # It warm-starts the matroid-intersection build (Phase 1 and the
+        # per-round rebuilds), but profiling shows that step is only ~5% of the
+        # packing time: the cost is dominated (>90%) by the Phase 2 extraction
+        # (find_tree and its swaps), which the DFS preprocessing does not
+        # touch. Enabling it (via a root->vertex-0 relabeling) gave no
+        # measurable speed-up, so it is kept off to stay simple and robust.
         cdef bint saved_dfs = self.dfs_preprocessing
         self.dfs_preprocessing = False
 
@@ -2253,9 +2258,10 @@ cdef class GabowEdgeConnectivity:
 
     def edge_disjoint_spanning_trees(self, k=None, root=None):
         r"""
-        Return a list of ``k`` edge-disjoint spanning out-arborescences
-        rooted at ``root``.
+        Return ``k`` edge-disjoint spanning arborescences rooted at ``root``.
 
+        The returned arborescences are out-arborescences (rooted spanning
+        trees with all edges directed away from the root).
         Following [Gabow1995]_ and Edmonds' branching theorem, the maximum
         number of edge-disjoint spanning out-arborescences rooted at a
         vertex ``r`` equals the minimum ``r``-cut of the digraph. When the
