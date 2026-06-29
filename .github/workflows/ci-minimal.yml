@@ -35,7 +35,7 @@ jobs:
         python: ['3.14']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Merge CI fixes from sagemath/sage
         run: |
