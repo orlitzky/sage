@@ -568,7 +568,7 @@ class Knot(Link, Element, metaclass=InheritComparisonClasscallMetaclass):
             sage: K2 = d[1].simplify()            # optional - snappy
             sage: d2 = K2.deconnect_sum(); d2     # optional - snappy
             [Knot represented by 3 crossings, Knot represented by 3 crossings]
-            sage: K.get_knotinfo()
+            sage: K.get_knotinfo()                # needs libhomfly
             KnotInfo['K3_1']^2*KnotInfo['K3_1m']
         """
         from sage.interfaces.snappy import snappy

@@ -3011,7 +3011,7 @@ class Link(SageObject):
         The four algorithms for computation give the same result when the
         trace closure of the braid representation is the link itself::
 
-            sage: # needs sage.symbolic
+            sage: # needs sage.symbolic libhomfly
             sage: L = Link([[[-1, 2, -3, 4, 5, 1, -2, 6, 7, 3, -4, -7, -6, -5]],
             ....:           [-1, -1, -1, -1, 1, -1, 1]])
             sage: jonesrep = L.jones_polynomial(algorithm='jonesrep')
