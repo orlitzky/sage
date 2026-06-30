@@ -2,37 +2,48 @@ r"""
 Feature for testing the presence of libbraiding
 """
 
-from sage.features.join_feature import JoinFeature
-from sage.features import PythonModule
+from sage.config import libbraiding_enabled
+from sage.features.build_feature import BuildModule
 
 
-class Libbraiding(JoinFeature):
+class Libbraiding(BuildModule):
     r"""
     A :class:`sage.features.Feature` describing the presence of
-    :mod:`sage.libs.braiding`, the interface to braid groups via
-    libbraiding.
+    :mod:`sage.libs.braiding`, the interface to libbraiding.
 
-    TESTS::
+    EXAMPLES::
 
         sage: from sage.features.libbraiding import Libbraiding
         sage: Libbraiding().is_present()  # needs libbraiding
         FeatureTestResult('libbraiding', True)
         sage: Libbraiding().is_present()  # needs !libbraiding
-        FeatureTestResult('sage.libs.braiding', False)
+        FeatureTestResult('libbraiding', False)
+
+    A runtime check. We only check the "present" case because, if
+    feature checks are _not_ deferred, the ``needs !libbraiding`` can be
+    satisfied (disabled at build time) at the same time we are able to
+    import a module that was installed for a previous build of sage::
+
+        sage: from sage.features.libbraiding import Libbraiding
+        sage: Libbraiding().is_present_at_runtime()  # needs libbraiding
+        FeatureTestResult('libbraiding', True)
 
     """
+    _enabled_in_build = libbraiding_enabled
+
     def __init__(self):
         r"""
-        TESTS::
+        EXAMPLES::
 
             sage: from sage.features.libbraiding import Libbraiding
-            sage: isinstance(Libbraiding(), Libbraiding)
-            True
+            sage: Libbraiding()
+            Feature('libbraiding')
 
         """
-        JoinFeature.__init__(self, 'libbraiding',
-                             [PythonModule('sage.libs.braiding')],
-                             spkg='libbraiding', type='standard')
+        module_name = "sage.libs.braiding"
+        super().__init__('libbraiding',
+                         module_name,
+                         type='standard')
 
 
 def all_features():
