@@ -3213,7 +3213,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
                     mu = S(mu_num) / S(mu_den)
                     f = mu.minpoly()
 
-                sep = self._domain.isogeny(f, codomain=frob.codomain()).dual(algorithm=None)
+                sep = self._domain.isogeny(f, codomain=frob.codomain()).dual()
 
             else:
                 sep = frob.codomain().isomorphism_to(self._domain)

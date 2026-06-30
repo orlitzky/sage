@@ -1105,7 +1105,7 @@ class EllipticCurveHom_velusqrt(EllipticCurveHom):
         return iso * phi
 
     # not explicitly cached here since .as_EllipticCurveIsogeny() and EllipticCurveIsogeny.dual() already cache their results
-    def dual(self):
+    def dual(self, algorithm=None):
         r"""
         Return the dual of this square-root Vélu
         isogeny as an :class:`EllipticCurveHom`.
@@ -1153,7 +1153,7 @@ class EllipticCurveHom_velusqrt(EllipticCurveHom):
         if self.base_ring().characteristic().divides(self.degree()):
             # The dual is inseparable.
             #TODO: This is a lazy workaround; it could be optimized more.
-            return self.as_EllipticCurveIsogeny().dual(algorithm=None)
+            return self.as_EllipticCurveIsogeny().dual(algorithm=algorithm)
 
         # The dual is separable.
         F = self._raw_domain.base_ring()
