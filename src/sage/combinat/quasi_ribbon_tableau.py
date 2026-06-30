@@ -897,6 +897,11 @@ class QuasiRibbonTableaux(SkewTableaux):
         """
         if self._max_entry is None or (self._shape is None and self._size is None):
             return infinity
+        if self._shape is None:
+            n = self._size
+            return sum(binomial(n - 1, r - 1) * binomial(self._max_entry + n - r, n)
+                       for r in range(1, n+1))
+
         n = self._shape.size()
         return binomial(self._max_entry + n - len(self._shape), n)
 
