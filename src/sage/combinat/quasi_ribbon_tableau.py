@@ -814,7 +814,7 @@ class QuasiRibbonTableaux(SkewTableaux):
 
             M = self._max_entry - (r - 1)
             if M <= 0:
-                return
+                continue
 
             descents = set(accumulate(shape[:-1]))
 
