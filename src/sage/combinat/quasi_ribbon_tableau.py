@@ -797,7 +797,7 @@ class QuasiRibbonTableaux(SkewTableaux):
             sage: list(QuasiRibbonTableaux(shape=[2, 1], max_entry=2))
             [[[1, 1], [None, 2]]]
             sage: list(QuasiRibbonTableaux(size=2, max_entry=2))
-            [[[1], [2]], [[1, 1]], [[1, 2]], [[2, 2]]]
+            [[[1, 1]], [[1, 2]], [[2, 2]], [[1], [2]]]
         """
         if self._max_entry is None:
             raise NotImplementedError("iteration requires max_entry to be specified")
@@ -805,7 +805,7 @@ class QuasiRibbonTableaux(SkewTableaux):
         if self._shape is not None:
             S = [self._shape]
         elif self._size is not None:
-            S = Compositions(self._size)
+            S = Compositions(self._size, max_length=self._max_entry)
         else:
             raise NotImplementedError("iteration requires either shape or size to be specified")
 
