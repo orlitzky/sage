@@ -3144,21 +3144,12 @@ class EllipticCurveIsogeny(EllipticCurveHom):
                 #Implement inseparable case.
                 #Implement composite degree cyclic case.
                 #Implement non-cyclic case.
-            #Optimizations:
-                #Faster root-finding for the quotient of the division polynomial by the kernel polynomial.
-                #x-only arithmetic when evaluating the preimage of a generator of the dual kernel.
             if F(d) == 0:
                 raise NotImplementedError("``pushforward`` method not implemented for inseparable isogenies")
             if not d.is_prime():
                 raise NotImplementedError("``pushforward`` method not implemented for composite degree isogenies")
             """
-            Construct the dual isogeny of a prime-degree isogeny phi: E -> E'.
-
-            Strategy:
-                - Compute the quotient of the l-division polynomial by the kernel polynomial.
-                - Pick an x-coordinate of an l-torsion point not in Ker(phi).
-                - Use Sage's native lift_x to recover a point on E.
-                - Push that point forward to generate Ker(phi_dual).
+            Construct the dual isogeny of a prime-degree separable isogeny phi: E -> E' by generating the kernel with a pushforward of a torsion point.
             """
             E = self.domain()
             E_prime = self.codomain()
@@ -3172,18 +3163,13 @@ class EllipticCurveIsogeny(EllipticCurveHom):
                 raise ValueError("the dual isogeny is not defined over the current ground field")
 
             x0 = roots[0]
-            try:
-                pts = E.lift_x(x0, all=True)
-            except (AttributeError, NotImplementedError, TypeError):
-                pts = []
+            Qx0 = EllipticCurveHom.xEVAL(self, x0)
+            R = kernel_poly.parent()
+            x = R.gens()[0]
+            from sage.schemes.elliptic_curves.ell_field import EllipticCurve_field
+            pushforward_kernel_poly =   EllipticCurve_field.kernel_polynomial_from_divisor(E_prime, x-Qx0, d)
 
-            if not pts:
-                raise ValueError("could not lift the chosen x-coordinate to a point on E")
-
-            P = pts[0]
-            Q = self(P)
-
-            return E_prime.isogeny(Q)
+            return E_prime.isogeny(pushforward_kernel_poly)
 
         #General case:
         if F(d) == 0:   # inseparable dual!
