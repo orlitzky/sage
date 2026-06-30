@@ -499,15 +499,14 @@ with respect to `h`; namely, we set `X_\lambda = \sum_{\mu\geq \lambda, |\mu|=|\
     ....:
     ....:         INPUT:
     ....:
-    ....:         - ``R`` -- the base ring.
+    ....:         - ``R`` -- the base ring
     ....:         - ``*args``, ``**kwargs`` -- optional arguments passed to the
-    ....:           :class:`CombinatorialFreeModule` constructor.
+    ....:           :class:`CombinatorialFreeModule` constructor
     ....:
     ....:         EXAMPLE::
     ....:
     ....:             sage: X = MySFBasis(QQ, prefix='x')
-    ....:             sage: X
-    ....:             Jason's basis for symmetric functions over Rational Field
+    ....:             sage: TestSuite(X).run()
     ....:         """
     ....:         CombinatorialFreeModule.__init__(self, R, Partitions(), category=AlgebrasWithBasis(R), *args, **kwargs)
     ....:         self._h = SymmetricFunctions(R).homogeneous()
