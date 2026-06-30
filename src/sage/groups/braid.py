@@ -541,6 +541,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: a = B([2, 2, -1, -1])
             sage: b = B([2, 1, 2, 1])
@@ -1646,6 +1647,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(4)
             sage: b = B([1, 2, 1, -2, 3, 1])
             sage: b.right_normal_form()
@@ -1661,6 +1663,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(4)
             sage: b = B([2, 1, 3, 2])
             sage: b.centralizer()
@@ -1670,6 +1673,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         Check that the :issue:`35529` is fixed::
 
+            sage: # needs libbraiding
             sage: BG = BraidGroup(5)
             sage: b = BG([3, 3, 4, 3, 3, 2, 1, 4, 3, 2]) # b is s2^2*s3*s2^2*s1*s0*s3*s2*s1
             sage: b.centralizer()
@@ -1686,6 +1690,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: b = B([1, 2, -1, -2, -2, 1])
             sage: b.super_summit_set()
@@ -1708,6 +1713,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: b = B([1, 2, -1, -2, -2, 1])
             sage: c = B([1, 2, 1])
@@ -1730,6 +1736,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: b = B([1, 2, -1, -2, -2, 1])
             sage: c = B([1, 2, 1])
@@ -1755,6 +1762,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: B.one().conjugating_braid(B.one())
             1
@@ -1812,6 +1820,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: a = B([2, 2, -1, -1])
             sage: b = B([2, 1, 2, 1])
@@ -1841,6 +1850,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(4)
             sage: B.one().pure_conjugating_braid(B.one())
             1
@@ -1923,6 +1933,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: a = B([2, 2, -1, -1, 2, 2])
             sage: b = B([2, 1, 2, 1])
@@ -1954,6 +1965,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: b = B([1, 2, -1])
             sage: b.thurston_type()
@@ -1973,6 +1985,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: b = B([1, 2, -1])
             sage: b.is_reducible()
@@ -1989,6 +2002,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: a = B([2, 2, -1, -1, 2, 2])
             sage: b = B([2, 1, 2, 1])
@@ -2005,6 +2019,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: a = B([2, 2, -1, -1, 2, 2])
             sage: b = B([2, 1, 2, 1])
@@ -2021,6 +2036,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: b = B([2, 1, 2, 1])
             sage: a = B([2, 2, -1, -1, 2, 2])
@@ -2040,6 +2056,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(3)
             sage: a = B([2, 2, -1, -1, 2, 2])
             sage: a.sliding_circuits()
@@ -2076,6 +2093,8 @@ class Braid(FiniteTypeArtinGroupElement):
             sage: b  = B5((-1, 2, -3, -1, -3, 4, 2, -3, 2, 4, 2, -3)) # closure K12a_427
             sage: bm = b.mirror_image(); bm
             s0*s1^-1*s2*s0*s2*s3^-1*s1^-1*s2*s1^-1*s3^-1*s1^-1*s2
+
+            sage: # needs libbraiding
             sage: bm.is_conjugated(b)
             True
             sage: bm.is_conjugated(~b)
@@ -2092,6 +2111,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: b  = BraidGroup(3)((1, 1, -2, 1, -2, 1, -2, -2))  # closure K8_17
             sage: br = b.reverse(); br
             s1^-1*(s1^-1*s0)^3*s0
@@ -2302,6 +2322,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(4)
             sage: b = B([1, 2, 1, 2, 3, -1, 2, 1, 3])
             sage: b.super_summit_set_element()
@@ -2318,6 +2339,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(4)
             sage: b = B([1, 2, 1, 2, 3, -1, 2, -1, 3])
             sage: b.ultra_summit_set_element()
@@ -2334,6 +2356,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(4)
             sage: b = B([1, 2, 1, 2, 3, -1, 2, -1, 3])
             sage: b.sliding_circuits_element()
@@ -2349,6 +2372,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(4)
             sage: b = B([1, 2, 1, 2, 3, -1, 2, -1, 3])
             sage: b.trajectory()
@@ -2369,6 +2393,7 @@ class Braid(FiniteTypeArtinGroupElement):
 
         EXAMPLES::
 
+            sage: # needs libbraiding
             sage: B = BraidGroup(4)
             sage: b = B([1, 2, 1, 2, 3, -1, 2, 1])
             sage: b.cyclic_slidings()
@@ -3488,6 +3513,8 @@ class BraidGroup_class(FiniteTypeArtinGroup):
             sage: b = B((1,-2,-1,3,2,1))
             sage: bm = mirr(b); bm
             s0^-1*s1*s0*s2^-1*s1^-1*s0^-1
+
+            sage: # needs libbraiding
             sage: bm == ~b
             False
             sage: bm.is_conjugated(b)
