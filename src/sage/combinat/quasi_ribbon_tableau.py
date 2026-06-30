@@ -892,6 +892,8 @@ class QuasiRibbonTableaux(SkewTableaux):
             +Infinity
             sage: QuasiRibbonTableaux(shape=[2, 1], max_entry=2).cardinality()
             1
+            sage: QuasiRibbonTableaux(1, max_entry=2).cardinality()
+            2
         """
         if self._max_entry is None or (self._shape is None and self._size is None):
             return infinity
