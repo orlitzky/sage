@@ -1530,9 +1530,14 @@ class Braid(FiniteTypeArtinGroupElement):
             sage: B.one().left_normal_form()
             (1,)
             sage: b = B([-2, 2, -4, -4, 4, -5, -1, 4, -1, 1])
-            sage: L1 = b.left_normal_form(); L1
+            sage: L1 = b.left_normal_form()
+            sage: L1  # needs libbraiding
             (s0^-1*s1^-1*s0^-1*s2^-1*s1^-1*s0^-1*s3^-1*s2^-1*s1^-1*s0^-1*s4^-1*s3^-1*s2^-1*s1^-1*s0^-1,
              s0*s2*s1*s0*s3*s2*s1*s0*s4*s3*s2*s1,
+             s3)
+            sage: L1  # needs !libbraiding (artin fallback)
+            (s0^-1*s1^-1*s0^-1*s2^-1*s1^-1*s0^-1*s3^-1*s2^-1*s1^-1*s0^-1*s4^-1*s3^-1*s2^-1*s1^-1*s0^-1,
+             s2*s3*s4*s0*s1*s2*s3*s0*s1*s2*s0*s1,
              s3)
             sage: L1 == b.left_normal_form()
             True
