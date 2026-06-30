@@ -44,6 +44,7 @@ REFERENCES:
 # ****************************************************************************
 
 from sage.categories.sets_cat import Sets
+from sage.categories.finite_enumerated_sets import FiniteEnumeratedSets
 from sage.combinat.skew_tableau import SkewTableau, SkewTableaux
 from sage.combinat.composition import Composition, Compositions
 from sage.rings.integer import Integer
@@ -688,7 +689,10 @@ class QuasiRibbonTableaux(SkewTableaux):
         """
         # If no category is specified, use the category of sets.
         if category is None:
-            category = Sets()
+            if max_entry is not None and (shape is not None or size is not None):
+                category = FiniteEnumeratedSets()
+            else:
+                category = Sets()
 
         # Initialize the inherited SkewTableaux parent class.
         SkewTableaux.__init__(self, category=category)
