@@ -3108,26 +3108,18 @@ class EllipticCurveIsogeny(EllipticCurveHom):
             sage: E1 = EllipticCurve(k, [1,4])
             sage: E2 = EllipticCurve(k, [12,7])
             sage: R.<x> = k[]
-            sage: f1 = x^2 + (w^7 + 5*w^6 + 9*w^5 + 3*w^4 + 9*w^3 + 3*w^2 + 10*
-            ....: w + 2)*x + 5*w^7 + 12*w^6 + 6*w^5 + 2*w^4 + 6*w^3 + 2*w^2 +
-            ....:  11*w + 12
-            sage: f1 = R(f1)
-            sage: f2 = x^2 + (12*w^7 + 8*w^6 + 4*w^5 + 10*w^4 + 4*w^3 + 10*w^2
-            ....: + 3*w + 8)*x + 8*w^7 + w^6 + 7*w^5 + 11*w^4 + 7*w^3 + 11*w^
-            ....: 2 + 2*w + 3
-            sage: f2 = R(f2)
+            sage: f1 = x^2 + (w^7 + 5*w^6 + 9*w^5 + 3*w^4 + 9*w^3 + 3*w^2 + 10*w + 2)*x + 5*w^7 + 12*w^6 + 6*w^5 + 2*w^4 + 6*w^3 + 2*w^2 + 11*w + 12
+            sage: f2 = x^2 + (12*w^7 + 8*w^6 + 4*w^5 + 10*w^4 + 4*w^3 + 10*w^2 + 3*w + 8)*x + 8*w^7 + w^6 + 7*w^5 + 11*w^4 + 7*w^3 + 11*w^2 + 2*w + 3
             sage: phi1 = E1.isogeny(f1)
             sage: phi2 = E1.isogeny(f2)
             sage: phi1_hat = phi1.dual()
             sage: phi2_hat = phi2.dual()
-            sage: print("phi_1: ", phi1, "\n")
-            sage: print("phi_2: ", phi2, "\n")
             sage: assert phi1 != phi2
-            sage: assert phi1.dual() == phi2.dual(); #same dual, but this curve has trivial reduced automorphism group
+            sage: assert phi1_hat == phi2_hat; #same dual, but this curve has trivial reduced automorphism group
             sage: #show the method fixes the issue
             sage: phi1_dual = phi1.dual(algorithm='pushforward')
             sage: phi2_dual = phi2.dual(algorithm='pushforward')
-            sage: assert phi1_dual == phi2_dual
+            sage: assert phi1_dual != phi2_dual
         """
         if self.__base_field.characteristic() in (2, 3):
             raise NotImplementedError("computation of dual isogenies not yet implemented in characteristics 2 and 3")
@@ -3167,7 +3159,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
             R = kernel_poly.parent()
             x = R.gens()[0]
             from sage.schemes.elliptic_curves.ell_field import EllipticCurve_field
-            pushforward_kernel_poly =   EllipticCurve_field.kernel_polynomial_from_divisor(E_prime, x-Qx0, d)
+            pushforward_kernel_poly = EllipticCurve_field.kernel_polynomial_from_divisor(E_prime, x-Qx0, d)
 
             return E_prime.isogeny(pushforward_kernel_poly)
 
