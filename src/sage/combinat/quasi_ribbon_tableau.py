@@ -149,7 +149,7 @@ class QuasiRibbonTableau(SkewTableau):
             TypeError: a skew tableau cannot have an empty list for a row
         """
         try:
-            r = [tuple(row) for row in rows]
+            rows = [tuple(row) for row in rows]
         except TypeError:
             raise TypeError("rows must be lists of positive integers")
 
