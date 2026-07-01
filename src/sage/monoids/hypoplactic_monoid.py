@@ -213,7 +213,7 @@ class HypoplacticMonoid(WordMonoid):
             sage: H.subset(2)
             Lazy family (to_word(i))_{i in Quasi-ribbon tableaux of size 2 with entries at most 2}
             sage: list(H.subset(2))
-            [21, 11, 12, 22]
+            [11, 12, 22, 21]
         """
         if not isinstance(k, (int, Integer)) or k < 0:
             raise ValueError("the size must be a nonnegative integer")
@@ -240,6 +240,7 @@ class HypoplacticMonoid(WordMonoid):
             sage: parent(x)
             Hypoplactic monoid of rank 4
         """
+        @cached_method
         def to_tableau(self):
             """
             Return the quasi-ribbon insertion tableau corresponding to ``self``.
