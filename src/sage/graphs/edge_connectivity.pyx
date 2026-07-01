@@ -2301,6 +2301,30 @@ cdef class GabowEdgeConnectivity:
             sage: all(T.num_edges() == 4 for T in trees)
             True
 
+        By default (``k=None``) the method returns ``ec`` arborescences,
+        where ``ec`` is the edge connectivity::
+
+            sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
+            sage: D = digraphs.Complete(5)
+            sage: G = GabowEdgeConnectivity(D)
+            sage: G.edge_connectivity()
+            4
+            sage: len(G.edge_disjoint_spanning_trees())
+            4
+
+        The arborescences can be rooted at any vertex; the root then has
+        indegree 0, every other vertex has indegree 1, and every vertex is
+        reachable from the root::
+
+            sage: D = digraphs.Complete(5)
+            sage: trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4, root=2)
+            sage: all(T.in_degree(2) == 0 for T in trees)
+            True
+            sage: all(T.in_degree(v) == 1 for T in trees for v in D if v != 2)
+            True
+            sage: all(set(T.depth_first_search(2)) == set(D) for T in trees)
+            True
+
         The returned arborescences are pairwise edge-disjoint::
 
             sage: D = digraphs.Complete(5)
@@ -2308,6 +2332,17 @@ cdef class GabowEdgeConnectivity:
             sage: all_edges = sum((T.edges(labels=False, sort=False) for T in trees), [])
             sage: len(all_edges) == len(set(all_edges))
             True
+
+        On a directed cycle the edge connectivity is 1, so the packing has a
+        single arborescence: the directed path from the root::
+
+            sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
+            sage: D = digraphs.Circuit(4)
+            sage: trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(root=0)
+            sage: len(trees)
+            1
+            sage: sorted(trees[0].edges(labels=False, sort=False))
+            [(0, 1), (1, 2), (2, 3)]
 
         Trivial case::
 
@@ -2327,6 +2362,15 @@ cdef class GabowEdgeConnectivity:
             ....: except EmptySetError:
             ....:     print("EmptySetError")
             EmptySetError
+
+        An unknown ``root`` raises a :class:`ValueError`::
+
+            sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
+            sage: D = digraphs.Complete(5)
+            sage: GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=2, root=99)
+            Traceback (most recent call last):
+            ...
+            ValueError: vertex 99 is not a vertex of the graph
         """
         from sage.graphs.digraph import DiGraph
         from sage.categories.sets_cat import EmptySetError
