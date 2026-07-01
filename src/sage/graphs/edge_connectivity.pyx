@@ -1258,7 +1258,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int e
         self.g_in = vector[vector[int]](self.n)
@@ -1435,7 +1436,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=1)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=1))
+            1
         """
         cdef int i, e_id
         self.arborescence_F.resize(k)
@@ -1462,7 +1464,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int i, j
 
@@ -1492,7 +1495,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int i
         self.sets = 0
@@ -1514,7 +1518,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int i, s
         if self.sets != 0:
@@ -1547,7 +1552,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int z1 = self.root[self.head[j]]
         cdef int z2 = self.root[self.tail[j]]
@@ -1566,7 +1572,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int z1 = self.root[self.head[j]]
         cdef int z2 = self.root[self.tail[j]]
@@ -1588,7 +1595,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int e
         for e in self.g_in[x]:
@@ -1610,7 +1618,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int i = 0, g, x, edge
 
@@ -1651,7 +1660,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int x = self.head[e]
         cdef int y = self.tail[e]
@@ -1770,7 +1780,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int myedge, found_joining
         cdef int i = 0
@@ -1798,7 +1809,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int r1 = self.root[self.tail[j]]
         cdef int r2 = self.root[self.head[j]]
@@ -1817,7 +1829,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int i
         for i in range(self.current_tree + 1):
@@ -1833,7 +1846,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int f
         while not self.my_Q.empty():
@@ -1855,7 +1869,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int y, joining_edge, e
 
@@ -1898,7 +1913,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int i, e_id
 
@@ -1945,7 +1961,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int x = self.tail[e]
         cdef int y = self.head[e]
@@ -1995,7 +2012,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int t
         for t in range(self.packing_ntrees):
@@ -2039,7 +2057,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int t = self.edge_state_1[e]
         cdef int y = self.head[e]
@@ -2112,7 +2131,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int j, e, x
 
@@ -2156,7 +2176,8 @@ cdef class GabowEdgeConnectivity:
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4))
+            4
         """
         cdef int i, v
 
@@ -2189,21 +2210,27 @@ cdef class GabowEdgeConnectivity:
         outgoing edge, it is marked exhausted and the next vertex from
         ``A`` is processed.
 
-        Without :meth:`search_step` (still a stub), this method only
-        succeeds when every needed edge happens to be "free" -- not the
-        case after the connectivity computation. The method becomes
-        effective once the swap is implemented.
+        An edge already used by a tree of the intersection is not simply
+        skipped: :meth:`search_step` performs a swap (an augmenting-path
+        search) that frees a usable edge while preserving the validity of the
+        other trees. This is what makes the greedy growth of ``A`` always
+        succeed on a genuine ``k``-intersection.
 
         OUTPUT:
 
         ``True`` if a spanning out-arborescence was successfully
         extracted (every vertex reached); ``False`` otherwise.
 
-        EXAMPLES::
+        EXAMPLES:
+
+        This method drives the Phase 2 extraction and is exercised through
+        the public :meth:`edge_disjoint_spanning_trees`::
 
             sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
             sage: D = digraphs.Complete(5)
-            sage: _ = GabowEdgeConnectivity(D)
+            sage: trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=4)
+            sage: len(trees)
+            4
         """
         cdef int j, v, found, e, x
 
@@ -2288,6 +2315,18 @@ cdef class GabowEdgeConnectivity:
         ``root``: the root has indegree 0, every other vertex has
         indegree 1, and every vertex is reachable from ``root``. The
         returned arborescences are pairwise edge-disjoint.
+
+        ALGORITHM:
+
+        This uses the matroid-intersection approach of [Gabow1995]_, in two
+        phases. Phase 1 builds a ``k``-intersection whose union is a
+        ``k``-in-regular subgraph rooted at ``root`` (every non-root vertex
+        has in-degree ``k``). Phase 2 decomposes that union into ``k``
+        spanning out-arborescences one at a time (:meth:`find_tree`): it grows
+        the set of vertices reachable from ``root``, and whenever the next edge
+        it needs is already used by another tree, an augmenting-path *swap*
+        (:meth:`search_step`) frees a usable edge while keeping the other trees
+        valid.
 
         EXAMPLES:
 
