@@ -2410,6 +2410,39 @@ cdef class GabowEdgeConnectivity:
             Traceback (most recent call last):
             ...
             ValueError: vertex 99 is not a vertex of the graph
+
+        TESTS:
+
+        Randomized validation: on random strongly connected digraphs, every
+        packing has the expected size and each returned graph is a valid
+        out-arborescence (root in-degree 0, every other vertex in-degree 1,
+        all reachable from the root), the arborescences being pairwise
+        edge-disjoint::
+
+            sage: from sage.graphs.edge_connectivity import GabowEdgeConnectivity
+            sage: def is_valid_packing(D, root, trees):
+            ....:     V = set(D)
+            ....:     if any(T.in_degree(root) != 0 for T in trees):
+            ....:         return False
+            ....:     if any(T.in_degree(v) != 1 for T in trees for v in V if v != root):
+            ....:         return False
+            ....:     if any(set(T.depth_first_search(root)) != V for T in trees):
+            ....:         return False
+            ....:     edges = [e for T in trees for e in T.edge_iterator(labels=False)]
+            ....:     return len(edges) == len(set(edges))
+            sage: set_random_seed(0)
+            sage: for _ in range(20):
+            ....:     n = randint(3, 7)
+            ....:     D = digraphs.RandomDirectedGNP(n, 0.5)
+            ....:     if not D.is_strongly_connected():
+            ....:         continue
+            ....:     ec = GabowEdgeConnectivity(D).edge_connectivity()
+            ....:     if ec == 0:
+            ....:         continue
+            ....:     for r in D:
+            ....:         trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=ec, root=r)
+            ....:         assert len(trees) == ec
+            ....:         assert is_valid_packing(D, r, trees)
         """
         from sage.graphs.digraph import DiGraph
         from sage.categories.sets_cat import EmptySetError
