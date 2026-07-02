@@ -906,7 +906,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
         from sage.rings.function_field.drinfeld_modules.action import DrinfeldModuleAction
         return DrinfeldModuleAction(self)
 
-    def automorphism_group_order(self, level=False, absolute=False, extension = 1):
+    def automorphism_group_order(self, level=False, absolute=False, extension=None):
         r"""
         Return the order of the automorphism group of the Drinfeld module.
 
@@ -926,7 +926,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
 
         - ``level`` (default: ``False``) -- boolean
         - ``absolute`` (default: ``False``) -- boolean
-        - ``extension`` (default: ``1``) -- an extension of the base field `K`; 
+        - ``extension`` (default: ``None``) -- an extension of the base field `K`; 
             when `K` is a finite field, an integer (interpreted as the degree 
             of the extension) is also allowed.
 
@@ -1003,7 +1003,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             sage: phi.automorphism_group_order(level=True, extension = L2)
             Traceback (most recent call last):
             ...
-            ValueError: extension must be a field extension of the base field K
+            ValueError: extension must be a field extension of the base field
         
         ::
 
@@ -1042,10 +1042,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             if not self.is_finite():
                 raise NotImplementedError('Drinfeld module must be over a finite field for non absolute automorphism group computations')
         if absolute:
-            if isinstance(extension,(int,Integer)):
-                if extension!=1:
-                    raise ValueError('when absolute=True, the argument extension must not be set, since extensions do nothing on absolute automorphism groups')
-            else:
+            if extension != None:
                 raise ValueError('when absolute=True, the argument extension must not be set, since extensions do nothing on absolute automorphism groups')
         r = self.rank()
         level_ = gcd([r] + [i for i in range(1, r) if self._gen[i] != 0])
@@ -1054,12 +1051,14 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             K = self.base()
             if isinstance(extension,(int,Integer)):
                 extension_degree = extension
+            elif extension == None:
+                extension_degree = 1
             else:
                 size = extension.order()
                 if size.is_power_of(K.order()):
                     extension_degree = log(size,K.order())
                 else:
-                    raise ValueError('extension must be a field extension of the base field K')
+                    raise ValueError('extension must be a field extension of the base field')
             n = log(K.order(), q)*extension_degree
             level_ = gcd(level_, n)
         if level:
