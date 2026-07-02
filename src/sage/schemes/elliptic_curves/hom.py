@@ -734,10 +734,12 @@ class EllipticCurveHom(Morphism):
 
     def kernel_gens(self, **kwds):
         r"""
-        Return a list of points which generate the kernel
-        subgroup of this isogeny.
+        Return a list of points which generate the kernel subgroup
+        of this isogeny.
 
-        ALGORITHM: Thin convenience wrapper around :meth:`kernel_subgroup`.
+        ALGORITHM: Returns the kernel generators given at construction
+        time if available; otherwise a thin convenience wrapper around
+        :meth:`kernel_subgroup`.
 
         EXAMPLES::
 
@@ -803,7 +805,9 @@ class EllipticCurveHom(Morphism):
             sage: h == phi.kernel_polynomial()
             True
         """
-        return [g.element() for g in self.kernel_subgroup(**kwds).gens()]
+        if not hasattr(self, '_kernel_gens'):
+            self._kernel_gens = tuple(g.element() for g in self.kernel_subgroup(**kwds).gens())
+        return list(self._kernel_gens)
 
     def dual(self):
         r"""
