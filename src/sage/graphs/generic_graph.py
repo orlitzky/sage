@@ -3333,7 +3333,7 @@ class GenericGraph(GenericGraph_pyx):
         EXAMPLES::
 
             sage: G = graphs.PetersenGraph()
-            sage: G.genus()
+            sage: G.genus(algorithm='simple')
             1
             sage: G.get_embedding()
             {0: [1, 4, 5], 1: [0, 2, 6], 2: [1, 3, 7], 3: [2, 4, 8],
@@ -6544,7 +6544,7 @@ class GenericGraph(GenericGraph_pyx):
                         return False
         return True
 
-    def genus(self, set_embedding=True, on_embedding=None, minimal=True, maximal=False, circular=None, ordered=True):
+    def genus(self, set_embedding=True, on_embedding=None, minimal=True, maximal=False, circular=None, ordered=True, algorithm='page'):
         r"""
         Return the minimal genus of the graph.
 
@@ -6602,6 +6602,16 @@ class GenericGraph(GenericGraph_pyx):
           ``True``, then whether or not the boundary order may be permuted
           (default: ``True``, which means the boundary order is preserved)
 
+        - ``algorithm`` -- string (default: ``'page'``); the algorithm to use
+          when computing minimum genus.  It must be one of ``'page'``,
+          ``'multi_genus'``, or ``'simple'``.  The ``'page'`` algorithm is the
+          default and is usually the fastest algorithm. It is particularly 
+          advantageous on sparse low-degree graphs and graphs with high girth.
+          The ``'multi_genus'`` algorithm is often very fast on small dense graphs
+          and uses less CPU cores, but has fixed C integer-size limits. The ``'simple'``
+          algorithm is a simple backtracking algorithm that enumerates rotation
+          systems and is useful for computing maximum genus.
+
         EXAMPLES::
 
             sage: g = graphs.PetersenGraph()
@@ -6620,6 +6630,10 @@ class GenericGraph(GenericGraph_pyx):
             0
             sage: K33 = graphs.CompleteBipartiteGraph(3,3)
             sage: K33.genus()
+            1
+            sage: K33.genus(algorithm='simple')
+            1
+            sage: K33.genus(algorithm='multi_genus')
             1
 
         Using the circular argument, we can compute the minimal genus preserving
@@ -6679,6 +6693,8 @@ class GenericGraph(GenericGraph_pyx):
 
         if maximal:
             minimal = False
+            if algorithm == "page":
+                algorithm = "simple"
 
         if circular is not None:
             if not isinstance(circular, list):
@@ -6733,7 +6749,7 @@ class GenericGraph(GenericGraph_pyx):
                     g = 0
                     for block in B:
                         H = G.subgraph(block)
-                        g += genus.simple_connected_graph_genus(H, set_embedding=True, check=False, minimal=True)
+                        g += genus.simple_connected_graph_genus(H, set_embedding=True, check=False, minimal=True, algorithm=algorithm)
                         emb = H.get_embedding()
                         for v in emb:
                             if v in embedding:
@@ -6742,7 +6758,7 @@ class GenericGraph(GenericGraph_pyx):
                                 embedding[v] = emb[v]
                     self._embedding = embedding
                 else:
-                    g = genus.simple_connected_graph_genus(G, set_embedding=True, check=False, minimal=minimal)
+                    g = genus.simple_connected_graph_genus(G, set_embedding=True, check=False, minimal=minimal, algorithm=algorithm)
                     self._embedding = G._embedding
                 return g
             if maximal and (self.has_multiple_edges() or self.has_loops()):
@@ -6752,9 +6768,9 @@ class GenericGraph(GenericGraph_pyx):
                 g = 0
                 for block in B:
                     H = G.subgraph(block)
-                    g += genus.simple_connected_graph_genus(H, set_embedding=False, check=False, minimal=True)
+                    g += genus.simple_connected_graph_genus(H, set_embedding=False, check=False, minimal=True, algorithm=algorithm)
                 return g
-            return genus.simple_connected_graph_genus(G, set_embedding=False, check=False, minimal=minimal)
+            return genus.simple_connected_graph_genus(G, set_embedding=False, check=False, minimal=minimal, algorithm=algorithm)
 
     def crossing_number(self):
         r"""
