@@ -31,13 +31,11 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.arith.functions import lcm
-from sage.arith.misc import GCD as gcd
-from sage.arith.misc import binomial
 from sage.groups import generic
-from sage.groups.additive_abelian.additive_abelian_wrapper import (
-    AdditiveAbelianGroupWrapper,
-)
+
+from sage.arith.functions import lcm
+from sage.arith.misc import binomial, GCD as gcd
+from sage.groups.additive_abelian.additive_abelian_wrapper import AdditiveAbelianGroupWrapper
 from sage.misc.cachefunc import cached_method
 from sage.rings.finite_rings.finite_field_base import FiniteField
 from sage.rings.finite_rings.finite_field_constructor import FiniteField as GF
@@ -45,10 +43,7 @@ from sage.rings.integer import Integer
 from sage.rings.integer_ring import ZZ
 from sage.rings.polynomial.polynomial_ring import polygen
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
-from sage.schemes.curves.projective_curve import (
-    Hasse_bounds,
-    ProjectivePlaneCurve_finite_field,
-)
+from sage.schemes.curves.projective_curve import Hasse_bounds, ProjectivePlaneCurve_finite_field
 from sage.structure.element import Element
 
 from . import ell_point
@@ -513,11 +508,8 @@ class EllipticCurve_finite_field(EllipticCurve_field, ProjectivePlaneCurve_finit
         self._order = N
         return N
 
-    from .cardinality import (
-        _cardinality_subfield,
-        cardinality_bsgs,
-        cardinality_exhaustive,
-    )
+    from .cardinality import (cardinality_bsgs,
+                              cardinality_exhaustive, _cardinality_subfield)
 
     order = cardinality  # alias
 
@@ -3325,13 +3317,9 @@ def special_supersingular_curve(F, q=None, *, endomorphism=False, maximal_order=
         O = Quat.quaternion_order([1, (1+i)/2, (j+k)/2, (i+k)/3])
 
     else:
-        from sage.algebras.quatalg.quaternion_algebra import (
-            basis_for_quaternion_lattice as bfql,
-        )
         from sage.matrix.constructor import matrix
-        from sage.schemes.elliptic_curves.hom_fractional import (
-            EllipticCurveHom_fractional,
-        )
+        from sage.algebras.quatalg.quaternion_algebra import basis_for_quaternion_lattice as bfql
+        from sage.schemes.elliptic_curves.hom_fractional import EllipticCurveHom_fractional
 
         maps = [E.identity_morphism(), endo, E.frobenius_isogeny(), endo * E.frobenius_isogeny()]
         def matrix_of_quat(quat, PQ):
@@ -3441,9 +3429,8 @@ def EllipticCurve_with_order(m, *, D=None):
 
      - Gareth Ma and Giacomo Pope (Sage Days 123): initial version
     """
-    from sage.arith.misc import factor, is_prime_power
+    from sage.arith.misc import is_prime_power, factor
     from sage.quadratic_forms.binary_qf import BinaryQF
-    from sage.schemes.elliptic_curves.cm import hilbert_class_polynomial
     from sage.structure.factorization import Factorization
 
     def find_q(m, m4_fac, D):
@@ -3707,7 +3694,6 @@ def EllipticCurve_with_prime_order(N):
     - Martin Grenouilloux, Gareth Ma (2024-09): initial implementation
     """
     import itertools
-
     from sage.arith.misc import is_prime, legendre_symbol
     from sage.misc.verbose import verbose
     from sage.quadratic_forms.binary_qf import BinaryQF
