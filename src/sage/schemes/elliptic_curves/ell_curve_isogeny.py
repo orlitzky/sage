@@ -3115,7 +3115,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
             sage: phi1_hat = phi1.dual()
             sage: phi2_hat = phi2.dual()
             sage: assert phi1 != phi2
-            sage: assert phi1_hat == phi2_hat; #same dual, but this curve has trivial reduced automorphism group
+            sage: assert phi1_hat != phi2_hat  # known bug -- see #42335
             sage: #show the method fixes the issue
             sage: phi1_dual = phi1.dual(algorithm='pushforward')
             sage: phi2_dual = phi2.dual(algorithm='pushforward')
