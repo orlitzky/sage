@@ -3429,8 +3429,9 @@ def EllipticCurve_with_order(m, *, D=None):
 
      - Gareth Ma and Giacomo Pope (Sage Days 123): initial version
     """
-    from sage.arith.misc import is_prime_power, factor
+    from sage.arith.misc import factor, is_prime_power
     from sage.quadratic_forms.binary_qf import BinaryQF
+    from sage.schemes.elliptic_curves.cm import hilbert_class_polynomial
     from sage.structure.factorization import Factorization
 
     def find_q(m, m4_fac, D):
