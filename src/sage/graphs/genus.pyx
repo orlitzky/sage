@@ -1,21 +1,17 @@
-"""
-Graph genus algorithms.
+r"""
+Graph genus algorithms
 
-This module integrates three algorithms for the orientable genus of a graph:
+This module integrates three algorithms for the orientable genus of a
+simple connected graph: PAGE, MultiGenus, and a simple backtracking
+algorithm.  The public API lives here; implementation details are in the
+corresponding helper modules and C wrappers.
 
-- ``'page'`` -- the default.  This is the PAGE cycle-fitting algorithm
-  [MetUlr2026]_.  It is often orders of magnitude faster than direct 
-  rotation-system enumeration especially on low-degree, high girth, 
-  and sparse graphs.
+AUTHORS:
 
-- ``'multi_genus'`` -- Brinkmann's edge-insertion implementation [Bri2022]_.
-  It is very fast on many dense, complete, complete multipartite, and small
-  miscellaneous graphs.
-
-- ``'simple'`` -- a simple backtracking algorithm.  It enumerates local
-  rotation systems directly.  It supports maximum genus, but generally scales as
-  a product of local rotation permutations and is the slowest option on larger
-  nonplanar graphs.
+- Tom Boothby (2010): original simple backtracking algorithm
+- Alexander Metzger and Austin Ulrigg (2026): PAGE algorithm
+- Gunnar Brinkmann (2022): MultiGenus algorithm
+- Alexander Metzger (2026): Sage integration of PAGE and MultiGenus
 """
 
 # ****************************************************************************
@@ -32,17 +28,18 @@ from sage.graphs.genus_simple import simple_connected_genus_backtracker
 from sage.graphs.genus_simple import simple_connected_graph_genus as simple_graph_genus
 
 cdef extern from "genus_page.h":
-    int sage_page_genus(int n, int m, int degree, const int *degrees,
-                        const int *neighbors, int stride, int *rotation,
-                        int rotation_stride, int *genus_out)
+    int sage_page_genus(int n, int m, int degree, const int * degrees,
+                        const int * neighbors, int stride, int * rotation,
+                        int rotation_stride, int * genus_out)
 
 cdef extern from "genus_multigenus.h":
-    int sage_multigenus_genus(int n, int m, const int *degrees,
-                              const int *neighbors, int stride, int *rotation,
-                              int rotation_stride, int *genus_out)
+    int sage_multigenus_genus(int n, int m, const int * degrees,
+                              const int * neighbors, int stride, int * rotation,
+                              int rotation_stride, int * genus_out)
 
 
-def simple_connected_graph_genus(G, set_embedding=False, check=True, minimal=True, algorithm="page"):
+def simple_connected_graph_genus(G, set_embedding=False, check=True,
+                                 minimal=True, algorithm="page"):
     r"""
     Compute the genus of a simple connected graph.
 
@@ -83,21 +80,41 @@ def simple_connected_graph_genus(G, set_embedding=False, check=True, minimal=Tru
     ALGORITHM:
 
     The ``'page'`` algorithm is based on the cycle-fitting method of
-    [MetUlr2026]_.  It is usually the best default especially for low-degree sparse
-    graphs. For example, PAGE solves 3-cages through many girth-9 examples in seconds 
-    where the simple enumerator takes days or does not finish.
-    The ``'multi_genus'`` algorithm wraps Brinkmann's implementation [Bri2022]_, 
-    which is often extremely fast on complete, complete multipartite, and many 
-    dense/small examples, but has fixed C integer-size limits.  
-    The ``'simple'`` algorithm is a direct rotation-system enumeration; 
-    it is useful for maximum genus and as a compact reference implementation, 
-    but has much worse scaling.
+    [MetUlr2026]_.  It is usually the best default especially for low-degree
+    sparse graphs. For example, PAGE solves 3-cages through many girth-9
+    examples in seconds where the simple enumerator takes days or does not
+    finish.  The ``'multi_genus'`` algorithm wraps Brinkmann's implementation
+    [Bri2022]_, which is often extremely fast on complete, complete
+    multipartite, and many dense/small examples, but has fixed C integer-size
+    limits.  The ``'simple'`` algorithm is a direct rotation-system
+    enumeration; it is useful for maximum genus and as a compact reference
+    implementation, but has much worse scaling.
+
+    TESTS::
+
+        sage: for alg in ('page', 'multi_genus', 'simple'):
+        ....:     G = graphs.CompleteGraph(5)
+        ....:     assert genus(G, set_embedding=True, algorithm=alg) == 1
+        ....:     assert len(G.faces(G.get_embedding())) == 5
+        sage: genus(graphs.CompleteGraph(5), set_embedding=False,
+        ....:       algorithm='multi_genus')
+        1
+        sage: genus(graphs.CompleteGraph(5), algorithm='unknown')
+        Traceback (most recent call last):
+        ...
+        ValueError: unknown algorithm 'unknown'
+        sage: genus(graphs.CompleteGraph(5), minimal=False,
+        ....:       algorithm='page')
+        Traceback (most recent call last):
+        ...
+        NotImplementedError: algorithm 'page' only computes minimum genus
     """
     if algorithm not in ('page', 'multi_genus', 'simple'):
         raise ValueError("unknown algorithm {!r}".format(algorithm))
 
     if algorithm != 'simple' and not minimal:
-        raise NotImplementedError("algorithm {!r} only computes minimum genus".format(algorithm))
+        raise NotImplementedError(
+            "algorithm {!r} only computes minimum genus".format(algorithm))
 
     if minimal and G.is_planar(set_embedding=set_embedding):
         return 0
@@ -121,9 +138,9 @@ cdef int _c_algorithm_graph_genus(G, bint set_embedding, bint use_page) except -
     cdef int m = G.size()
     cdef int stride = 0
     cdef int i, j, result, genus
-    cdef int *degrees = NULL
-    cdef int *neighbors = NULL
-    cdef int *rotation = NULL
+    cdef int * degrees = NULL
+    cdef int * neighbors = NULL
+    cdef int * rotation = NULL
     vertices = list(G)
     index = {v: i for i, v in enumerate(vertices)}
 
@@ -139,10 +156,10 @@ cdef int _c_algorithm_graph_genus(G, bint set_embedding, bint use_page) except -
             G.set_embedding({v: [] for v in vertices})
         return 0
 
-    degrees = <int *>malloc(n * sizeof(int))
-    neighbors = <int *>malloc(n * stride * sizeof(int))
+    degrees = <int*> malloc(n * sizeof(int))
+    neighbors = <int*> malloc(n * stride * sizeof(int))
     if set_embedding:
-        rotation = <int *>malloc(n * stride * sizeof(int))
+        rotation = <int*> malloc(n * stride * sizeof(int))
     if degrees == NULL or neighbors == NULL or (set_embedding and rotation == NULL):
         free(degrees)
         free(neighbors)
@@ -163,10 +180,10 @@ cdef int _c_algorithm_graph_genus(G, bint set_embedding, bint use_page) except -
 
         if use_page:
             result = sage_page_genus(n, m, stride, degrees, neighbors, stride,
-                                     rotation, stride, &genus)
+                                     rotation, stride, & genus)
         else:
             result = sage_multigenus_genus(n, m, degrees, neighbors, stride,
-                                           rotation, stride, &genus)
+                                           rotation, stride, & genus)
         if result < 0:
             if use_page:
                 raise RuntimeError("PAGE failed with status {}".format(result))

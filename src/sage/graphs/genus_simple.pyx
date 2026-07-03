@@ -1,5 +1,13 @@
-"""
-Simple graph genus backtracking algorithm that enumerates rotation systems.
+r"""
+Simple graph genus backtracking algorithm
+
+This module contains Sage's direct rotation-system enumeration algorithm
+for minimum and maximum genus computations.
+
+AUTHORS:
+
+- Tom Boothby (2010): initial version
+- Alexander Metzger (2026): moved the simple algorithm into a separate module
 """
 
 # ****************************************************************************
@@ -23,7 +31,6 @@ from sage.combinat.permutation_cython cimport next_swap, reset_swap
 
 from sage.graphs.base.dense_graph cimport DenseGraph
 from sage.graphs.graph import Graph
-
 
 
 cdef inline int edge_map(int i) noexcept:
@@ -81,12 +88,12 @@ cdef class simple_connected_genus_backtracker:
         2
     """
     cdef MemoryAllocator mem
-    cdef int **vertex_darts
-    cdef int *face_map
-    cdef int *degree
-    cdef int *visited
-    cdef int *face_freeze
-    cdef int **swappers
+    cdef int ** vertex_darts
+    cdef int * face_map
+    cdef int * degree
+    cdef int * visited
+    cdef int * face_freeze
+    cdef int ** swappers
     cdef int num_darts, num_verts, num_cycles, record_genus
 
     def __init__(self, DenseGraph G):
@@ -111,14 +118,14 @@ cdef class simple_connected_genus_backtracker:
 
         # Allocate arrays
         self.mem = MemoryAllocator()
-        self.degree = <int *> self.mem.malloc(self.num_verts * sizeof(int))
-        self.face_map = <int *> self.mem.malloc(self.num_darts * sizeof(int))
-        self.visited = <int *> self.mem.malloc(self.num_darts * sizeof(int))
-        self.face_freeze = <int *> self.mem.malloc(self.num_darts * sizeof(int))
-        self.vertex_darts = <int **>self.mem.malloc(self.num_verts * sizeof(int *))
-        self.swappers = <int **>self.mem.malloc(self.num_verts * sizeof(int *))
-        cdef int *w = <int *> self.mem.malloc((self.num_verts + self.num_darts) * sizeof(int))
-        cdef int *s = <int *> self.mem.malloc(2 * (self.num_darts - self.num_verts) * sizeof(int))
+        self.degree = <int*> self.mem.malloc(self.num_verts * sizeof(int))
+        self.face_map = <int*> self.mem.malloc(self.num_darts * sizeof(int))
+        self.visited = <int*> self.mem.malloc(self.num_darts * sizeof(int))
+        self.face_freeze = <int*> self.mem.malloc(self.num_darts * sizeof(int))
+        self.vertex_darts = <int**> self.mem.malloc(self.num_verts * sizeof(int*))
+        self.swappers = <int**> self.mem.malloc(self.num_verts * sizeof(int*))
+        cdef int * w = <int*> self.mem.malloc((self.num_verts + self.num_darts) * sizeof(int))
+        cdef int * s = <int*> self.mem.malloc(2 * (self.num_darts - self.num_verts) * sizeof(int))
 
         cdef int i, j, dv, u, v
 
@@ -219,8 +226,8 @@ cdef class simple_connected_genus_backtracker:
             return {0: []}
 
         cdef int i, j, v
-        cdef int *w
-        cdef int *face_map = self.face_freeze
+        cdef int * w
+        cdef int * face_map = self.face_freeze
         cdef list darts_to_verts = [0 for i in range(self.num_darts)]
         cdef dict embedding = {}
         cdef list orbit_v
@@ -316,8 +323,8 @@ cdef class simple_connected_genus_backtracker:
         before the flip, the cycle breaks into three.  Otherwise, the number of
         cycles stays the same.
         """
-        cdef int *w = self.vertex_darts[v]
-        cdef int *face_map = self.face_map
+        cdef int * w = self.vertex_darts[v]
+        cdef int * face_map = self.face_map
 
         cdef int v0, v1, v2, e0, e1, e2, f0, f1, f2, j, k
 
@@ -427,9 +434,9 @@ cdef class simple_connected_genus_backtracker:
             return 0
         sig_on()
         if style == 1:
-            g = self.genus_backtrack(cutoff, record_embedding, &min_genus_check)
+            g = self.genus_backtrack(cutoff, record_embedding, & min_genus_check)
         elif style == 2:
-            g = self.genus_backtrack(cutoff, record_embedding, &max_genus_check)
+            g = self.genus_backtrack(cutoff, record_embedding, & max_genus_check)
         sig_off()
         return g
 
@@ -450,7 +457,7 @@ cdef class simple_connected_genus_backtracker:
     cdef int genus_backtrack(self,
                              int cutoff,
                              bint record_embedding,
-                             (int (*)(simple_connected_genus_backtracker, int, bint, int) noexcept) check_embedding) noexcept:
+                             (int(*)(simple_connected_genus_backtracker, int, bint, int) noexcept) check_embedding) noexcept:
         """
         Here's the main backtracking routine.
 
@@ -527,8 +534,6 @@ cdef int max_genus_check(simple_connected_genus_backtracker self,
         if g >= cutoff:
             return 1
     return 0
-
-
 
 
 def simple_connected_graph_genus(G, set_embedding=False, check=True, minimal=True):

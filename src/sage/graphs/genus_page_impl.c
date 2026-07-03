@@ -1,5 +1,13 @@
-// This is the PAGE minimum genus algorithm by Alexander Metzger and Austin Ulrigg [MetUlr2026].
-// Included with permission by Alexander Metzger.
+/*
+ * PAGE graph genus algorithm implementation copied for Sage integration.
+ *
+ * AUTHORS:
+ *
+ * - Alexander Metzger and Austin Ulrigg (2026): PAGE algorithm
+ *
+ * Included with permission by Alexander Metzger.
+ */
+
 // For more on how it works, check https://github.com/SanderGi/Genus.
 
 // Narrows down the genus of an arbitrary graph given its adjacency list.

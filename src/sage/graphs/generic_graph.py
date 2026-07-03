@@ -6605,12 +6605,12 @@ class GenericGraph(GenericGraph_pyx):
         - ``algorithm`` -- string (default: ``'page'``); the algorithm to use
           when computing minimum genus.  It must be one of ``'page'``,
           ``'multi_genus'``, or ``'simple'``.  The ``'page'`` algorithm is the
-          default and is usually the fastest algorithm. It is particularly 
+          default and is usually the fastest algorithm. It is particularly
           advantageous on sparse low-degree graphs and graphs with high girth.
-          The ``'multi_genus'`` algorithm is often very fast on small dense graphs
-          and uses less CPU cores, but has fixed C integer-size limits. The ``'simple'``
-          algorithm is a simple backtracking algorithm that enumerates rotation
-          systems and is useful for computing maximum genus.
+          The ``'multi_genus'`` algorithm is often very fast on small dense
+          graphs and uses less CPU cores, but has fixed C integer-size limits.
+          The ``'simple'`` algorithm is a simple backtracking algorithm that
+          enumerates rotation systems and is useful for computing maximum genus.
 
         EXAMPLES::
 

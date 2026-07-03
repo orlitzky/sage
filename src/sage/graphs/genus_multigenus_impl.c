@@ -1,7 +1,13 @@
 /*
-This is Brinkmann's backtracking based minimum genus program [Bri2022].
-Included with permission (see https://github.com/sagemath/sage/issues/29724).
-*/
+ * Brinkmann's MultiGenus graph genus algorithm implementation copied for
+ * Sage integration with permission 
+ * (see https://github.com/sagemath/sage/issues/29724).
+ *
+ * AUTHORS:
+ *
+ * - Gunnar Brinkmann (2022): MultiGenus algorithm
+ */
+
 /* Call: cat Codes | multi_genus_128
                               or
                cat Codes | multi_genus_64
