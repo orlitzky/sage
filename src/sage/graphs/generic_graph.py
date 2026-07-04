@@ -6697,8 +6697,8 @@ class GenericGraph(GenericGraph_pyx):
 
         if maximal:
             minimal = False
-            if algorithm in (None, "page"):
-                algorithm = "simple"
+        if not minimal and algorithm is None:
+            algorithm = 'simple'
 
         if circular is not None:
             if not isinstance(circular, list):
