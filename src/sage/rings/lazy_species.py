@@ -1979,7 +1979,7 @@ class DerivativeSpeciesElement(LazyCombinatorialSpeciesElement):
             sage: L.<X> = LazyCombinatorialSpecies(QQ)
             sage: E = L.Sets()
             sage: E.derivative().cycle_index_series() - E.cycle_index_series()
-            O^7
+            O^6
         """
         return self._F.cycle_index_series().derivative_with_respect_to_p1()
 
