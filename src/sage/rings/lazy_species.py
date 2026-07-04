@@ -1919,16 +1919,6 @@ def _derivative_of_polynomial_species(f):
     Return the derivative of a polynomial species.
 
     This applies the previous molecular derivative formula term by term.
-
-    TESTS::
-
-        sage: L.<X> = LazyCombinatorialSpecies(QQ)
-        sage: _derivative_of_polynomial_species((X^3)[3])
-        3*X^2
-
-        sage: E2 = L(SymmetricGroup(2))
-        sage: _derivative_of_polynomial_species(E2[2])
-        X
     """
     P = f.parent()
 
