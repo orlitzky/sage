@@ -6544,7 +6544,7 @@ class GenericGraph(GenericGraph_pyx):
                         return False
         return True
 
-    def genus(self, set_embedding=True, on_embedding=None, minimal=True, maximal=False, circular=None, ordered=True, algorithm='page'):
+    def genus(self, set_embedding=True, on_embedding=None, minimal=True, maximal=False, circular=None, ordered=True, algorithm=None):
         r"""
         Return the minimal genus of the graph.
 
@@ -6602,15 +6602,17 @@ class GenericGraph(GenericGraph_pyx):
           ``True``, then whether or not the boundary order may be permuted
           (default: ``True``, which means the boundary order is preserved)
 
-        - ``algorithm`` -- string (default: ``'page'``); the algorithm to use
-          when computing minimum genus.  It must be one of ``'page'``,
-          ``'multi_genus'``, or ``'simple'``.  The ``'page'`` algorithm is the
-          default and is usually the fastest algorithm. It is particularly
-          advantageous on sparse low-degree graphs and graphs with high girth.
-          The ``'multi_genus'`` algorithm is often very fast on small dense
-          graphs and uses less CPU cores, but has fixed C integer-size limits.
-          The ``'simple'`` algorithm is a simple backtracking algorithm that
-          enumerates rotation systems and is useful for computing maximum genus.
+        - ``algorithm`` -- string or ``None`` (default: ``None``); the algorithm to
+          use when computing minimum genus.  It must be one of ``'page'``,
+          ``'multi_genus'``, or ``'simple'``.  If ``None``, Sage uses
+          ``'page'`` when the optional :ref:`graph_genus <spkg_graph_genus>`
+          package is installed and otherwise uses ``'simple'``.  The optional
+          ``'page'`` algorithm is usually fastest on sparse low-degree graphs
+          and graphs with high girth.  The optional ``'multi_genus'``
+          algorithm is often very fast on small dense graphs and uses fewer
+          CPU cores, but has fixed C integer-size limits.  The built-in
+          ``'simple'`` algorithm enumerates rotation systems and is useful
+          for computing maximum genus.
 
         EXAMPLES::
 
@@ -6633,7 +6635,9 @@ class GenericGraph(GenericGraph_pyx):
             1
             sage: K33.genus(algorithm='simple')
             1
-            sage: K33.genus(algorithm='multi_genus')
+            sage: K33.genus(algorithm='page')        # optional - graph_genus
+            1
+            sage: K33.genus(algorithm='multi_genus') # optional - graph_genus
             1
 
         Using the circular argument, we can compute the minimal genus preserving
@@ -6693,7 +6697,7 @@ class GenericGraph(GenericGraph_pyx):
 
         if maximal:
             minimal = False
-            if algorithm == "page":
+            if algorithm in (None, "page"):
                 algorithm = "simple"
 
         if circular is not None:

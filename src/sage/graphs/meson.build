@@ -104,7 +104,7 @@ extension_data = {
   'convexity_properties': files('convexity_properties.pyx'),
   'distances_all_pairs': files('distances_all_pairs.pyx'),
   'generic_graph_pyx': files('generic_graph_pyx.pyx'),
-  'genus': files('genus.pyx', 'genus_page.c', 'genus_multigenus.c'),
+  'genus': files('genus.pyx'),
   'genus_simple': files('genus_simple.pyx'),
   'graph_generators_pyx': files('graph_generators_pyx.pyx'),
   'hyperbolicity': files('hyperbolicity.pyx'),
