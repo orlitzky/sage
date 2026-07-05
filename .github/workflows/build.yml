@@ -309,6 +309,6 @@ jobs:
 
       - name: Upload coverage to codecov
         if: (success() || failure()) && steps.container.outcome == 'success'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           directory: .coverage/coverage-report
