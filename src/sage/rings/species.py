@@ -2027,6 +2027,73 @@ class PolynomialSpeciesElement(CombinatorialFreeModule.Element):
             result += c * result_m
         return result
 
+    def _derivative_of_molecular_species(self,  M):
+        r"""
+        Return the derivative of a molecular species ``M``.
+        We use the molecular derivative formula from Proposition 10 of
+        Section 2.6 in [BLL1998]_.
+        """
+        def delete_point_from_permutation(g, r, m):
+            r"""
+            Delete the fixed point ``r`` from a permutation of ``{1, ..., m}``.
+            The permutation ``g`` is assumed to fix ``r``. The remaining points are
+            relabelled increasingly in ``{1, ..., m - 1}``.
+            """
+            relabel = {i: i if i < r else i - 1 for i in range(1, m + 1) if i != r}
+            cycles = []
+            for cycle in g.cycle_tuples():
+                if r in cycle:
+                   continue
+                new_cycle = tuple(relabel[i] for i in cycle)
+                if len(new_cycle) > 1:
+                    cycles.append(new_cycle)
+            return tuple(cycles)
+        P=self.parent()
+        m = sum(M.grade())
+        if m == 0:
+            return P.zero()
+        if m == 1:
+            return P.one()
+        H, _ = M.permutation_group()
+        ans = P.zero()
+        for orbit in H.orbits():
+            r = min(orbit)
+            H_r = libgap.Stabilizer(H.gap(), r)
+            gens = []
+            for g in H_r.GeneratorsOfGroup().sage():
+                cycles = delete_point_from_permutation(g, r, m)
+                if cycles:
+                    gens.append(cycles)
+            H_r_star = PermutationGroup(gens, domain=range(1, m))
+            ans += P(H_r_star)
+
+        return ans
+
+    def derivative(self):
+        r"""
+        Return the derivative of ``self``.
+
+        TESTS::
+
+            sage: from sage.rings.species import PolynomialSpecies
+            sage: P = PolynomialSpecies(QQ, ["X"])
+            sage: X = P(SymmetricGroup(1))
+            sage: E2 = P(SymmetricGroup(2))
+            sage: (X^3).derivative()
+            3*X^2
+            sage: (E2^2).derivative()
+            2*X*E_2
+            sage: E2(E2).derivative()
+            X*E_2
+        """
+        P = self.parent()
+        if P._arity != 1:
+            raise NotImplementedError("derivative is not yet implemented for multisort species")
+        ans = P.zero()
+        for M, c in self.monomial_coefficients().items():
+            ans += c * self._derivative_of_molecular_species(M)
+        return ans
+
     def hadamard_product(self, other):
         r"""
         Compute the hadamard product of ``self`` and ``other``.

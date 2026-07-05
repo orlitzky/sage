@@ -1854,89 +1854,8 @@ class HadamardProductSpeciesElement(LazyCombinatorialSpeciesElement):
 
         return f.parent()(coefficient)
 
-######################################################################
-# helpers for derivative species
-######################################################################
-
-def _delete_point_from_permutation(g, r, m):
-    r"""
-    Delete the fixed point ``r`` from a permutation of ``{1, ..., m}``.
-
-    The permutation ``g`` is assumed to fix ``r``. The remaining points are
-    relabelled increasingly in ``{1, ..., m - 1}``.
-    """
-    relabel = {i: i if i < r else i - 1
-               for i in range(1, m + 1) if i != r}
-
-    cycles = []
-    for cycle in g.cycle_tuples():
-        if r in cycle:
-            continue
-        new_cycle = tuple(relabel[i] for i in cycle)
-        if len(new_cycle) > 1:
-            cycles.append(new_cycle)
-
-    return tuple(cycles)
-
-
-def _derivative_of_molecular_species(M, P):
-    r"""
-    Return the derivative of a molecular species ``M``.
-
-    We use the molecular derivative formula from Proposition 10 of
-    Section 2.6 in [BLL1998]_.
-    """
-    m = sum(M.grade())
-
-    if m == 0:
-        return P.zero()
-
-    if m == 1:
-        return P.one()
-
-    H, _ = M.permutation_group()
-    ans = P.zero()
-
-    for orbit in H.orbits():
-        r = min(orbit)
-
-        H_r = libgap.Stabilizer(H.gap(), r)
-
-        gens = []
-        for g in H_r.GeneratorsOfGroup().sage():
-            cycles = _delete_point_from_permutation(g, r, m)
-            if cycles:
-                gens.append(cycles)
-
-        H_r_star = PermutationGroup(gens, domain=range(1, m))
-        ans += P(H_r_star)
-
-    return ans
-
-
-def _derivative_of_polynomial_species(f):
-    r"""
-    Return the derivative of a polynomial species.
-
-    This applies the previous molecular derivative formula term by term.
-    """
-    P = f.parent()
-
-    if P._arity != 1:
-        raise NotImplementedError("derivative is not yet implemented for multisort species")
-
-    ans = P.zero()
-    for M, c in f.monomial_coefficients().items():
-        ans += c * _derivative_of_molecular_species(M, P)
-
-    return ans
-
 
 class DerivativeSpeciesElement(LazyCombinatorialSpeciesElement):
-    r"""
-    The derivative of a lazy combinatorial species.
-    """
-
     def __init__(self, F):
         r"""
         Initialize the derivative of ``F``.
@@ -1947,7 +1866,7 @@ class DerivativeSpeciesElement(LazyCombinatorialSpeciesElement):
         self._F = F
 
         coeff_stream = Stream_function(
-            lambda n: _derivative_of_polynomial_species(F[n + 1]),
+            lambda n: F[n + 1].derivative(),
             F.parent()._sparse,
             max(F._coeff_stream._approximate_order - 1, 0),
         )
