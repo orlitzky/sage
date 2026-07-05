@@ -2328,6 +2328,14 @@ cdef class GabowEdgeConnectivity:
         (:meth:`search_step`) frees a usable edge while keeping the other trees
         valid.
 
+        The extraction scheme follows the practical implementation studied in
+        [GKMN2022]_. Phase 1 runs in time `O(km\log(n^2/m))` [Gabow1995]_.
+        Phase 2 performs `k` extraction rounds, each rebuilding an
+        intersection on the remaining edge pool before carving out one
+        arborescence, and its swaps dominate the running time in practice:
+        the observed total grows roughly like `k^2 m` (about `n^4` on
+        complete digraphs, where `k = n - 1`).
+
         EXAMPLES:
 
         On a complete digraph, the algorithm returns ``n-1`` arborescences::
