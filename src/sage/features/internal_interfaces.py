@@ -24,6 +24,17 @@ EXAMPLES::
     Feature `regina` is hidden.
     Use method `unhide` to make it available again.
     sage: F.unhide()
+
+    sage: from sage.features.internal_interfaces import SnapPy
+    sage: F = SnapPy
+    sage: F.hide()
+    sage: snappy(~7)
+    Traceback (most recent call last):
+    ...
+    sage.features.FeatureNotPresentError: regina is not available.
+    Feature `snappy` is hidden.
+    Use method `unhide` to make it available again.
+    sage: F.unhide()
 """
 
 # ****************************************************************************
@@ -40,6 +51,7 @@ from . import PythonModule
 
 Mathics = PythonModule('mathics', spkg='mathics')
 Regina = PythonModule('regina', spkg='regina')
+SnapPy = PythonModule('snappy', spkg='snappy')
 
 
 def all_features():
@@ -50,6 +62,6 @@ def all_features():
 
         sage: from sage.features.internal_interfaces import all_features
         sage: list(all_features())
-        [Feature('mathics'), Feature('regina')]
+        [Feature('mathics'), Feature('regina'), Feature('snappy')]
     """
-    return [Mathics, Regina]
+    return [Mathics, Regina, SnapPy]
