@@ -49,6 +49,7 @@ bliss_enabled = @BLISS_ENABLED@
 brial_enabled = @BRIAL_ENABLED@
 coxeter3_enabled = @COXETER3_ENABLED@
 eclib_enabled = @ECLIB_ENABLED@
+libbraiding_enabled = @LIBBRAIDING_ENABLED@
 libhomfly_enabled = @LIBHOMFLY_ENABLED@
 mcqd_enabled = @MCQD_ENABLED@
 meataxe_enabled = @MEATAXE_ENABLED@
