@@ -106,7 +106,7 @@ jobs:
 
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install test prerequisites
         # From docker.yml
@@ -225,7 +225,7 @@ jobs:
           swap-storage: true
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install test prerequisites
         # From docker.yml
