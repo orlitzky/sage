@@ -2480,15 +2480,12 @@ cdef class GabowEdgeConnectivity:
                 "arborescences rooted at {!r}".format(k, self.int_to_vertex[root_idx]))
 
         # Build DiGraphs from the saved arborescence edge sets
-        cdef int i, e_id
+        cdef int i
         vertices = list(self.int_to_vertex)
         result = []
         for i in range(k):
-            edges = []
-            for e_id in self.arborescence_F[i]:
-                u = self.int_to_vertex[self.tail[e_id]]
-                v = self.int_to_vertex[self.head[e_id]]
-                edges.append((u, v))
+            edges = ((self.int_to_vertex[self.tail[e_id]], self.int_to_vertex[self.head[e_id]])
+                     for e_id in self.arborescence_F[i])
             result.append(DiGraph([vertices, edges], format='vertices_and_edges'))
 
         return result
