@@ -2430,7 +2430,6 @@ cdef class GabowEdgeConnectivity:
             ....:         return False
             ....:     edges = [e for T in trees for e in T.edge_iterator(labels=False)]
             ....:     return len(edges) == len(set(edges))
-            sage: set_random_seed(0)
             sage: for _ in range(20):
             ....:     n = randint(3, 7)
             ....:     D = digraphs.RandomDirectedGNP(n, 0.5)
