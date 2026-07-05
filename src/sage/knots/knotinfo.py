@@ -98,15 +98,14 @@ If you have `SnapPy <https://snappy.math.uic.edu/index.html>`__ installed inside
 Sage, you can obtain an instance of :class:`~spherogram.links.links_base.Link`,
 too::
 
-    sage: # optional - snappy
+    sage: # optional snappy
     sage: L6 = KnotInfo.L6a1_0
     sage: l6s = L6.link(snappy=True); l6s
-    ...
     <Link: 2 comp; 6 cross>
     sage: type(l6s)
-    <class 'spherogram.links.invariants.Link'>
+    <class 'sage.interfaces.snappy.SnapPyElement'>
     sage: l6  = L6.link()
-    sage: l6 == l6s.sage_link()
+    sage: l6 == Link(l6s)
     True
     sage: L6.link(L6.items.name, snappy=True)
     <Link L6a1: 2 comp; 6 cross>
@@ -114,16 +113,16 @@ too::
     sage: l6s == l6sn
     False
     sage: l6m = l6.mirror_image()
-    sage: l6sn.sage_link().is_isotopic(l6m)
+    sage: Link(l6sn).is_isotopic(l6m)
     True
 
 But observe that the name conversion to SnapPy does not distinguish orientation
 types::
 
     sage: L6b = KnotInfo.L6a1_1
-    sage: L6b.link(L6b.items.name, snappy=True)  # optional - snappy
+    sage: L6b.link(L6b.items.name, snappy=True)  # optional snappy
     <Link L6a1: 2 comp; 6 cross>
-    sage: _.PD_code() == l6sn.PD_code()          # optional - snappy
+    sage: _.PD_code() == l6sn.PD_code()          # optional snappy
     True
 
 Obtaining the HOMFLY-PT polynomial::
@@ -151,9 +150,7 @@ Further methods::
     sage: K.determinant()
     5
     sage: K.symmetry_type()
-    'fully amphicheiral'
-    sage: _ == K[K.items.symmetry_type]
-    True
+    <SymmetryType.ful_amphicheiral: 'fully amphicheiral'>
     sage: K.is_reversible()
     True
     sage: K.is_amphicheiral()
@@ -1048,17 +1045,18 @@ class KnotInfoBase(Enum):
             sage: KnotInfo.K6_1.series().inject()
             Defining K6
             sage: [(K.name, K.symmetry_type()) for K in K6]
-            [('K6_1', 'reversible'),
-             ('K6_2', 'reversible'),
-             ('K6_3', 'fully amphicheiral')]
+            [('K6_1', <SymmetryType.reversible: 'reversible'>),
+             ('K6_2', <SymmetryType.reversible: 'reversible'>),
+             ('K6_3', <SymmetryType.ful_amphicheiral: 'fully amphicheiral'>)]
         """
         if not self.is_knot():
             raise NotImplementedError('this is only available for knots')
 
         symmetry_type = self[self.items.symmetry_type].strip()  # for example K10_88 is a case with trailing whitespaces
+        from sage.knots.knot import SymmetryType
         if not symmetry_type and self.crossing_number() == 0:
-            return 'fully amphicheiral'
-        return symmetry_type
+            return SymmetryType.ful_amphicheiral
+        return SymmetryType(symmetry_type)
 
     @cached_method
     def is_reversible(self) -> bool:
@@ -1077,10 +1075,11 @@ class KnotInfoBase(Enum):
             sage: KnotInfo.L7a4_0.is_reversible() # optional - database_knotinfo
         """
         if self.is_knot():
+            from sage.knots.knot import SymmetryType
             symmetry_type = self.symmetry_type()
-            if symmetry_type == 'reversible':
+            if symmetry_type == SymmetryType.reversible:
                 return True
-            return symmetry_type == 'fully amphicheiral'
+            return symmetry_type == SymmetryType.ful_amphicheiral
 
         # revert orientation
         b = self.braid()
@@ -1139,14 +1138,15 @@ class KnotInfoBase(Enum):
         """
         if self.is_knot():
             symmetry_type = self.symmetry_type()
+            from sage.knots.knot import SymmetryType
             if positive:
-                if symmetry_type == 'positive amphicheiral':
+                if symmetry_type == SymmetryType.pos_amphicheiral:
                     return True
             else:
-                if symmetry_type == 'negative amphicheiral':
+                if symmetry_type == SymmetryType.neg_amphicheiral:
                     return True
 
-            return symmetry_type == 'fully amphicheiral'
+            return symmetry_type == SymmetryType.ful_amphicheiral
 
         h = self.homfly_polynomial()
         v, z = h.parent().gens()
@@ -2166,21 +2166,21 @@ class KnotInfoBase(Enum):
 
             sage: L2  = KnotInfo.L2a1_1
             sage: l2  = L2.link()
-            sage: l2s = L2.link(snappy=True).sage_link()  # optional -  snappy
-            sage: l2 == l2s                               # optional -  snappy
+            sage: l2s = Link(L2.link(snappy=True))        # optional snappy
+            sage: l2 == l2s                               # optional snappy
             True
 
         but observe::
 
             sage: K7   = KnotInfo.K7_2
-            sage: k7s  = K7.link(snappy=True); k7s        # optional - snappy
+            sage: k7s  = K7.link(snappy=True); k7s        # optional snappy
             <Link: 1 comp; 7 cross>
-            sage: k7sn = K7.link(K7.items.name, snappy=True); k7sn     # optional - snappy
+            sage: k7sn = K7.link(K7.items.name, snappy=True); k7sn     # optional snappy
             <Link 7_2: 1 comp; 7 cross>
-            sage: k7s.sage_link().is_isotopic(k7sn)       # optional - snappy
+            sage: Link(k7s).is_isotopic(k7sn)             # optional snappy
             False
-            sage: k7snm = k7sn.sage_link().mirror_image() # optional - snappy
-            sage: k7s.sage_link().is_isotopic(k7snm)      # optional - snappy
+            sage: k7snm = Link(k7sn).mirror_image()       # optional snappy
+            sage: Link(k7s).is_isotopic(k7snm)            # optional snappy
             True
 
         using ``braid_notation``::
@@ -2217,10 +2217,8 @@ class KnotInfoBase(Enum):
             raise TypeError('%s must be an instance of %s' % (use_item, KnotInfoColumns))
 
         if snappy:
-            try:
-                from snappy import Link
-            except ImportError:
-                raise ImportError('this option demands snappy to be installed')
+            from sage.interfaces.snappy import snappy
+            Link = snappy.Link
         elif self.is_knot():
             from sage.knots.knot import Knot as Link
         else:
