@@ -2048,7 +2048,7 @@ class PolynomialSpeciesElement(CombinatorialFreeModule.Element):
                 if len(new_cycle) > 1:
                     cycles.append(new_cycle)
             return tuple(cycles)
-        P=self.parent()
+        P = self.parent()
         m = sum(M.grade())
         if m == 0:
             return P.zero()
