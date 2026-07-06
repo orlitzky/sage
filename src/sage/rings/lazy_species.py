@@ -1077,6 +1077,7 @@ class LazyCombinatorialSpeciesElement(LazyCompletionGradedAlgebraElement):
         with `\sigma` on `U` and fixes `*`.
 
         EXAMPLES::
+
             sage: L.<X> = LazyCombinatorialSpecies(QQ)
             sage: (X^3).derivative()[2]
             3*X^2
