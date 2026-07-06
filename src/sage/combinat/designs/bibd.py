@@ -463,7 +463,7 @@ def steiner_triple_system(n, algorithm=None, seed=None, check=True):
 
     - ``algorithm`` -- string (default: ``None``); can be one of the following:
 
-      - ``None`` or ``"bose-skolem"`` -- use Bose's or Skolem's deterministic
+      - ``None`` or ``"bose-skolem"`` -- use Bose and Skolem's deterministic
         construction
 
       - ``"stinson"`` -- use Stinson's randomized algorithm
