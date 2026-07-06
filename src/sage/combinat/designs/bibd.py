@@ -511,6 +511,22 @@ def steiner_triple_system(n, algorithm=None, seed=None, check=True):
         ...
         EmptySetError: Steiner triple systems only exist for n = 1 mod 6 or n = 3 mod 6
 
+    TESTS::
+
+        sage: (designs.steiner_triple_system(9, algorithm='bose-skolem').blocks()
+        ....:  == designs.steiner_triple_system(9).blocks())
+        True
+        sage: designs.steiner_triple_system(1, algorithm='stinson').n_blocks()
+        0
+        sage: designs.steiner_triple_system(10, algorithm='stinson')
+        Traceback (most recent call last):
+        ...
+        EmptySetError: Steiner triple systems only exist for n = 1 mod 6 or n = 3 mod 6
+        sage: designs.steiner_triple_system(9, algorithm='unknown')
+        Traceback (most recent call last):
+        ...
+        ValueError: unknown algorithm: 'unknown'
+
     REFERENCES:
 
     .. [AndHonk97] A short course in Combinatorial Designs,
