@@ -41,6 +41,16 @@ possible cases of `(v,4,1)`-BIBD.
 Decompositions of `K_v` into `K_4` (i.e. `(v,4,1)`-BIBD) are built following
 Clayton Smith's construction [ClaytonSmith]_.
 
+REFERENCES:
+
+.. [DesignHandbook] Charles J. Colbourn, Jeffrey H. Dinitz,
+  *Handbook of Combinatorial Designs*, 2nd Edition,
+  Chapman & Hall/CRC, 2006.
+
+.. [Stinson2004] Douglas R. Stinson,
+  *Combinatorial designs: construction and analysis*,
+  Springer, 2004.
+
 .. [ClaytonSmith] On the existence of `(v,5,1)`-BIBD.
   http://www.argilo.net/files/bibd.pdf
   Clayton Smith
@@ -435,7 +445,7 @@ def BruckRyserChowla_check(v, k, lambd):
     return flag
 
 
-def steiner_triple_system(n):
+def steiner_triple_system(n, algorithm=None, seed=None, check=True):
     r"""
     Return a Steiner Triple System.
 
@@ -447,14 +457,28 @@ def steiner_triple_system(n):
     It can alternatively be thought of as a factorization of
     the complete graph `K_n` with triangles.
 
-    A Steiner Triple System of a `n`-set exists if and only if
+    A Steiner Triple System of an `n`-set exists if and only if
     `n \equiv 1 \pmod 6` or `n \equiv 3 \pmod 6`, in which case
     one can be found through Bose's and Skolem's constructions,
-    respectively [AndHonk97]_.
+    respectively [AndHonk97]_. A randomized construction using Stinson's
+    algorithm [DesignHandbook]_ is also available.
 
     INPUT:
 
     - ``n`` -- return a Steiner Triple System of `\{0,...,n-1\}`
+
+    - ``algorithm`` -- string (default: ``None``); can be one of the following:
+
+      - ``None`` or ``"bose-skolem"`` -- use Bose's or Skolem's deterministic
+        construction
+
+      - ``"stinson"`` -- use Stinson's randomized algorithm
+
+    - ``seed`` -- (default: ``None``) a seed for the random number generator;
+      only used when ``algorithm="stinson"``
+
+    - ``check`` -- boolean (default: ``True``); whether to check that the
+      output of Stinson's randomized algorithm has the correct BIBD parameters
 
     EXAMPLES:
 
@@ -473,6 +497,19 @@ def steiner_triple_system(n):
         sage: sts.is_t_design(return_parameters=True)
         (True, (2, 9, 3, 1))
 
+    A Steiner Triple System using Stinson's randomized algorithm ::
+
+        sage: sts = designs.steiner_triple_system(9, algorithm='stinson', seed=0)
+        sage: sts.is_t_design(return_parameters=True)
+        (True, (2, 9, 3, 1))
+
+    The optional seed makes Stinson's algorithm reproducible ::
+
+        sage: designs.steiner_triple_system(9, algorithm='stinson', seed=0).blocks()
+        [[0, 1, 7], [0, 2, 8], [0, 3, 4], [0, 5, 6], [1, 2, 4],
+         [1, 3, 6], [1, 5, 8], [2, 3, 5], [2, 6, 7], [3, 7, 8],
+         [4, 5, 7], [4, 6, 8]]
+
     An exception is raised for invalid values of ``n`` ::
 
         sage: designs.steiner_triple_system(10)
@@ -487,6 +524,10 @@ def steiner_triple_system(n):
       Internet Editions, Spring 1997,
       http://www.utu.fi/~honkala/designs.ps
     """
+    if algorithm == "stinson":
+        return _stinson_steiner_triple_system(n, seed=seed, check=check)
+    if algorithm not in (None, "bose-skolem"):
+        raise ValueError("unknown algorithm: {!r}".format(algorithm))
 
     name = "Steiner Triple System on "+str(n)+" elements"
 
@@ -519,6 +560,86 @@ def steiner_triple_system(n):
     sts = set(frozenset(T(xx) for xx in x) for x in sts)
 
     return BIBD(n, sts, name=name,check=False)
+
+
+def _stinson_steiner_triple_system(n, seed=None, check=True):
+    r"""
+    Return a Steiner Triple System using Stinson's randomized algorithm.
+
+    The distribution of the resulting systems is not claimed to be uniform.
+    """
+    if n % 6 not in (1, 3):
+        raise EmptySetError("Steiner triple systems only exist for n = 1 mod 6 or n = 3 mod 6")
+
+    n = int(n)
+    name = "Randomized Steiner Triple System on " + str(n) + " elements"
+    if n == 1:
+        return BIBD(n, [], name=name, check=False)
+
+    import random
+    if seed is not None and hasattr(seed, "__index__"):
+        seed = int(seed)
+    rand = random.Random(seed)
+
+    other = [[-1] * n for _ in range(n)]
+    live_pairs = [set(range(n)) - {x} for x in range(n)]
+    live_points = set(range(n))
+    num_blocks = 0
+
+    def insert_pair(x, y):
+        if not live_pairs[x]:
+            live_points.add(x)
+        live_pairs[x].add(y)
+
+    def delete_pair(x, y):
+        live_pairs[x].remove(y)
+        if not live_pairs[x]:
+            live_points.remove(x)
+
+    def add_block(x, y, z):
+        other[x][y] = other[y][x] = z
+        other[x][z] = other[z][x] = y
+        other[y][z] = other[z][y] = x
+        delete_pair(x, y)
+        delete_pair(y, x)
+        delete_pair(x, z)
+        delete_pair(z, x)
+        delete_pair(y, z)
+        delete_pair(z, y)
+
+    def exchange_block(x, y, z, w):
+        other[x][y] = other[y][x] = z
+        other[x][z] = other[z][x] = y
+        other[y][z] = other[z][y] = x
+        other[w][y] = other[y][w] = -1
+        other[w][z] = other[z][w] = -1
+        insert_pair(w, y)
+        insert_pair(y, w)
+        insert_pair(w, z)
+        insert_pair(z, w)
+        delete_pair(x, y)
+        delete_pair(y, x)
+        delete_pair(x, z)
+        delete_pair(z, x)
+
+    target_blocks = n * (n - 1) // 6
+    while num_blocks < target_blocks:
+        x = rand.choice(sorted(live_points))
+        y, z = rand.sample(sorted(live_pairs[x]), 2)
+        if other[y][z] == -1:
+            add_block(x, y, z)
+            num_blocks += 1
+        else:
+            exchange_block(x, y, z, other[y][z])
+
+    blocks = []
+    for x in range(n):
+        for y in range(x + 1, n):
+            z = other[x][y]
+            if z > y:
+                blocks.append([x, y, z])
+
+    return BIBD(n, blocks, k=3, lambd=1, name=name, check=check, copy=False)
 
 
 def BIBD_from_TD(v, k, existence=False):
