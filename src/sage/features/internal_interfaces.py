@@ -31,7 +31,7 @@ EXAMPLES::
     sage: snappy(~7)
     Traceback (most recent call last):
     ...
-    sage.features.FeatureNotPresentError: regina is not available.
+    sage.features.FeatureNotPresentError: snappy is not available.
     Feature `snappy` is hidden.
     Use method `unhide` to make it available again.
     sage: F.unhide()
