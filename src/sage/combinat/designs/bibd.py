@@ -43,10 +43,6 @@ Clayton Smith's construction [ClaytonSmith]_.
 
 REFERENCES:
 
-.. [DesignHandbook] Charles J. Colbourn, Jeffrey H. Dinitz,
-  *Handbook of Combinatorial Designs*, 2nd Edition,
-  Chapman & Hall/CRC, 2006.
-
 .. [Stinson2004] Douglas R. Stinson,
   *Combinatorial designs: construction and analysis*,
   Springer, 2004.
@@ -459,7 +455,7 @@ def steiner_triple_system(n, algorithm=None, seed=None, check=True):
     `n \equiv 1 \pmod 6` or `n \equiv 3 \pmod 6`, in which case
     one can be found through Bose's and Skolem's constructions,
     respectively [AndHonk97]_. A randomized construction using Stinson's
-    algorithm [DesignHandbook]_ is also available.
+    algorithm [KreherStinson98]_ is also available.
 
     INPUT:
 
@@ -515,12 +511,17 @@ def steiner_triple_system(n, algorithm=None, seed=None, check=True):
         ...
         EmptySetError: Steiner triple systems only exist for n = 1 mod 6 or n = 3 mod 6
 
-    REFERENCE:
+    REFERENCES:
 
     .. [AndHonk97] A short course in Combinatorial Designs,
       Ian Anderson, Iiro Honkala,
       Internet Editions, Spring 1997,
       http://www.utu.fi/~honkala/designs.ps
+    
+    .. [KreherStinson98] Combinatorial Designs: Generation, Enumeration, and Search
+      Donald L. Kreher, Douglas R. Stinson,
+      1998
+      https://doi.org/10.1201/9781003068006
     """
     if algorithm == "stinson":
         return _stinson_steiner_triple_system(n, seed=seed, check=check)
