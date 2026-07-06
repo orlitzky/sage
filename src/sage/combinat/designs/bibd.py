@@ -347,8 +347,7 @@ def balanced_incomplete_block_design(v, k, lambd=1, existence=False, use_LJCR=Fa
             if B.n_blocks() == expected_n_of_blocks:
                 if existence:
                     return True
-                else:
-                    return BIBD(B.ground_set(), B.blocks(), k=k, lambd=1, copy=False)
+                return BIBD(B.ground_set(), B.blocks(), k=k, lambd=1, copy=False)
 
     if ( (k+lambd)*(k+lambd-1) == lambd*(v+k+lambd-1) and
          balanced_incomplete_block_design(v+k+lambd, k+lambd, lambd, existence=True) is True):
@@ -369,8 +368,7 @@ def balanced_incomplete_block_design(v, k, lambd=1, existence=False, use_LJCR=Fa
 
     if existence:
         return Unknown
-    else:
-        raise NotImplementedError("I don't know how to build a ({},{},{})-BIBD!".format(v, k, lambd))
+    raise NotImplementedError("I don't know how to build a ({},{},{})-BIBD!".format(v, k, lambd))
 
 
 def BruckRyserChowla_check(v, k, lambd):
@@ -780,8 +778,7 @@ def BIBD_from_TD(v, k, existence=False):
     else:
         if existence:
             return Unknown
-        else:
-            raise NotImplementedError("I do not know how to build a ({},{},1)-BIBD!".format(v,k))
+        raise NotImplementedError("I do not know how to build a ({},{},1)-BIBD!".format(v,k))
 
     return BIBD
 
@@ -1214,7 +1211,6 @@ def _get_t_u(v):
     """
     # Table 7.1
     v = int(v)
-    global table_7_1
     d = table_7_1[v % 48]
     s = v//48
     if s < d['s']:
@@ -1755,7 +1751,7 @@ class BalancedIncompleteBlockDesign(PairwiseBalancedDesign):
         # trivial cases
         if s <= 0:
             return []
-        elif s >= max(self.block_sizes()):
+        if s >= max(self.block_sizes()):
             return self._points[:]
 
         # integer linear program

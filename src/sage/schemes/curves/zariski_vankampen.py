@@ -68,8 +68,6 @@ from sage.rings.rational_field import QQ
 from sage.rings.real_mpfr import RealField
 from sage.schemes.curves.constructor import Curve
 
-lazy_import('sage.libs.braiding', ['leftnormalform', 'rightnormalform'])
-
 roots_interval_cache: dict[tuple, Any] = {}
 
 
@@ -353,7 +351,7 @@ def orient_circuit(circuit, convex=False, precision=53, verbose=False) -> tuple:
         if pr > 0:
             # return circuit
             return circuit_vertex
-        elif pr < 0:
+        if pr < 0:
             return tuple(reversed(circuit_vertex))
     prec = precision
     while True:
@@ -768,7 +766,6 @@ def roots_interval_cached(f, x0) -> dict:
         sage: (f, 1) in roots_interval_cache
         True
     """
-    global roots_interval_cache
     try:
         return roots_interval_cache[(f, x0)]
     except KeyError:
@@ -805,7 +802,6 @@ def populate_roots_interval_cache(inputs) -> None:
          0.4795466549853897? + 1.475892845355996?*I: 1.? + 2.?*I,
          14421467174121563/9293107134194871: 2.? + 0.?*I}
     """
-    global roots_interval_cache
     tocompute = [inp for inp in inputs if inp not in roots_interval_cache]
     problem_par = True
     while problem_par:  # hack to deal with random fails in parallelization
@@ -1282,7 +1278,6 @@ def braid_monodromy(f, arrangement=(), vertical=False) -> tuple:
         sage: braid_monodromy(prod(L), arrangement=L, vertical=True)
         ([s^2, 1], {0: 1, 1: 3}, {0: 0, 1: 2}, 2)
     """
-    global roots_interval_cache
     F = fieldI(f.base_ring())
     I1 = F(QQbar.gen())
     f = f.change_ring(F)
@@ -1365,8 +1360,8 @@ def braid_monodromy(f, arrangement=(), vertical=False) -> tuple:
     end_braid_computation = False
     while not end_braid_computation:
         try:
-            braidscomputed = (braid_in_segment([(glist, seg[0], seg[1])
-                                                for seg in segs]))
+            braidscomputed = braid_in_segment([(glist, seg[0], seg[1])
+                                               for seg in segs])
             segsbraids = {}
             for braidcomputed in braidscomputed:
                 seg = (braidcomputed[0][0][1], braidcomputed[0][0][2])
@@ -1421,6 +1416,7 @@ def conjugate_positive_form(braid) -> list[list]:
 
     EXAMPLES::
 
+        sage: # needs libbraiding
         sage: from sage.schemes.curves.zariski_vankampen import conjugate_positive_form
         sage: B = BraidGroup(4)
         sage: t = B((1, 3, 2, -3, 1, 1))
@@ -1438,6 +1434,10 @@ def conjugate_positive_form(braid) -> list[list]:
         sage: conjugate_positive_form(s1)
         [[s1^3, []]]
     """
+    from sage.features.libbraiding import Libbraiding
+    Libbraiding().require()
+    from sage.libs.braiding import rightnormalform
+
     B = braid.parent()
     d = B.strands()
     rnf = rightnormalform(braid)
@@ -1504,12 +1504,17 @@ def braid2rels(L) -> list:
 
     EXAMPLES::
 
+        sage: # needs libbraiding
         sage: from sage.schemes.curves.zariski_vankampen import braid2rels
         sage: B.<s0, s1, s2> = BraidGroup(4)
         sage: L = ((s1*s0)^2, [s2])
         sage: braid2rels(L)
         [(4, 1, -2, -1), (2, -4, -2, 1)]
     """
+    from sage.features.libbraiding import Libbraiding
+    Libbraiding().require()
+    from sage.libs.braiding import leftnormalform
+
     br = L[0]
     L1 = L[1]
     B = br.parent()
@@ -1656,6 +1661,11 @@ def fundamental_group_from_braid_mon(bm, degree=None,
         a1 = tuple([-j for j in reversed(a)])
         cnjdelta.append(a + (d - j,) + a1)
     homcnjdelta = F.hom(codomain=F, im_gens=cnjdelta)
+
+    from sage.features.libbraiding import Libbraiding
+    Libbraiding().require()
+    from sage.libs.braiding import rightnormalform
+
     for j, k in enumerate(vertical0):
         l1 = d + j + 1
         br = bm[k]
@@ -1845,7 +1855,7 @@ def fundamental_group_arrangement(flist, simplified=True, projective=False,
       each of these paths is the conjugated of a loop around one of the points
       in the discriminant of the projection of ``f``.
 
-    - A dictionary attaching to ``j`` a tuple a list of elements
+    - A dictionary attaching to ``j`` a list of elements
       of the group  which are meridians of the curve in position ``j``.
       If ``projective`` is ``False`` and the `y`-degree of the horizontal
       components coincide with the total degree, another key is added
@@ -1954,5 +1964,7 @@ def fundamental_group_arrangement(flist, simplified=True, projective=False,
     n = g1.ngens()
     rels = [rel.Tietze() for rel in g1.relations()]
     g1 = FreeGroup(n) / rels
-    dic1 = {i: list({g1(el.Tietze()) for el in dic1[i]}) for i in dic1}
+    dic1 = {i: [*{t: g1(t) for el in dic1[i] for t in (el.Tietze(),)}.values()] for i in dic1}
+    # each list in dic1.values() may have duplicates, but deduplicating it properly
+    # requires solving the group problem on g1 which can be prohibitive
     return (g1, dic1)
