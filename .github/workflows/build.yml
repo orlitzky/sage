@@ -194,7 +194,7 @@ jobs:
 
       - name: Upload coverage results
         if: (success() || failure()) && steps.container.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           # The path .coverage is a directory that contains the combined coverage
           # data file .coverage, which is a hidden file because of the leading dot
