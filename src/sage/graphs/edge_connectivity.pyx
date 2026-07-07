@@ -141,7 +141,7 @@ cdef class GabowEdgeConnectivity:
     cdef int TEMP_REMOVED  # edge_state sentinel for an edge temporarily pulled out of its tree during a swap
 
     # The graph is stored as lists of incident edges
-    cdef readonly GenericGraph_pyx G  # the original graph
+    cdef GenericGraph_pyx G  # the original graph
     cdef list int_to_vertex  # mapping from integers to vertex labels
     cdef vector[vector[int]] g_out
     cdef vector[vector[int]] g_in
