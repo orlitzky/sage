@@ -1081,9 +1081,9 @@ class LazyCombinatorialSpeciesElement(LazyCompletionGradedAlgebraElement):
             sage: L.<X> = LazyCombinatorialSpecies(QQ)
             sage: (X^3).derivative()[2]
             3*X^2
-            sage: E2 = L(SymmetricGroup(2))
-            sage: (X*E2).derivative()[2]
-            E_2 + X^2
+            sage: Lin = 1 / (1 - X)
+            sage: Lin.derivative()[4] == (Lin^2)[4]
+            True
         """
         return DerivativeSpeciesElement(self)
 
