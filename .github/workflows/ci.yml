@@ -10,6 +10,7 @@ on:
       - 'uv.lock'
       - 'subprojects/**'
       - '.github/workflows/ci.yml'
+      - 'build/pkgs/*/distros/*.txt'
   workflow_dispatch:
     # Allow to run manually
 
@@ -56,7 +57,7 @@ jobs:
           fi
 
       - name: Checkout code
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v7
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7.1.4
@@ -131,7 +132,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6.3.1
