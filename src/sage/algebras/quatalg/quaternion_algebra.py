@@ -4001,7 +4001,7 @@ class QuaternionFractionalIdeal_rational(QuaternionFractionalIdeal):
             ''
             sage: magma.eval(f'O := QuaternionOrder({list(C[0].right_order().basis())})')
             ''
-            sage: [ magma(f'rideal<O | {list(I.basis())}>') for I in C]
+            sage: [ magma(f'rideal<O | {list(I.basis())}>').Norm() for I in C]
             [16, 32, 32]
 
             sage: A.<i,j,k> = QuaternionAlgebra(-1,-1)
