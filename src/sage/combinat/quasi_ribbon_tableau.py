@@ -110,15 +110,10 @@ class QuasiRibbonTableau(SkewTableau):
     @staticmethod
     def __classcall_private__(cls, rows):
         r"""
-        Normalize input and return a quasi-ribbon tableau object.
+        Construct a quasi-ribbon tableau from ``rows``.
 
-        We use it to check that the input is made of rows and that entries
-        are positive integers or ``None``.
-
-        The user may either include the ``None`` entries manually or enter
-        rows without ``None`` entries. In both cases, we remove all
-        user-given ``None`` entries first and then rebuild the shifted shape
-        using our quasi-ribbon convention.
+        Construction is delegated to :class:`QuasiRibbonTableaux`, whose
+        element constructor normalizes and validates the input.
 
         EXAMPLES::
 
@@ -131,48 +126,22 @@ class QuasiRibbonTableau(SkewTableau):
             [[1, 2, 3], [None, None, 4, 5]]
             sage: QuasiRibbonTableau([[1, 2, 3], [4, 5], [6]])
             [[1, 2, 3], [None, None, 4, 5], [None, None, None, 6]]
-
-        TESTS::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
-            sage: QuasiRibbonTableau([1, 2])
-            Traceback (most recent call last):
-            ...
-            TypeError: rows must be lists of positive integers
-            sage: QuasiRibbonTableau([[1, -2]])
-            Traceback (most recent call last):
-            ...
-            TypeError: entries must be positive integers or None
-            sage: QuasiRibbonTableau([[None]])
-            Traceback (most recent call last):
-            ...
-            TypeError: a skew tableau cannot have an empty list for a row
         """
-        try:
-            rows = [tuple(row) for row in rows]
-        except TypeError:
-            raise TypeError("rows must be lists of positive integers")
+        return QuasiRibbonTableaux()(rows)
 
-        clean_rows = []
-        for row in rows:
-            clean_row = []
-            for entry in row:
-                if entry is None:
-                    continue
-                if not isinstance(entry, (int, Integer)) or entry <= 0:
-                    raise TypeError("entries must be positive integers or None")
-                clean_row.append(entry)
-            clean_rows.append(list(clean_row))
-        return QuasiRibbonTableaux()(clean_rows)
 
-    def __init__(self, parent, rows, check=True):
-        """
-        Initialize ``self``.
+    def __init__(self, parent, rows):
+        r"""
+        Initialize ``self`` from normalized quasi-ribbon rows.
 
-        The input rows are in quasi-ribbon orientation, from top to bottom.
-        We store these rows for our own quasi-ribbon methods, but we also flip
-        them before calling ``SkewTableau.__init__`` so that the object uses
-        Sage's skew tableau infrastructure.
+        The rows are given from top to bottom, contain no ``None`` entries,
+        and are assumed to satisfy the quasi-ribbon tableau conditions.
+        Validation is performed by
+        :meth:`QuasiRibbonTableaux._element_constructor_` during ordinary
+        construction.
+
+        This method adds the shifts determined by the quasi-ribbon shape and
+        reverses the rows before initializing :class:`SkewTableau`.
 
         EXAMPLES::
 
@@ -182,22 +151,11 @@ class QuasiRibbonTableau(SkewTableau):
             sage: Q.rows()
             [[1, 2, 3], [None, None, 4, 5]]
         """
-        self._clean_rows_data = rows
-
-        if check:
-            for row in self._clean_rows_data:
-                if any(row[i] > row[i + 1] for i in range(len(row) - 1)):
-                    raise ValueError("rows must be weakly increasing")
-
-            for upper, lower in zip(
-                    self._clean_rows_data,
-                    self._clean_rows_data[1:]):
-                if upper[-1] >= lower[0]:
-                    raise ValueError("columns must be strictly increasing")
+        self._filling = rows
 
         shifted_rows = []
         shift = 0
-        for row in self._clean_rows_data:
+        for row in self._filling:
             shifted_rows.append([None] * shift + list(row))
             shift += len(row) - 1
 
@@ -308,7 +266,7 @@ class QuasiRibbonTableau(SkewTableau):
         flipped skew-tableau rows.
 
         EXAMPLES::
-
+            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
             sage: Q = QuasiRibbonTableau([[1,2,2],[3]])
             sage: Q
             [[1, 2, 2], [None, None, 3]]
@@ -337,24 +295,6 @@ class QuasiRibbonTableau(SkewTableau):
             lines.append(line)
         return "\n".join(lines)
 
-    def _clean_rows(self):
-        """
-        Return the rows of ``self`` with the ``None`` entries removed.
-
-        The tableau stores shifted positions using ``None`` entries, but for
-        insertion it is often easier to work only with the actual entries.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
-            sage: Q = QuasiRibbonTableau([[1, 2, 3], [4, 5]])
-            sage: Q.rows()
-            [[1, 2, 3], [None, None, 4, 5]]
-            sage: Q._clean_rows()
-            [[1, 2, 3], [4, 5]]
-        """
-        return self._clean_rows_data
-
     def _entries_with_positions(self):
         """
         Return all entries of ``self`` with their positions in the cleaned rows.
@@ -369,7 +309,7 @@ class QuasiRibbonTableau(SkewTableau):
             [(1, 0, 0), (2, 0, 1), (3, 0, 2), (4, 1, 0), (5, 1, 1)]
         """
         entries = []
-        for row_index, row in enumerate(self._clean_rows()):
+        for row_index, row in enumerate(self._filling):
             for col_index, entry in enumerate(row):
                 if entry is not None:
                     entries.append((entry, row_index, col_index))
@@ -404,25 +344,6 @@ class QuasiRibbonTableau(SkewTableau):
         # Pick the candidate with largest row index, then largest column index.
         return max(candidates, key=lambda item: (item[1], item[2]))
 
-    @classmethod
-    def _from_clean_rows_unchecked(cls, parent, rows):
-        """
-        Construct a quasi-ribbon tableau from clean rows without validation.
-
-        TESTS::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau, QuasiRibbonTableaux
-            sage: P = QuasiRibbonTableaux()
-            sage: Q = QuasiRibbonTableau._from_clean_rows_unchecked(
-            ....:     P, [[1, 2, 3], [4, 5]]
-            ....: )
-            sage: Q.rows()
-            [[1, 2, 3], [None, None, 4, 5]]
-        """
-        obj = cls.__new__(cls)
-        cls.__init__(obj, parent, rows, check=False)
-        return obj
-
     def split(self, row_index, col_index):
         """
         Return two quasi-ribbon tableaux split from ``self``.
@@ -454,9 +375,11 @@ class QuasiRibbonTableau(SkewTableau):
             sage: Q4.rows()
             [[5]]
         """
-        rows = self._clean_rows()
+        rows = self._filling
+
         if len(rows) <= row_index:
-            return self, QuasiRibbonTableau([])
+            parent = self.parent()
+            return self, parent.element_class(parent, [])
 
         top_rows = rows[:row_index] + [rows[row_index][:col_index + 1]]
         tail = rows[row_index][col_index + 1:]
@@ -466,7 +389,9 @@ class QuasiRibbonTableau(SkewTableau):
             bottom_rows = rows[row_index + 1:]
 
         parent = self.parent()
-        return self._from_clean_rows_unchecked(parent, top_rows), self._from_clean_rows_unchecked(parent, bottom_rows)
+        element_class = parent.element_class
+        return (element_class(parent, top_rows),
+                element_class(parent, bottom_rows))
 
     def insert_letter(self, a):
         """
@@ -495,14 +420,15 @@ class QuasiRibbonTableau(SkewTableau):
             sage: Q.insert_letter(4)
             [[1, 2, 3], [None, None, 4, 4], [None, None, None, 5]]
         """
-
         if not isinstance(a, (int, Integer)) or a <= 0:
             raise ValueError("the inserted letter must be a positive integer")
 
-        rows = self._clean_rows()
+        rows = self._filling
+        parent = self.parent()
+        element_class = parent.element_class
 
         if not rows:
-            return QuasiRibbonTableau([[a]])
+            return element_class(parent, [[a]])
 
         site = None
         for row_index, row in enumerate(rows):
@@ -525,7 +451,7 @@ class QuasiRibbonTableau(SkewTableau):
 
             new_rows.extend(rows[row_index + 1:])
 
-        return type(self)._from_clean_rows_unchecked(self.parent(),new_rows)
+        return element_class(parent, new_rows)
 
     def insert_word(self, word):
         """
@@ -648,7 +574,6 @@ class QuasiRibbonTableaux(SkewTableaux):
         [[1, 2], [None, 3]],
         [[2, 2], [None, 3]]]
     """
-
     @staticmethod
     def __classcall_private__(cls, shape=None, max_entry=None, size=None, category=None):
         """
@@ -772,6 +697,77 @@ class QuasiRibbonTableaux(SkewTableaux):
         return "Quasi-ribbon tableaux with entries at most {}".format(self._max_entry)
 
     Element = QuasiRibbonTableau
+
+    def _element_constructor_(self, rows):
+        r"""
+        Construct an element of ``self`` from ``rows``.
+
+        The rows are given from top to bottom. Entries equal to ``None`` are
+        removed, and all remaining entries are coerced to integers.
+
+        The resulting rows must be nonempty, consist of positive integers,
+        be weakly increasing from left to right, and be strictly increasing
+        from top to bottom in each overlapping column.
+
+        Internal methods that produce rows already known to be normalized and
+        valid may bypass this method by calling
+        ``self.element_class(self, rows)`` directly.
+
+        EXAMPLES::
+
+            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableaux
+            sage: QRT = QuasiRibbonTableaux()
+            sage: QRT([[1, 2, 3], [4, 5]])
+            [[1, 2, 3], [None, None, 4, 5]]
+            sage: QRT([[1, 2, 3], [None, 4, 5]])
+            [[1, 2, 3], [None, None, 4, 5]]
+
+        TESTS::
+
+            sage: QRT([1, 2])
+            Traceback (most recent call last):
+            ...
+            TypeError: entries must be positive integers or None
+            sage: QRT([[1, -2]])
+            Traceback (most recent call last):
+            ...
+            TypeError: entries must be positive integers or None
+            sage: QRT([[None]])
+            Traceback (most recent call last):
+            ...
+            TypeError: a skew tableau cannot have an empty list for a row
+            sage: QRT([[2, 1]])
+            Traceback (most recent call last):
+            ...
+            ValueError: rows must be weakly increasing
+            sage: QRT([[1, 3], [2]])
+            Traceback (most recent call last):
+            ...
+            ValueError: columns must be strictly increasing
+        """
+        try:
+            clean_rows = [
+                [ZZ(entry) for entry in row if entry is not None]
+                for row in rows
+            ]
+        except (TypeError, ValueError):
+            raise TypeError("entries must be positive integers or None")
+
+        if any(not row for row in clean_rows):
+            raise TypeError("a skew tableau cannot have an empty list for a row")
+
+        if any(entry <= 0 for row in clean_rows for entry in row):
+            raise TypeError("entries must be positive integers or None")
+
+        for row in clean_rows:
+            if any(row[i] > row[i + 1] for i in range(len(row) - 1)):
+                raise ValueError("rows must be weakly increasing")
+
+        for upper, lower in zip(clean_rows, clean_rows[1:]):
+            if upper[-1] >= lower[0]:
+                raise ValueError("columns must be strictly increasing")
+
+        return self.element_class(self, clean_rows)
 
     def _an_element_(self):
         r"""
@@ -912,7 +908,7 @@ class QuasiRibbonTableaux(SkewTableaux):
             return False
 
         if self._max_entry is not None:
-            for row in Q._clean_rows():
+            for row in Q._filling:
                 for entry in row:
                     if entry > self._max_entry:
                         return False
