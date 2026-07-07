@@ -221,10 +221,10 @@ cdef class GabowEdgeConnectivity:
     cdef bint* in_union        # per-edge: True if edge is part of the k-intersection union found in Phase 1
     cdef int packing_ntrees    # number of trees in the current (current_k - 1)-intersection during Phase 2
 
-    # Disjoint-set machinery for the dedicated Phase 2 packing search
-    # (Georgiadis myset / root_set / set_seen / sets). Groups vertices into
-    # sets as components merge during a swap, so the fundamental-cycle
-    # traversal can jump across component boundaries on a split tree.
+    # Disjoint-set machinery for the dedicated Phase 2 packing search.
+    # Groups vertices into sets as components merge during a swap, so the
+    # fundamental-cycle traversal can jump across component boundaries on a
+    # split tree.
     cdef int* myset            # per-vertex: id of the set the vertex belongs to (-1 if none)
     cdef int* set_seen         # per-set: marked during a traversal
     cdef vector[vector[int]] root_set  # root_set[s][tree] = L_root of tree `tree` for set s
@@ -1247,9 +1247,8 @@ cdef class GabowEdgeConnectivity:
         edges in the Phase 1 union that have not yet been extracted into a
         previous arborescence.
 
-        This is the in-place analog of Georgiadis's ``remove_unused_edges``
-        / ``G_minus_A``: instead of recreating the whole CSR graph, we
-        rebuild the two adjacency vectors so that both
+        Instead of recreating a smaller graph, we rebuild the two adjacency
+        vectors in place so that both
         :meth:`construct_trees` (which reads ``g_in`` / ``g_out``) and
         :meth:`find_tree` (which reads ``g_out``) only ever see pool edges.
         Edge ids, ``tail`` and ``head`` are unchanged.
@@ -1273,7 +1272,7 @@ cdef class GabowEdgeConnectivity:
         r"""
         Build ``k`` edge-disjoint out-arborescences rooted at ``root_idx``.
 
-        Two phases, following [Gabow1995]_ and the Georgiadis reference:
+        Two phases, following [Gabow1995]_ and [GKMN2022]_:
 
         - **Phase 1** builds the full ``k``-intersection to determine the
           *union* (the ``k``-in-regular subgraph rooted at ``root_idx``).
@@ -1357,9 +1356,9 @@ cdef class GabowEdgeConnectivity:
             self.in_union[j] = (self.edge_state_1[j] != self.UNUSED)
 
         # ---------------- Phase 2: decompose the union into k arborescences ------------
-        # Restrict the working graph to the union pool (Georgiadis's
-        # remove_unused_edges). We save the full adjacency and restore it at
-        # the end so the instance stays reusable.
+        # Restrict the working graph to the union pool. We save the full
+        # adjacency and restore it at the end so the instance stays
+        # reusable.
         cdef vector[vector[int]] saved_g_in = self.g_in
         cdef vector[vector[int]] saved_g_out = self.g_out
         self.rebuild_pool_adjacency()
@@ -1487,9 +1486,9 @@ cdef class GabowEdgeConnectivity:
 
     cdef void packing_init_set(self) noexcept:
         r"""
-        Reset the disjoint-set machinery for a new packing search
-        (Georgiadis ``init_set``). One empty set (id 0) is created with no
-        per-tree root yet, and every vertex starts unassigned.
+        Reset the disjoint-set machinery for a new packing search.
+        One empty set (id 0) is created with no per-tree root yet, and
+        every vertex starts unassigned.
 
         EXAMPLES::
 
@@ -1509,10 +1508,10 @@ cdef class GabowEdgeConnectivity:
 
     cdef void packing_merge_sets(self) noexcept:
         r"""
-        Close the current set and open a fresh one (Georgiadis
-        ``merge_sets``). Every vertex whose set was marked ``set_seen``
-        during the last traversal is folded into the new set; the current
-        ``L_roots`` are stored as the new set's per-tree roots.
+        Close the current set and open a fresh one. Every vertex whose set
+        was marked ``set_seen`` during the last traversal is folded into
+        the new set; the current ``L_roots`` are stored as the new set's
+        per-tree roots.
 
         EXAMPLES::
 
@@ -1545,8 +1544,7 @@ cdef class GabowEdgeConnectivity:
         r"""
         Return whether edge ``j`` is a joining edge for the current packing
         search: its endpoints lie in different f_trees, one of which is the
-        augmenting root, and ``j`` is not already in the arborescence
-        (Georgiadis ``check_if_joining``).
+        augmenting root, and ``j`` is not already in the arborescence.
 
         EXAMPLES::
 
@@ -1564,9 +1562,8 @@ cdef class GabowEdgeConnectivity:
 
     cdef bint packing_label_step(self, int j, int e) noexcept:
         r"""
-        Label edge ``j`` with ``e`` and report whether ``j`` is joining
-        (Georgiadis ``Label_step``). Non-joining edges are pushed onto the
-        work queue ``my_Q``.
+        Label edge ``j`` with ``e`` and report whether ``j`` is joining.
+        Non-joining edges are pushed onto the work queue ``my_Q``.
 
         EXAMPLES::
 
@@ -1588,8 +1585,8 @@ cdef class GabowEdgeConnectivity:
     cdef bint packing_any_unused_is_unlabelled(self, int x) noexcept:
         r"""
         Check whether every unused, non-arborescence edge directed into
-        ``x`` is also unlabeled; collect such edges in ``incident_edges_Q``
-        (Georgiadis ``any_unused_is_unlabelled``).
+        ``x`` is also unlabeled; collect such edges in
+        ``incident_edges_Q``.
 
         EXAMPLES::
 
@@ -1608,9 +1605,9 @@ cdef class GabowEdgeConnectivity:
 
     cdef int packing_label_A_step(self, int l, int k) noexcept:
         r"""
-        Label the incident unused edges along the current ``A_path``
-        (Georgiadis ``Label_A_step``). ``l`` is the label to apply, ``k``
-        the number of edges in ``A_path``.
+        Label the incident unused edges along the current ``A_path``.
+        ``l`` is the label to apply, ``k`` the number of edges in
+        ``A_path``.
 
         Returns the edge id of a joining edge if found, else ``INT_MAX``.
 
@@ -1645,16 +1642,16 @@ cdef class GabowEdgeConnectivity:
 
     cdef int packing_fundamental_cycle_step(self, int e, int tree) noexcept:
         r"""
-        Dedicated Phase 2 version of the fundamental-cycle traversal
-        (Georgiadis ``fundamental_cycle_step`` with ``search_mode`` always
-        on). Walks up tree ``tree`` from the two endpoints of edge ``e``,
+        Dedicated Phase 2 version of the fundamental-cycle traversal.
+        Walks up tree ``tree`` from the two endpoints of edge ``e``,
         building ``A_path`` of unlabeled edges and returning the first
         joining edge found, or ``INT_MAX``.
 
         The disjoint-set redirects (``myset`` / ``root_set`` / ``set_seen``)
         let the traversal jump across component boundaries of a split tree
-        -- this is what David's connectivity ``fundamental_cycle_step``
-        lacks and why it cannot be reused here.
+        -- this is what the connectivity version of
+        :meth:`fundamental_cycle_step` lacks and why it cannot be reused
+        here.
 
         EXAMPLES::
 
@@ -1773,8 +1770,8 @@ cdef class GabowEdgeConnectivity:
     cdef int packing_next_edge_step(self) noexcept:
         r"""
         Process queued edges and run :meth:`packing_fundamental_cycle_step`
-        until the queue empties or a joining edge is found (Georgiadis
-        ``Next_edge_step``). Returns the joining edge id or ``INT_MAX``.
+        until the queue empties or a joining edge is found. Returns the
+        joining edge id or ``INT_MAX``.
 
         EXAMPLES::
 
@@ -1803,7 +1800,7 @@ cdef class GabowEdgeConnectivity:
     cdef void packing_join(self, int j, int tree) noexcept:
         r"""
         Assign edge ``j`` to ``tree`` and merge the two f_trees it connects
-        into the root component (Georgiadis ``packing_join``).
+        into the root component.
 
         EXAMPLES::
 
@@ -1823,7 +1820,7 @@ cdef class GabowEdgeConnectivity:
     cdef void packing_init_Lroots(self, int x) noexcept:
         r"""
         Initialize the ``L_i`` tree of every ``T_i`` to vertex ``x`` and
-        mark ``x`` labeled (Georgiadis ``init_Lroots``).
+        mark ``x`` labeled.
 
         EXAMPLES::
 
@@ -1839,8 +1836,7 @@ cdef class GabowEdgeConnectivity:
 
     cdef void packing_empty_the_queue(self) noexcept:
         r"""
-        Empty ``my_Q``, clearing the label of every edge in it (Georgiadis
-        ``Empty_the_queue``).
+        Empty ``my_Q``, clearing the label of every edge in it.
 
         EXAMPLES::
 
@@ -1857,10 +1853,9 @@ cdef class GabowEdgeConnectivity:
 
     cdef bint search_packing_joining(self, int x, int tree) noexcept:
         r"""
-        Dedicated Phase 2 joining search (Georgiadis
-        ``search_packing_joining``): try to reconnect the f_tree rooted at
-        ``x`` into ``tree``, either directly via a free incoming edge from a
-        different f_tree, or via a cascade of swaps found by
+        Dedicated Phase 2 joining search: try to reconnect the f_tree
+        rooted at ``x`` into ``tree``, either directly via a free incoming
+        edge from a different f_tree, or via a cascade of swaps found by
         :meth:`packing_next_edge_step`.
 
         Returns ``True`` if a joining edge was found and joined.
@@ -1944,9 +1939,9 @@ cdef class GabowEdgeConnectivity:
         the orphaned one. This method recomputes ``parent_1[t]`` /
         ``depth_1[t]`` and sets ``root[]`` so that every vertex reachable
         from the root keeps ``root = root_vertex`` while the orphaned
-        component is rooted at ``myv``. This is the analog of Georgiadis's
-        ``update_mytree`` and is what lets :meth:`search_packing_joining`
-        see the correct two f_trees to reconnect.
+        component is rooted at ``myv``. This is what lets
+        :meth:`search_packing_joining` see the correct two f_trees to
+        reconnect.
 
         Assumes the ``my_*`` aliases are set to the out-arborescence
         direction.
@@ -2083,7 +2078,7 @@ cdef class GabowEdgeConnectivity:
         # packing search sees the correct two f_trees to reconnect.
         # Mark e with TEMP_REMOVED (not UNUSED) so the search does NOT
         # re-select the very edge we are trying to free as a reconnection
-        # edge (Georgiadis's distinct -2 marker).
+        # edge.
         self.edge_state_1[e] = self.TEMP_REMOVED
         self.update_mytree(t, e)
 
@@ -2181,8 +2176,7 @@ cdef class GabowEdgeConnectivity:
         """
         cdef int i, v
 
-        # Fresh disjoint-set for the next vertex's exploration (Georgiadis
-        # calls init_set at the start of period_step).
+        # Fresh disjoint-set for the next vertex's exploration.
         self.packing_init_set()
 
         if self.A_size >= self.n:
@@ -2489,11 +2483,10 @@ cdef class GabowEdgeConnectivity:
 
         # Build DiGraphs from the saved arborescence edge sets
         cdef int i
-        vertices = list(self.int_to_vertex)
         result = []
         for i in range(k):
             edges = ((self.int_to_vertex[self.tail[e_id]], self.int_to_vertex[self.head[e_id]])
                      for e_id in self.arborescence_F[i])
-            result.append(DiGraph([vertices, edges], format='vertices_and_edges'))
+            result.append(DiGraph([self.int_to_vertex, edges], format='vertices_and_edges'))
 
         return result
