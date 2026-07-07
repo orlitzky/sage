@@ -2111,7 +2111,7 @@ class PolynomialSpeciesElement(CombinatorialFreeModule.Element):
             sage: (X^3).derivative()
             3*X^2
             sage: (E2^2 + X).derivative()
-            1+ 2*X*E_2
+            1 + 2*X*E_2
             sage: E2(E2).derivative()
             X*E_2
         """
