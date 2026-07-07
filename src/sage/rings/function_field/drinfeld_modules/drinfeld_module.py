@@ -1034,29 +1034,27 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             sage: t = DrinfeldModule(A, [z, 1]).ore_variable() 
             sage: phi = DrinfeldModule(A, z+t^8)
             sage: L = K.extension(2);
-            sage: phi.automorphism_group_order(extension = L)
+            sage: phi.automorphism_group_order(extension=L)
             65535
 
         """
-        if not absolute:
-            if not self.is_finite():
-                raise NotImplementedError('Drinfeld module must be over a finite field for non absolute automorphism group computations')
-        if absolute:
-            if extension != None:
-                raise ValueError('when absolute=True, the argument extension must not be set, since extensions do nothing on absolute automorphism groups')
+        if not (absolute or self.is_finite()):
+            raise NotImplementedError('Drinfeld module must be over a finite field for non absolute automorphism group computations')
+        if absolute and extension is not None:
+            raise ValueError('when absolute=True, the argument extension must not be set, since extensions do nothing on absolute automorphism groups')
         r = self.rank()
         level_ = gcd([r] + [i for i in range(1, r) if self._gen[i] != 0])
         q = self.function_ring().base_ring().order()
         if not absolute:
             K = self.base()
-            if isinstance(extension,(int,Integer)):
+            if isinstance(extension, (int, Integer)):
                 extension_degree = extension
-            elif extension == None:
+            elif extension is None:
                 extension_degree = 1
             else:
                 size = extension.order()
                 if size.is_power_of(K.order()):
-                    extension_degree = log(size,K.order())
+                    extension_degree = log(size, K.order())
                 else:
                     raise ValueError('extension must be a field extension of the base field')
             n = log(K.order(), q)*extension_degree
