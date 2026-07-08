@@ -8,12 +8,6 @@ Krob--Thibon insertion. Multiplication is induced by concatenation of
 words, followed by replacing the product with its quasi-ribbon reading word
 representative.
 
-This file depends on the implementations of quasi-ribbon tableaux.
-
-The main functionality includes constructing hypoplactic monoid elements,
-computing their quasi-ribbon insertion tableaux, converting elements to
-their quasi-ribbon reading word representatives, multiplying elements, and
-computing finite hypoplactic equivalence classes by brute force.
 
 AUTHORS:
 
