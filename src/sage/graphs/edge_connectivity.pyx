@@ -138,7 +138,9 @@ cdef class GabowEdgeConnectivity:
 
     cdef int UNUSED
     cdef int FIRSTEDGE
-    cdef int TEMP_REMOVED  # edge_state sentinel for an edge temporarily pulled out of its tree during a swap
+    # edge_state sentinel for an edge temporarily pulled out of its tree
+    # during a swap
+    cdef int TEMP_REMOVED
 
     # The graph is stored as lists of incident edges
     cdef GenericGraph_pyx G  # the original graph
@@ -204,30 +206,30 @@ cdef class GabowEdgeConnectivity:
     cdef bint dfs_preprocessing  # whether to use DFS-based fast initialization
     cdef bint use_rec  # whether to use the recursive DFS initialization
 
-    # State for arborescence packing (Gabow 1995, extension of the connectivity algorithm).
-    # Stored separately from ``self.F`` since the latter mixes in- and out-arborescences
-    # produced by ``compute_edge_connectivity``.
-    cdef vector[vector[int]] arborescence_F  # saved out-arborescence edge sets, one per packed tree
+    # State for arborescence packing (Gabow 1995). Kept separate from
+    # ``self.F``, which mixes the in- and out-arborescences produced by
+    # ``compute_edge_connectivity``.
+    cdef vector[vector[int]] arborescence_F  # out-arborescence edge sets
 
     # Phase 2 (extraction) state -- used by find_tree to carve one spanning
     # out-arborescence at a time out of the k-intersection.
-    cdef bint* arbor_edge      # per-edge: True if edge belongs to the arborescence currently extracted
-    cdef bint* in_A            # per-vertex: True if vertex is in the reachable set A (grown from root)
-    cdef bint* in_X            # per-vertex: True if vertex is exhausted (no usable outgoing edge left)
-    cdef bint* marked_edge     # per-edge: True if edge has been processed in the current find_tree call
-    cdef int* A_order          # ordered list of vertices added to A (root first)
+    cdef bint* arbor_edge      # edge is in the arborescence being extracted
+    cdef bint* in_A            # vertex is in the reachable set A
+    cdef bint* in_X            # vertex is exhausted (no usable out-edge)
+    cdef bint* marked_edge     # edge processed in this find_tree call
+    cdef int* A_order          # vertices added to A, in order (root first)
     cdef int A_size            # number of vertices currently in A
-    cdef bint* extracted_edge  # per-edge: True if edge belongs to some already-extracted arborescence (cross-call G_minus_A marker)
-    cdef bint* in_union        # per-edge: True if edge is part of the k-intersection union found in Phase 1
-    cdef int packing_ntrees    # number of trees in the current (current_k - 1)-intersection during Phase 2
+    cdef bint* extracted_edge  # edge belongs to an already-extracted tree
+    cdef bint* in_union        # edge is part of the Phase 1 union
+    cdef int packing_ntrees    # trees in the current partial intersection
 
     # Disjoint-set machinery for the dedicated Phase 2 packing search.
     # Groups vertices into sets as components merge during a swap, so the
     # fundamental-cycle traversal can jump across component boundaries on a
     # split tree.
-    cdef int* myset            # per-vertex: id of the set the vertex belongs to (-1 if none)
+    cdef int* myset            # set id of the vertex (-1 if none)
     cdef int* set_seen         # per-set: marked during a traversal
-    cdef vector[vector[int]] root_set  # root_set[s][tree] = L_root of tree `tree` for set s
+    cdef vector[vector[int]] root_set  # L_root of each tree, per set
     cdef int sets              # number of sets currently created
 
     def __init__(self, G, dfs_preprocessing=True, use_rec=False):
@@ -1337,7 +1339,7 @@ cdef class GabowEdgeConnectivity:
         cdef bint saved_dfs = self.dfs_preprocessing
         self.dfs_preprocessing = False
 
-        # ---------------- Phase 1: build the k-intersection (find the union) -----------
+        # ----- Phase 1: build the k-intersection (find the union) -----
         cdef bint ok = True
         for i in range(k):
             if not self.construct_trees(False, i):
@@ -1355,7 +1357,7 @@ cdef class GabowEdgeConnectivity:
         for j in range(self.m):
             self.in_union[j] = (self.edge_state_1[j] != self.UNUSED)
 
-        # ---------------- Phase 2: decompose the union into k arborescences ------------
+        # ----- Phase 2: decompose the union into k arborescences -----
         # Restrict the working graph to the union pool. We save the full
         # adjacency and restore it at the end so the instance stays
         # reusable.
