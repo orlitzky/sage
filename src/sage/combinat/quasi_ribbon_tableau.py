@@ -548,6 +548,7 @@ class QuasiRibbonTableau(SkewTableau):
                 f"column {col} is not strictly increasing",
             )
 
+
 class QuasiRibbonTableaux(SkewTableaux):
     r"""
     The set of quasi-ribbon tableaux.
