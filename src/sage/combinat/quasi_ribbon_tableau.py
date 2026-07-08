@@ -129,7 +129,6 @@ class QuasiRibbonTableau(SkewTableau):
         """
         return QuasiRibbonTableaux()(rows)
 
-
     def __init__(self, parent, rows):
         r"""
         Initialize ``self`` from normalized quasi-ribbon rows.
