@@ -1944,6 +1944,15 @@ class DerivativeSpeciesElement(LazyCombinatorialSpeciesElement):
     def __init__(self, F):
         r"""
         Initialize the derivative of ``F``.
+
+        TESTS::
+
+            sage: L.<X> = LazyCombinatorialSpecies(QQ)
+            sage: E2 = L(SymmetricGroup(2))
+            sage: D = (X^2*E2).derivative()
+            sage: D[3] == (2*X*E2 + X^3)[3]
+            True
+            sage: TestSuite(D).run(skip=['_test_category', '_test_pickling'])
         """
         if F.parent()._arity != 1:
             raise NotImplementedError("derivative is not yet implemented for multisort species")

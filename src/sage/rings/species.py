@@ -1852,9 +1852,9 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
             TESTS::
 
                 sage: M = MolecularSpecies("X")
-                sage: [sum(1 for m in M.subset(n) if m.derivative().is_molecular()) for n in range(1, 9)]
-                [1, 1, 2, 5, 5, 16, 7, 50]
-                sage: oeis(_)
+                sage: [sum(1 for m in M.subset(n) if m.derivative().is_molecular()) for n in range(1, 7)]
+                [1, 1, 2, 5, 5, 16]
+                sage: oeis(_) # optional - internet
                 0: A002106: Number of transitive permutation groups of degree n.
             """
             def delete_point_from_permutation(g, r, m):
