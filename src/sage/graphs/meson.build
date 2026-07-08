@@ -1,7 +1,7 @@
 bliss = cc.find_library('bliss', required: get_option('bliss'), disabler: true)
 
 mcqd = disabler()
-mcqd = dependency('Mcqd', method : 'cmake', required: false, disabler: true)
+mcqd = dependency('Mcqd', method: 'cmake', required: false, disabler: true)
 if not mcqd.found()
   if cc.has_header('mcqd.h', required: get_option('mcqd'))
     # mcqd is a header-only library
