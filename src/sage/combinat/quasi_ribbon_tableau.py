@@ -11,15 +11,6 @@ from top to bottom. The entries in each row are weakly increasing left to right,
 entries in each column are strictly increasing top to bottom, and ``None`` entries are used
 to record the shifted positions in the ribbon shape.
 
-This file consists of the following major classes:
-
-Element classes:
-
-* :class:`QuasiRibbonTableau`
-
-Parent classes:
-
-* :class:`QuasiRibbonTableaux`
 
 The main functionality includes constructing quasi-ribbon tableaux,
 computing their associated compositions, computing column-reading words,
