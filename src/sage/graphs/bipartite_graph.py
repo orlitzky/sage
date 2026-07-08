@@ -829,12 +829,26 @@ class BipartiteGraph(Graph):
             RuntimeError: cannot add duplicate vertex to other partition
             sage: (bg.left, bg.right)
             ({0, 1, 2}, set())
+            sage: bg.add_vertices([0, 1, 2], left=[False])
+            Traceback (most recent call last):
+            ...
+            ValueError: zip() argument 2 is longer than argument 1
+
+
+        Check that :issue:`42512` is fixed::
+
+            sage: bg = BipartiteGraph()
+            sage: bg.add_vertices(iter(range(5)), left=True)
+            sage: list(bg)
+            [0, 1, 2, 3, 4]
         """
         # sanity check on partition specifiers
         if left and right:  # also triggered if both lists are specified
             raise RuntimeError("only one partition may be specified")
         if not (left or right):
             raise RuntimeError("partition must be specified (e.g. left=True)")
+
+        vertices = list(vertices)
 
         # handle partitions
         if left and (not isinstance(left, Iterable)):
@@ -849,7 +863,7 @@ class BipartiteGraph(Graph):
                 left = [not tf for tf in right]
             new_left = set()
             new_right = set()
-            for tf, vv in zip(left, vertices):
+            for tf, vv in zip(left, vertices, strict=True):
                 if tf:
                     new_left.add(vv)
                 else:
