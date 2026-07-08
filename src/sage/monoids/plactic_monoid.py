@@ -191,8 +191,8 @@ class WordMonoidElement(ElementWrapper):
 
         INPUT:
 
-        - ``parent`` -- a word monoid
-        - ``value`` -- a word, given as a list or tuple of letters in the
+        - ``parent`` -- word monoid
+        - ``value`` -- word given as a list or tuple of letters in the
           alphabet of ``parent``
 
         TESTS::
