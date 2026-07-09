@@ -1840,16 +1840,25 @@ class EllipticCurveHom(Morphism):
             sage: f = phi.minimal_polynomial()
             sage: psi.push_subgroup(f)
             1
+
+        The image subgroup may have zero as its `x`-coordinate::
+
+            sage: F.<a> = GF(2^2)
+            sage: E = EllipticCurve(F, [0, 0, a, 0, 0])
+            sage: phi = E.isogeny(E(0, a))
+            sage: R.<x> = F[]
+            sage: phi.push_subgroup(x^3 + a + 1)
+            x
         """
         g = self.x_rational_map()
         g1, g2 = g.numerator(), g.denominator()
         gker = g2.gcd(f)
         f1 = f // gker
         R = f1.parent()
+        if f1.degree() == 0:
+            return R.one()
         S = R.quotient_ring(f1)
         alpha = S(g1 * g2.inverse_mod(f1))
-        if not alpha:
-            return R.one()
         return alpha.minpoly()
 
     def xEVAL(self, xP):
