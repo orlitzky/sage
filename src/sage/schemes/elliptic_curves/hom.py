@@ -740,7 +740,8 @@ class EllipticCurveHom(Morphism):
         EE = E.change_ring(to_K)
 
         roots = f.change_ring(to_K).roots(multiplicities=False)
-        for i, x in enumerate(roots):
+        while roots:
+            x = roots.pop(0)
             h = EE.defining_polynomial()(x=x, z=1).univariate_polynomial()
             try:
                 y = h.any_root()
@@ -750,7 +751,7 @@ class EllipticCurveHom(Morphism):
                 # everything computed so far still lives over the old field
                 pts = [P.change_ring(to_L) for P in pts]
                 x = to_L(x)
-                roots[i+1:] = [to_L(r) for r in roots[i+1:]]
+                roots = [to_L(r) for r in roots]
                 y = h.change_ring(to_L).any_root()
             pts.append(EE(x, y))
 
