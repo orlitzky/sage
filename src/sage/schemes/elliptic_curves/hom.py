@@ -619,9 +619,18 @@ class EllipticCurveHom(Morphism):
               embedded in Abelian group of points on Elliptic Curve defined by y^2 + x*y = x^3 + 1
                 over Finite Field in t of size 2^42
 
-        When the `y`-coordinates require a second extension after splitting
-        the kernel polynomial, all accumulated and remaining `x`-coordinates
-        are mapped to the larger field::
+        Make sure :issue:`42506` is fixed; the ``'kerpoly'`` algorithm used to
+        fail immediately with a :exc:`NameError`::
+
+            sage: E = EllipticCurve(QQ, [0, 0, 0, -1, 0])
+            sage: phi = E.isogeny(E(0, 0))
+            sage: phi.kernel_subgroup(algorithm='kerpoly').invariants()
+            (2,)
+
+        When the `y`-coordinate of a root only exists over a further extension
+        `L`, both the points found so far and the roots not yet processed must
+        be mapped into `L`.  Here that extension is needed for the very first
+        root, so no point has been accumulated yet::
 
             sage: E = EllipticCurve(QQ, [0, 0, 0, 0, 2])
             sage: x = polygen(QQ)
@@ -629,6 +638,19 @@ class EllipticCurveHom(Morphism):
             sage: G = (phi.dual() * phi).kernel_subgroup(extend=True, algorithm='kerpoly')
             sage: G.invariants()
             (3, 3)
+
+        Here it is needed only after a `2`-torsion point has been accumulated,
+        so the points found so far really do have to be remapped::
+
+            sage: E = EllipticCurve(GF(11), [0, 1])
+            sage: phi3 = E.isogenies_prime_degree(3)[1]
+            sage: phi2 = phi3.codomain().isogenies_prime_degree(2)[0]
+            sage: G = (phi2 * phi3).kernel_subgroup(extend=True, algorithm='kerpoly')
+            sage: G.invariants()
+            (6,)
+            sage: G.universe()
+            Abelian group of points on Elliptic Curve defined by y^2 = x^3 + 1
+             over Finite Field in v of size 11^2
         """
         if algorithm is None:
             if self.domain().base_ring().is_finite():
@@ -714,7 +736,7 @@ class EllipticCurveHom(Morphism):
                     return A
             raise ValueError('kernel subgroup has no generating points over the base field')
 
-        K, to_K = f.splitting_field('u', map=True)
+        _, to_K = f.splitting_field('u', map=True)
         EE = E.change_ring(to_K)
 
         roots = f.change_ring(to_K).roots(multiplicities=False)
@@ -725,10 +747,10 @@ class EllipticCurveHom(Morphism):
             except ValueError:
                 L, to_L = h.splitting_field('v', map=True)
                 EE = EE.change_ring(to_L)
-                pts = [EE([to_L(c) for c in P]) for P in pts]
-                roots[i:] = [to_L(r) for r in roots[i:]]
-                x = roots[i]
-                K, to_K = L, to_L * to_K
+                # everything computed so far still lives over the old field
+                pts = [P.change_ring(to_L) for P in pts]
+                x = to_L(x)
+                roots[i+1:] = [to_L(r) for r in roots[i+1:]]
                 y = h.change_ring(to_L).any_root()
             pts.append(EE(x, y))
 
