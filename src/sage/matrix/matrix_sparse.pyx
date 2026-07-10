@@ -218,6 +218,13 @@ cdef class Matrix_sparse(matrix.Matrix):
             ....:     def _richcmp_(self, other, op):
             ....:         return richcmp((self.value, self._is_zero),
             ....:                        (other.value, other._is_zero), op)
+            ....:     def __bool__(self):
+            ....:         P = self.parent()
+            ....:         if self._is_zero and P.fail_zero_test:
+            ....:             P.zero_tests += 1
+            ....:             if P.zero_tests == 2:
+            ....:                 raise RuntimeError("zero test failed")
+            ....:         return not self._is_zero
             ....:     def is_zero(self):
             ....:         return self._is_zero
             ....:     def __hash__(self):
@@ -226,6 +233,8 @@ cdef class Matrix_sparse(matrix.Matrix):
             ....:     Element = ExplodingElement
             ....:     def __init__(self):
             ....:         Parent.__init__(self, category=Rings())
+            ....:         self.fail_zero_test = False
+            ....:         self.zero_tests = 0
             ....:     def _repr_(self):
             ....:         return "Exploding zero test ring"
             ....:     def _element_constructor_(self, x=0):
@@ -263,6 +272,21 @@ cdef class Matrix_sparse(matrix.Matrix):
             [(0, 2)]
             sage: C.rows()
             [(0, 0, 10), (0, 0, 0), (0, 0, 0)]
+
+        The cache is also invalidated if writing the result fails after
+        partially modifying the destination::
+
+            sage: A = matrix(R, 2, 2, {(0, 0): R(1)}, sparse=True)
+            sage: B = matrix(R, 2, 2, {(0, 0): R(1)}, sparse=True)
+            sage: C = matrix(R, 2, 2, {(0, 0): R(2), (1, 1): R(3)}, sparse=True)
+            sage: R.fail_zero_test = True
+            sage: C.set_to_product(A, B)
+            Traceback (most recent call last):
+            ...
+            RuntimeError: zero test failed
+            sage: R.fail_zero_test = False
+            sage: C.nonzero_positions()
+            [(1, 1)]
         """
         cdef dict e = left._multiply_classical_entries(right)
         return left.new_matrix(left._nrows, right._ncols, entries=e, coerce=False, copy=False)

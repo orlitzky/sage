@@ -86,6 +86,7 @@ from cysignals.signals cimport sig_on, sig_off
 cimport sage.matrix.matrix_dense as matrix_dense
 from sage.structure.element cimport Matrix
 from sage.structure.element cimport Element
+from sage.matrix.matrix0 cimport Matrix as Matrix0
 from sage.structure.richcmp cimport rich_to_bool
 from sage.rings.finite_rings.element_base cimport Cache_base
 
@@ -474,19 +475,48 @@ cdef class Matrix_gf2e_dense(matrix_dense.Matrix_dense):
             sage: B = random_matrix(K, 50, 17)
             sage: A*B == A._multiply_classical(B)
             True
+
+        The product can be stored in and overwrite a preallocated matrix::
+
+            sage: K.<a> = GF(2^8)
+            sage: A = matrix(K, 2, 3, range(6))
+            sage: B = matrix(K, 3, 2, range(6, 12))
+            sage: C = matrix(K, 2, 2, [a] * 4)
+            sage: C.set_to_product(A, B)
+            sage: C == A * B
+            True
+            sage: C.set_to_product(matrix(K, 2, 0), matrix(K, 0, 2))
+            sage: C.is_zero()
+            True
         """
         check_matrix_multiplication_sizes(self, right)
 
         cdef Matrix_gf2e_dense ans
 
         ans = self.new_matrix(nrows = self.nrows(), ncols = right.ncols())
-        if self._nrows == 0 or self._ncols == 0 or right._ncols == 0:
-            # We know right._nrows == self._ncols because check_matrix_multiplication_sizes passed
-            return ans
-        sig_on()
-        ans._entries = mzed_mul(ans._entries, self._entries, (<Matrix_gf2e_dense>right)._entries)
-        sig_off()
+        ans._set_to_product(self, <Matrix0>right)
         return ans
+
+    cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
+        """
+        Set ``self`` to ``left * right`` using M4RIE.
+        """
+        cdef Matrix_gf2e_dense _left = <Matrix_gf2e_dense>left
+        cdef Matrix_gf2e_dense _right = <Matrix_gf2e_dense>right
+
+        # ``mzed_set_ui`` is not valid for a zero-column matrix.
+        if self._nrows == 0 or self._ncols == 0:
+            return
+
+        if _left._ncols == 0:
+            sig_on()
+            mzed_set_ui(self._entries, 0)
+            sig_off()
+            return
+
+        sig_on()
+        self._entries = mzed_mul(self._entries, _left._entries, _right._entries)
+        sig_off()
 
     cpdef Matrix_gf2e_dense _multiply_newton_john(Matrix_gf2e_dense self, Matrix_gf2e_dense right):
         """

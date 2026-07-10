@@ -36,6 +36,7 @@ from cpython.sequence cimport *
 from sage.rings.rational cimport Rational
 from sage.rings.integer  cimport Integer
 from sage.matrix.matrix cimport Matrix
+cimport sage.matrix.matrix0 as matrix0
 from sage.matrix.args cimport SparseEntry, MatrixArgs_init
 
 from sage.libs.gmp.mpz cimport *
@@ -221,8 +222,39 @@ cdef class Matrix_rational_sparse(Matrix_sparse):
     #   * x _dict -- sparse dictionary of underlying elements (need not be a copy)
 
     cdef sage.structure.element.Matrix _matrix_times_matrix_(self, sage.structure.element.Matrix _right):
+        """
+        Return the product of two sparse rational matrices.
+
+        A preallocated destination uses the same specialized sparse
+        multiplication code and may be reused::
+
+            sage: a = matrix(QQ, 2, [1/2, 2, 3, 4], sparse=True)
+            sage: b = matrix(QQ, 2, 3, [1..6], sparse=True)
+            sage: C = matrix(QQ, 2, 3, [7] * 6, sparse=True)
+            sage: C.set_to_product(a, b)
+            sage: C == a * b
+            True
+            sage: C.set_to_product(2 * a, b)
+            sage: C == (2 * a) * b
+            True
+        """
         cdef Matrix_rational_sparse right, ans
         right = _right
+
+        ans = self.new_matrix(self._nrows, right._ncols)
+        ans._set_to_product_classical(self, right)
+        return ans
+
+    cdef void _set_to_product_classical(self, matrix0.Matrix _left,
+                                        matrix0.Matrix _right) except *:
+        """
+        Set ``self`` to the product of two sparse rational matrices.
+
+        This is the destination-writing version of
+        :meth:`_matrix_times_matrix_`.
+        """
+        cdef Matrix_rational_sparse left = <Matrix_rational_sparse>_left
+        cdef Matrix_rational_sparse right = <Matrix_rational_sparse>_right
 
         cdef mpq_vector* v
 
@@ -238,7 +270,12 @@ cdef class Matrix_rational_sparse(Matrix_sparse):
         right_indices = [j for j in range(right._ncols)
                          if nonzero_positions_in_columns[j]]
 
-        ans = self.new_matrix(self._nrows, right._ncols)
+        # Clear any previous entries, while avoiding a second initialization
+        # pass for the empty rows of a freshly allocated destination.
+        for i in range(self._nrows):
+            if self._matrix[i].num_nonzero:
+                mpq_vector_clear(&self._matrix[i])
+                mpq_vector_init(&self._matrix[i], self._ncols, 0)
 
         # Now do the multiplication, getting each row completely before filling it in.
         cdef set c
@@ -246,8 +283,8 @@ cdef class Matrix_rational_sparse(Matrix_sparse):
         mpq_init(x)
         mpq_init(y)
         mpq_init(s)
-        for i in range(self._nrows):
-            v = &(self._matrix[i])
+        for i in range(left._nrows):
+            v = &(left._matrix[i])
             if not v.num_nonzero:
                 continue
             for j in right_indices:
@@ -258,12 +295,11 @@ cdef class Matrix_rational_sparse(Matrix_sparse):
                         mpq_vector_get_entry(y, &right._matrix[v.positions[k]], j)
                         mpq_mul(x, v.entries[k], y)
                         mpq_add(s, s, x)
-                mpq_vector_set_entry(&ans._matrix[i], j, s)
+                mpq_vector_set_entry(&self._matrix[i], j, s)
 
         mpq_clear(x)
         mpq_clear(y)
         mpq_clear(s)
-        return ans
 
     def _matrix_times_matrix_dense(self, sage.structure.element.Matrix _right):
         """

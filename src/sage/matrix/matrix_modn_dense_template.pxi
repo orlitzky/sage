@@ -105,7 +105,7 @@ cdef sage.rings.fast_arith.arith_int ArithIntObj
 ArithIntObj = sage.rings.fast_arith.arith_int()
 
 # for copying/pickling
-from libc.string cimport memcpy
+from libc.string cimport memcpy, memset
 from libc.stdio cimport snprintf
 
 from sage.modules.vector_modn_dense cimport Vector_modn_dense
@@ -113,6 +113,7 @@ from sage.modules.vector_modn_dense cimport Vector_modn_dense
 from sage.arith.misc import is_prime
 from sage.structure.element cimport (Element, Vector, Matrix,
                                      ModuleElement, RingElement)
+from sage.matrix.matrix0 cimport Matrix as Matrix0
 from sage.matrix.matrix_dense cimport Matrix_dense
 from sage.matrix.matrix_integer_dense cimport Matrix_integer_dense
 from sage.rings.finite_rings.integer_mod cimport IntegerMod_int, IntegerMod_abstract
@@ -1218,6 +1219,18 @@ cdef class Matrix_modn_dense_template(Matrix_dense):
 
             sage: E == F
             True
+
+        The product can also be written into a reusable destination matrix::
+
+            sage: for R in (Zmod(36), Zmod(65521)):
+            ....:     A = matrix(R, 2, 3, range(6), implementation='linbox')
+            ....:     B = matrix(R, 3, 2, range(6, 12), implementation='linbox')
+            ....:     C = matrix(R, 2, 2, [1] * 4, implementation='linbox')
+            ....:     C.set_to_product(A, B)
+            ....:     assert C == A * B
+            ....:     C.set_to_product(matrix(R, 2, 0, implementation='linbox'),
+            ....:                      matrix(R, 0, 2, implementation='linbox'))
+            ....:     assert C.is_zero()
         """
         if get_verbose() >= 2:
             verbose('mod-p multiply of %s x %s matrix by %s x %s matrix modulo %s' % (
@@ -1225,17 +1238,34 @@ cdef class Matrix_modn_dense_template(Matrix_dense):
 
         check_matrix_multiplication_sizes(self, right)
 
-        cdef int e
         cdef Matrix_modn_dense_template ans, B
 
         ans = self.new_matrix(nrows = self.nrows(), ncols = right.ncols())
 
         B = right
 
-        linbox_matrix_matrix_multiply(self.p, ans._entries, self._entries,
-                                      B._entries, self._nrows, B._ncols, B._nrows)
+        ans._set_to_product(self, B)
 
         return ans
+
+    cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
+        """
+        Set ``self`` to ``left * right`` using LinBox.
+        """
+        cdef Matrix_modn_dense_template _left = <Matrix_modn_dense_template>left
+        cdef Matrix_modn_dense_template _right = <Matrix_modn_dense_template>right
+
+        if self._nrows == 0 or self._ncols == 0:
+            return
+
+        if _left._ncols == 0:
+            memset(self._entries, 0,
+                   self._nrows * self._ncols * sizeof(celement))
+            return
+
+        linbox_matrix_matrix_multiply(self.p, self._entries, _left._entries,
+                                      _right._entries, _left._nrows,
+                                      _right._ncols, _right._nrows)
 
     cdef _vector_times_matrix_(self, Vector v):
         """

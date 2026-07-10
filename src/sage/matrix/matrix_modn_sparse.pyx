@@ -99,6 +99,7 @@ from sage.libs.linbox.conversion cimport (METHOD_DEFAULT,
 from sage.matrix.args cimport SparseEntry, MatrixArgs_init
 from sage.matrix.matrix2 import Matrix as Matrix2
 from sage.matrix.matrix_dense cimport Matrix_dense
+cimport sage.matrix.matrix0 as matrix0
 from sage.matrix.matrix_sparse cimport Matrix_sparse
 from sage.misc.verbose import verbose, get_verbose
 from sage.modules.vector_integer_sparse cimport *
@@ -332,9 +333,35 @@ cdef class Matrix_modn_sparse(Matrix_sparse):
             [32770 32770 32770]
             sage: M*M.transpose() # previously returned [32738]
             [3]
+
+        A preallocated destination uses the same specialized sparse
+        multiplication code and may be reused::
+
+            sage: C = matrix(GF(43), 3, 3, [7] * 9, sparse=True)
+            sage: C.set_to_product(a, b)
+            sage: C == a * b
+            True
+            sage: C.set_to_product(2 * a, b)
+            sage: C == (2 * a) * b
+            True
         """
         cdef Matrix_modn_sparse right, ans
         right = _right
+
+        ans = self.new_matrix(self._nrows, right._ncols)
+        ans._set_to_product_classical(self, right)
+        return ans
+
+    cdef void _set_to_product_classical(self, matrix0.Matrix _left,
+                                        matrix0.Matrix _right) except *:
+        """
+        Set ``self`` to the product of two sparse modular matrices.
+
+        This is the destination-writing version of
+        :meth:`_matrix_times_matrix_`.
+        """
+        cdef Matrix_modn_sparse left = <Matrix_modn_sparse>_left
+        cdef Matrix_modn_sparse right = <Matrix_modn_sparse>_right
 
         cdef c_vector_modint* v
 
@@ -346,14 +373,19 @@ cdef class Matrix_modn_sparse(Matrix_sparse):
             for j in range(v.num_nonzero):
                 (<set> nonzero_positions_in_columns[v.positions[j]]).add(i)
 
-        ans = self.new_matrix(self._nrows, right._ncols)
+        # Clear any previous entries, while avoiding a second initialization
+        # pass for the empty rows of a freshly allocated destination.
+        for i in range(self._nrows):
+            if self.rows[i].num_nonzero:
+                clear_c_vector_modint(&self.rows[i])
+                init_c_vector_modint(&self.rows[i], self.p, self._ncols, 0)
 
         # Now do the multiplication, getting each row completely before filling it in.
         cdef int x, y, s
         cdef set c
 
-        for i in range(self._nrows):
-            v = &(self.rows[i])
+        for i in range(left._nrows):
+            v = &(left.rows[i])
             for j in range(right._ncols):
                 s = 0
                 c = <set> nonzero_positions_in_columns[j]
@@ -362,8 +394,7 @@ cdef class Matrix_modn_sparse(Matrix_sparse):
                         y = get_entry(&right.rows[v.positions[k]], j)
                         x = v.entries[k] * y
                         s = (s + x) % self.p
-                set_entry(&ans.rows[i], j, s)
-        return ans
+                set_entry(&self.rows[i], j, s)
 
     def _matrix_times_matrix_dense(self, Matrix _right):
         """

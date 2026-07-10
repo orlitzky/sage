@@ -1342,6 +1342,31 @@ cdef class Matrix_gfpn_dense(Matrix_dense):
         # asymptotically faster. So, we used it by default.
         return 0
 
+    cdef void _set_to_product(self, sage.matrix.matrix0.Matrix left,
+                              sage.matrix.matrix0.Matrix right) except *:
+        self._set_to_product_strassen(left, right, 0)
+
+    cdef void _set_to_product_strassen(self, sage.matrix.matrix0.Matrix left,
+                                       sage.matrix.matrix0.Matrix right,
+                                       int cutoff) except *:
+        cdef Matrix_gfpn_dense _left = <Matrix_gfpn_dense>left
+        cdef Matrix_gfpn_dense _right = <Matrix_gfpn_dense>right
+
+        if self.Data == NULL or _left.Data == NULL or _right.Data == NULL:
+            raise ValueError("The matrices must not be empty")
+        if self._nrows == 0 or self._ncols == 0:
+            return
+        if _left._ncols == 0:
+            memset(self.Data.Data, FF_ZERO, self.Data.RowSize * self.Data.Nor)
+            return
+
+        StrassenSetCutoff(cutoff // sizeof(long))
+        sig_on()
+        try:
+            MatMulStrassen(self.Data, _left.Data, _right.Data)
+        finally:
+            sig_off()
+
     cpdef Matrix_gfpn_dense _multiply_classical(Matrix_gfpn_dense self, Matrix_gfpn_dense right):
         """
         Multiplication using the cubic school book multiplication algorithm.
@@ -1390,18 +1415,29 @@ cdef class Matrix_gfpn_dense(Matrix_dense):
             sage: N = MatrixSpace(GF(9,'x'),600,1500).random_element()
             sage: M._multiply_strassen(N) == M._multiply_strassen(N,80) == M._multiply_strassen(N,2)
             True
+
+        A preallocated MeatAxe matrix uses the same multiplication and can be
+        reused::
+
+            sage: K.<x> = GF(9)
+            sage: A = MatrixSpace(K, 8, 5).random_element()
+            sage: B = MatrixSpace(K, 5, 7).random_element()
+            sage: C = MatrixSpace(K, 8, 7).random_element()
+            sage: C.set_to_product(A, B)
+            sage: C == A * B == A._multiply_strassen(B, 0)
+            True
+            sage: C.set_to_product(A, 2*B)
+            sage: C == A * (2*B)
+            True
         """
         if self.Data == NULL or right.Data == NULL:
             raise ValueError("The matrices must not be empty")
         check_matrix_multiplication_sizes(self, right)
-        StrassenSetCutoff(cutoff // sizeof(long))
-        sig_on()
-        try:
-            mat = MatAlloc(self.Data.Field, self._nrows, right._ncols)
-            MatMulStrassen(mat, self.Data, right.Data)
-        finally:
-            sig_off()
-        return new_mtx(mat, self)
+        cdef Matrix_t *mat = MatAlloc(self.Data.Field, self._nrows,
+                                      right._ncols)
+        cdef Matrix_gfpn_dense result = new_mtx(mat, self)
+        result._set_to_product_strassen(self, right, cutoff)
+        return result
 
     cdef _mul_long(self, long n) noexcept:
         """

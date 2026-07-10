@@ -202,11 +202,15 @@ cdef class Matrix(sage.structure.element.Matrix):
 
         self.clear_cache()
         self._subdivisions = None
-        self._set_to_product(left, right)
-        # Drop any cache the backend may have populated from the destination's
-        # previous contents while writing the product (e.g. the sparse
-        # algorithm queries ``nonzero_positions``); the result is a fresh value.
-        self.clear_cache()
+        try:
+            self._set_to_product(left, right)
+        finally:
+            # Drop any cache the backend may have populated from the
+            # destination's previous contents while writing the product (e.g.
+            # the sparse algorithm queries ``nonzero_positions``).  This must
+            # also happen if the backend raises after modifying only part of
+            # the destination.
+            self.clear_cache()
 
     def __cinit__(self, parent, *args, **kwds):
         """

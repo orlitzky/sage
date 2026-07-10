@@ -14,6 +14,7 @@ from sage.categories.fields import Fields
 from sage.libs.gap.libgap import libgap
 from sage.structure.element cimport Matrix
 from sage.matrix.args cimport MatrixArgs_init
+from sage.matrix.matrix0 cimport Matrix as Matrix0
 from sage.matrix.matrix_utils cimport check_matrix_multiplication_sizes
 
 
@@ -358,11 +359,34 @@ cdef class Matrix_gap(Matrix_dense):
             sage: m1 * m2
             [ 1 -1]
             [ 7 -7]
+
+        A preallocated GAP matrix can be reused as the destination::
+
+            sage: C = M(1)
+            sage: C.set_to_product(m1, m2)
+            sage: C == m1 * m2
+            True
+            sage: C.set_to_product(m2, m1)
+            sage: C == m2 * m1
+            True
+            sage: C.set_to_product(MatrixSpace(QQ, 2, 0, implementation='gap')(),
+            ....:                  MatrixSpace(QQ, 0, 2, implementation='gap')())
+            sage: C.is_zero()
+            True
         """
         check_matrix_multiplication_sizes(self, right)
         cdef Matrix_gap M = self._new(self._nrows, right._ncols)
-        M._libgap = <Matrix_gap> ((<Matrix_gap> self)._libgap * (<Matrix_gap> right)._libgap)
+        M._set_to_product(<Matrix0>self, <Matrix0>right)
         return M
+
+    cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
+        cdef Matrix_gap _left = <Matrix_gap>left
+        cdef Matrix_gap _right = <Matrix_gap>right
+        if self._nrows == 0 or self._ncols == 0 or _left._ncols == 0:
+            self._libgap = libgap([[0] * self._ncols
+                                   for _ in range(self._nrows)])
+            return
+        self._libgap = _left._libgap * _right._libgap
 
     def transpose(self):
         r"""

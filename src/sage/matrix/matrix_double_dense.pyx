@@ -249,6 +249,29 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
             [0.0 0.0 0.0]
             [0.0 0.0 0.0]
             [0.0 0.0 0.0]
+
+        A destination constructed from a Fortran-contiguous NumPy array is
+        also supported::
+
+            sage: import numpy
+            sage: A = matrix(RDF, [[1, 2], [3, 4]])
+            sage: B = matrix(RDF, [[5, 6], [7, 8]])
+            sage: C = matrix(RDF, numpy.asfortranarray([[1., 1.], [1., 1.]]))
+            sage: C.set_to_product(A, B)
+            sage: C == A * B
+            True
+            sage: C.set_to_product(B, A)
+            sage: C == B * A
+            True
+
+        The same holds over the complex double field::
+
+            sage: A = A.change_ring(CDF)
+            sage: B = B.change_ring(CDF)
+            sage: C = matrix(CDF, numpy.asfortranarray([[1., 1.], [1., 1.]], dtype='complex128'))
+            sage: C.set_to_product(A, B)
+            sage: C == A * B
+            True
         """
         check_matrix_multiplication_sizes(self, right)
 
@@ -268,8 +291,13 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
         if numpy is None:
             import numpy
 
-        numpy.dot(_left._matrix_numpy, _right._matrix_numpy,
-                  out=self._matrix_numpy)
+        if cnumpy.PyArray_IS_C_CONTIGUOUS(self._matrix_numpy):
+            numpy.dot(_left._matrix_numpy, _right._matrix_numpy,
+                      out=self._matrix_numpy)
+        else:
+            numpy.copyto(self._matrix_numpy,
+                         numpy.dot(_left._matrix_numpy,
+                                   _right._matrix_numpy))
 
     def __invert__(self):
         """
