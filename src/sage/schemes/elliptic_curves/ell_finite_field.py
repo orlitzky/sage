@@ -600,12 +600,12 @@ class EllipticCurve_finite_field(EllipticCurve_field, ProjectivePlaneCurve_finit
             ....:     except ArithmeticError:
             ....:         continue
             ....:     break
-            ....: ells = [2, 3, 8, 5, 25]
+            ....: ells = [2, 4, 5, 8, 25]
             ....: for l in ells:
             ....:     K = E.division_field(l)
             ....:     n = E.cardinality(extension_degree=K.degree()//F.degree())
             ....:     assert (l^2 if q%l else 0 + E.is_ordinary()).divides(n)
-            ....:     check(E, l, K) # long time
+            ....:     check(E, l, K)  # long time
 
         Also check that it matches the generic implementation from :class:`EllipticCurve_field`::
 
@@ -638,8 +638,8 @@ class EllipticCurve_finite_field(EllipticCurve_field, ProjectivePlaneCurve_finit
                     ext = m * Mod((pi**m)[0], n).multiplicative_order()
 
         else:
-            def van_tuyl(N, f, e):
-                assert N == f**e
+            def van_tuyl(f, e):
+                N = f**e
                 chi = self.frobenius_polynomial()
 
                 if N.is_prime():
@@ -677,7 +677,7 @@ class EllipticCurve_finite_field(EllipticCurve_field, ProjectivePlaneCurve_finit
                 from sage.groups.generic import order_from_multiple
                 return order_from_multiple(U, N*(f**2 - 1), operation='*')
 
-            ext = lcm(van_tuyl(f**e, f, e) for f,e in n.factor())
+            ext = lcm(van_tuyl(f, e) for f,e in n.factor())
 
         return F.extension(ext, names=names, map=map, **kwds)
 
@@ -3429,10 +3429,10 @@ def EllipticCurve_with_order(m, *, D=None):
 
      - Gareth Ma and Giacomo Pope (Sage Days 123): initial version
     """
-    from sage.arith.misc import factor, is_prime_power
+    from sage.arith.misc import is_prime_power, factor
     from sage.quadratic_forms.binary_qf import BinaryQF
-    from sage.schemes.elliptic_curves.cm import hilbert_class_polynomial
     from sage.structure.factorization import Factorization
+    from sage.schemes.elliptic_curves.cm import hilbert_class_polynomial
 
     def find_q(m, m4_fac, D):
         for t, _ in BinaryQF(1, 0, -D).solve_integer(m4_fac, _flag=3):
