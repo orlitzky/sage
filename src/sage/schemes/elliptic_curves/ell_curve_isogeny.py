@@ -539,11 +539,12 @@ def _factored_isogeny_from_kernel_polynomial(E, kernel_polynomial,
                                              check=True):
     r"""
     Construct an isogeny from a kernel polynomial with both a nontrivial
-    2-torsion part and a nontrivial odd part, as a composite of an
-    even-degree and an odd-degree isogeny.
+    2-torsion part and another component, recursively extracting
+    2-torsion factors.
 
     This handles the case where the direct Kohel implementation can compute
-    the even part and the odd quotient, but not both in a single step.
+    each 2-torsion factor and the final residual kernel, but not the full
+    kernel polynomial in a single step.
 
     EXAMPLES::
 
@@ -556,6 +557,17 @@ def _factored_isogeny_from_kernel_polynomial(E, kernel_polynomial,
         [2, 3]
         sage: phi.codomain()
         Elliptic Curve defined by y^2 = x^3 + 141*x + 269 over Finite Field of size 419
+
+    The pushed-forward quotient can still have a nontrivial 2-torsion
+    part, in which case the construction recurses::
+
+        sage: h = (x^6 + 336*x^5 + 252*x^4 + 167*x^3
+        ....:      + 83*x^2 + 418*x)
+        sage: phi = E.isogeny(h)
+        sage: [f.degree() for f in phi.factors()]
+        [2, 2, 3]
+        sage: phi.kernel_polynomial() == h
+        True
 
     TESTS:
 
@@ -574,24 +586,22 @@ def _factored_isogeny_from_kernel_polynomial(E, kernel_polynomial,
     if not psi.is_monic():
         raise ValueError("given kernel polynomial is not monic")
 
-    psi_even = two_torsion_part(E, psi)
-    if psi_even.degree() == 0:
+    psi_2tor = two_torsion_part(E, psi)
+    if psi_2tor.degree() == 0:
         return EllipticCurveIsogeny(E, psi, codomain=codomain, model=model,
                                     check=check)
 
-    psi_odd_preimage = psi // psi_even
-    if psi_odd_preimage.degree() == 0:
-        return EllipticCurveIsogeny(E, psi_even, codomain=codomain,
+    psi_quotient = psi // psi_2tor
+    if psi_quotient.degree() == 0:
+        return EllipticCurveIsogeny(E, psi_2tor, codomain=codomain,
                                     model=model, check=check)
 
-    phi_even = EllipticCurveIsogeny(E, psi_even, check=check)
-    psi_odd = phi_even.push_subgroup(psi_odd_preimage)
-    phi_odd = EllipticCurveIsogeny(phi_even.codomain(), psi_odd,
-                                   codomain=codomain, model=model,
-                                   check=check)
-
-    from sage.schemes.elliptic_curves.hom_composite import EllipticCurveHom_composite
-    factored_isogeny = EllipticCurveHom_composite.from_factors([phi_even, phi_odd])
+    phi_2tor = EllipticCurveIsogeny(E, psi_2tor, check=check)
+    psi_image = phi_2tor.push_subgroup(psi_quotient)
+    phi_quotient = _factored_isogeny_from_kernel_polynomial(
+        phi_2tor.codomain(), psi_image, codomain=codomain, model=model,
+        check=check)
+    factored_isogeny = phi_quotient * phi_2tor
 
     if check and factored_isogeny.kernel_polynomial() != psi:
         raise ValueError(f"the polynomial {psi} does not define a finite subgroup of {E}")
