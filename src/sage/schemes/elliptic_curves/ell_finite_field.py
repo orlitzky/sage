@@ -642,7 +642,7 @@ class EllipticCurve_finite_field(EllipticCurve_field, ProjectivePlaneCurve_finit
                 N = f**e
                 chi = self.frobenius_polynomial()
 
-                if N.is_prime():
+                if e == 1:
                     chi_mod_N = chi.change_ring(GF(N))
                     if (roots := chi_mod_N.roots(multiplicities=False)):
 
