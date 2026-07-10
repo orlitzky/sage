@@ -9524,20 +9524,8 @@ cdef class Matrix(Matrix1):
         if cutoff <= 0:
             raise ValueError("cutoff must be at least 1")
 
-        output = self.new_matrix(self._nrows, right._ncols)
-        # The following used to be a little faster, but meanwhile
-        # the previous line is faster.
-        # if self.is_sparse():
-        #    output = self.matrix_space(self._nrows, right._ncols, sparse = True)(0)
-        # else:
-        #    output = self.matrix_space(self._nrows, right._ncols, sparse = False).zero_matrix().__copy__()
-
-        self_window = self.matrix_window()
-        right_window = right.matrix_window()
-        output_window = output.matrix_window()
-
-        from sage.matrix import strassen
-        strassen.strassen_window_multiply(output_window, self_window, right_window, cutoff)
+        cdef Matrix output = self.new_matrix(self._nrows, right._ncols)
+        output._set_to_product_strassen(self, right, cutoff)
         return output
 
     def _echelon_strassen(self, int cutoff=0):

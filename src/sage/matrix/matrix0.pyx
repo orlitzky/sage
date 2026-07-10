@@ -207,7 +207,6 @@ cdef class Matrix(sage.structure.element.Matrix):
         # previous contents while writing the product (e.g. the sparse
         # algorithm queries ``nonzero_positions``); the result is a fresh value.
         self.clear_cache()
-        return None
 
     def __cinit__(self, parent, *args, **kwds):
         """
@@ -1079,7 +1078,7 @@ cdef class Matrix(sage.structure.element.Matrix):
         cdef list row_list
         cdef list col_list
         cdef Py_ssize_t i
-        cdef int row = 0, col = 0
+        cdef int row, col
         cdef int nrows = self._nrows
         cdef int ncols = self._ncols
         cdef tuple key_tuple
@@ -1556,7 +1555,7 @@ cdef class Matrix(sage.structure.element.Matrix):
         cdef list value_list
         cdef bint value_list_one_dimensional = 0
         cdef Py_ssize_t i
-        cdef Py_ssize_t row = 0, col = 0
+        cdef Py_ssize_t row, col
         cdef Py_ssize_t nrows = self._nrows
         cdef Py_ssize_t ncols = self._ncols
         cdef tuple key_tuple
@@ -5711,7 +5710,7 @@ cdef class Matrix(sage.structure.element.Matrix):
         cdef int cutoff = left._strassen_default_cutoff(right)
         if cutoff > 0 and left._nrows > cutoff and left._ncols > cutoff and \
                 right._nrows > cutoff and right._ncols > cutoff:
-            self._set_to_product_strassen(left, right)
+            self._set_to_product_strassen(left, right, cutoff)
         else:
             self._set_to_product_classical(left, right)
 
@@ -5732,11 +5731,10 @@ cdef class Matrix(sage.structure.element.Matrix):
                     dotp += left.get_unsafe(i, k) * right.get_unsafe(k, j)
                 self.set_unsafe(i, j, dotp)
 
-    cdef void _set_to_product_strassen(self, Matrix left, Matrix right) except *:
+    cdef void _set_to_product_strassen(self, Matrix left, Matrix right, int cutoff) except *:
         """
         Set ``self`` to ``left * right`` using the generic Strassen routine.
         """
-        cdef int cutoff = left._strassen_default_cutoff(right)
         if cutoff <= 0:
             raise ValueError("cutoff must be at least 1")
 

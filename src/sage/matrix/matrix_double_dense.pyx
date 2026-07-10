@@ -252,17 +252,8 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
         """
         check_matrix_multiplication_sizes(self, right)
 
-        cdef Matrix_double_dense M, _right, _left
-
-        if self._nrows == 0 or self._ncols == 0 or right._nrows == 0 or right._ncols == 0:
-            M = self._new(self._nrows, right._ncols)
-            M._set_to_product(self, <Matrix0>right)
-            return M
-
-        M = self._new(self._nrows, right._ncols)
-        _right = right
-        _left = self
-        M._set_to_product(_left, _right)
+        cdef Matrix_double_dense M = self._new(self._nrows, right._ncols)
+        M._set_to_product(self, <Matrix0>right)
         return M
 
     cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:

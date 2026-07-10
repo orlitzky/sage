@@ -1,5 +1,4 @@
 from sage.matrix.matrix_dense cimport Matrix_dense
-from sage.matrix.matrix0 cimport Matrix
 from sage.libs.m4ri cimport *
 
 cdef class Matrix_mod2_dense(Matrix_dense):
@@ -9,7 +8,6 @@ cdef class Matrix_mod2_dense(Matrix_dense):
 
     cpdef Matrix_mod2_dense _multiply_m4rm(Matrix_mod2_dense self, Matrix_mod2_dense right, int k)
     cpdef Matrix_mod2_dense _multiply_strassen(Matrix_mod2_dense self, Matrix_mod2_dense right, int cutoff)
-    cdef void _set_to_product(self, Matrix left, Matrix right) except *
 
     # For conversion to other systems
     cpdef _export_as_string(self)

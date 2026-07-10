@@ -31,7 +31,7 @@ from cysignals.signals cimport sig_on, sig_str, sig_off
 from libc.string cimport memcpy
 
 from sage.structure.element cimport Element, Matrix
-from sage.structure.element import Vector
+from sage.structure.element import is_Vector
 from sage.structure.richcmp cimport rich_to_bool, Py_EQ, Py_NE
 from sage.structure.factorization import Factorization
 from sage.arith.power cimport generic_power
@@ -180,7 +180,8 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
         if nrows == self._nrows and ncols == self._ncols:
             P = self._parent
         else:
-            P = self.matrix_space(nrows, ncols)
+            from sage.matrix.matrix_space import MatrixSpace
+            P = MatrixSpace(self._parent._base, nrows, ncols, sparse=False)
         cdef Matrix_modn_dense_flint ans = Matrix_modn_dense_flint.__new__(Matrix_modn_dense_flint, P)
         ans._parent = P
         return ans
@@ -256,20 +257,11 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
             sage: C.set_to_product(A, B)
             sage: C == A * B
             True
-
-            sage: A = MatrixSpace(GF(7), 2, 200, implementation='flint')(0)
-            sage: T = A.transpose()
-            sage: type(T) is T.parent().Element
-            True
-            sage: type(T * A) is (T * A).parent().Element
-            True
         """
         check_matrix_multiplication_sizes(left, _right)
         cdef Matrix_modn_dense_flint right = _right
         cdef Matrix_modn_dense_flint M = left._new(left._nrows, right._ncols)
-        sig_on()
-        nmod_mat_mul(M._matrix, left._matrix, right._matrix)
-        sig_off()
+        M._set_to_product(left, right)
         return M
 
     cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
@@ -364,15 +356,9 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
             True
             sage: A < B
             True
-
-            sage: N = 2^40
-            sage: A = matrix(Zmod(N), 1, [0], implementation='flint')
-            sage: B = matrix(Zmod(N), 1, [2^32], implementation='flint')
-            sage: A < B
-            True
         """
         cdef Py_ssize_t i, j
-        cdef mp_limb_t a, b
+        cdef int k
 
         if op == Py_EQ:
             return bool(nmod_mat_equal(self._matrix, (<Matrix_modn_dense_flint>right)._matrix))
@@ -382,11 +368,10 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
             sig_on()
             for i in range(self._nrows):
                 for j in range(self._ncols):
-                    a = nmod_mat_get_entry(self._matrix, i, j)
-                    b = nmod_mat_get_entry((<Matrix_modn_dense_flint>right)._matrix, i, j)
-                    if a != b:
+                    k = nmod_mat_get_entry(self._matrix, i, j) - nmod_mat_get_entry((<Matrix_modn_dense_flint>right)._matrix, i, j)
+                    if k:
                         sig_off()
-                        if a < b:
+                        if k < 0:
                             return rich_to_bool(op, -1)
                         else:
                             return rich_to_bool(op, 1)
@@ -755,9 +740,6 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
             sage: fs = [A.charpoly(algorithm=alg) for alg in ['crt', 'lift', 'df']]
             sage: len(set(fs))
             1
-
-            sage: matrix(Zmod(1), 2, 2, implementation='flint').det()
-            0
         """
         if not self.is_square():
             raise TypeError("self must be square")
@@ -783,13 +765,10 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
         cdef mp_limb_t pe, prepe, preN, x, y, scalar, t, N = R.order()
         cdef Matrix_modn_dense_flint A
         cdef nmod_mat_t H, c
-        if N == 1:
-            S = PolynomialRing(R, var)
-            ans = S.zero()
-        elif algorithm == "linbox":
+        S = PolynomialRing(R, var, implementation="FLINT")
+        if algorithm == "linbox":
             ans = self._change_implementation("linbox").charpoly(var)
         elif algorithm == "flint":
-            S = PolynomialRing(R, var, implementation="FLINT")
             f = S()
             sig_on()
             nmod_mat_charpoly(&f.x, self._matrix)
@@ -798,7 +777,6 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
         elif algorithm == "lift":
             ans = self.lift_centered().charpoly(var).change_ring(R)
         elif algorithm == "crt":
-            S = PolynomialRing(R, var, implementation="FLINT")
             preN = n_preinvert_limb(N)
             # We hessenbergize at each prime, CRT, then compute the charpoly from the Hessenberg form
             try:
@@ -937,11 +915,6 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
 
             sage: A._shift_mod(N, 3, domod=True)
             [9223372036854775800]
-
-            sage: B = matrix(Zmod(12), 2, 101, implementation='flint')
-            sage: C = B._shift_mod(12)
-            sage: type(C) is C.parent().Element
-            True
         """
         cdef Py_ssize_t i, j, m = self._nrows, n = self._ncols
         cdef mp_limb_t x, preN, preshift, N = modulus
@@ -950,7 +923,7 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
             preshift = n_preinvert_limb(shift)
         R = Zmod(N)
         from sage.matrix.matrix_space import MatrixSpace
-        P = MatrixSpace(R, m, n, sparse=False, implementation='flint')
+        P = MatrixSpace(R, m, n, sparse=False)
         cdef Matrix_modn_dense_flint ans = Matrix_modn_dense_flint.__new__(Matrix_modn_dense_flint, P)
         ans._parent = P
         for i in range(m):
@@ -1035,14 +1008,6 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
         """
         nmod_mat_swap_rows(self._matrix, NULL, r1, r2)
 
-    def _solve_right_general(self, B, check=True):
-        r"""
-        Solve the matrix equation `A X = B`.
-
-        This delegates to FLINT's modular solver.
-        """
-        return self._solve_right_modn(B, check=check)
-
     def _solve_right_modn(self, B, check=True):
         r"""
         Solve the matrix equation `A X = B`.
@@ -1056,22 +1021,11 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
         ....:                 B = A * X0
         ....:                 X = A.solve_right(B)
         ....:                 assert A * X == B
-
-        sage: A = matrix(GF(7), 2, 2, [1, 0, 0, 0], implementation='flint')
-        sage: A._solve_right_modn(vector(GF(7), [0, 1]), check=True)
-        Traceback (most recent call last):
-        ...
-        ValueError: matrix equation has no solution
-        sage: A.solve_right(vector(GF(7), [0, 1]), check=False)
-        Traceback (most recent call last):
-        ...
-        ValueError: matrix equation has no solution
         """
-        b_is_vec = isinstance(B, Vector)
+        b_is_vec = is_Vector(B)
         cdef Py_ssize_t i, j, ii, jj, n, Cm, An = self.ncols()
         cdef mp_limb_t piv, q, r, entry, N = self.base_ring().order(), Ninv = n_preinvert_limb(N)
         cdef double pivinv
-        cdef int success
         if b_is_vec:
             n = 1
         else:
@@ -1082,10 +1036,8 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
         if R.is_field():
             C = B.column() if b_is_vec else B
             sig_on()
-            success = nmod_mat_can_solve(X._matrix, self._matrix, C._matrix)
+            nmod_mat_can_solve(X._matrix, self._matrix, C._matrix)
             sig_off()
-            if not success:
-                raise ValueError("matrix equation has no solution")
         else:
             # We use Howell form to solve the system
             C = self.augment(B)

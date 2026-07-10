@@ -33,9 +33,6 @@ jobs:
           - ubuntu:26.04
     container:
       image: ${{ matrix.container }}
-    env:
-      PYTHON_VERSION: '3.13'
-      PYTHON_TAG: 'cp313'
 
     steps:
       - name: Prepare container
@@ -66,11 +63,11 @@ jobs:
       # https://github.com/actions/setup-python/issues/527
       - name: Set up Python
         run: |
-          uv python install "$PYTHON_VERSION"
+          uv python install
           if [ "${{ matrix.container }}" = "ghcr.io/void-linux/void-glibc-full" ] || [ "${{ matrix.container }}" = "archlinux" ]; then
-            uv venv --python "$PYTHON_VERSION" --system-site-packages
+            uv venv --system-site-packages
           else
-            uv venv --python "$PYTHON_VERSION"
+            uv venv
           fi
           . .venv/bin/activate
           echo PATH=$PATH >> $GITHUB_ENV
@@ -117,8 +114,8 @@ jobs:
         with:
           name: ${{ steps.clear-container-name.outputs.CONTAINER_NAME }}-log
           path: |
-            build/${{ env.PYTHON_TAG }}/meson-logs/
-            build/${{ env.PYTHON_TAG }}/meson-info/
+            build/cp313/meson-logs/
+            build/cp313/meson-info/
 
   macos:
     name: Build and Test (macos-${{ matrix.version }})

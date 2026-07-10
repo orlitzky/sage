@@ -780,9 +780,16 @@ cdef class Matrix_mod2_dense(matrix_dense.Matrix_dense):   # dense or sparse
             verbose('matrix multiply of %s x %s matrix by %s x %s matrix' % (
                 self._nrows, self._ncols, right._nrows, right._ncols))
 
-        return self._multiply_strassen(right, 0)
+        cdef Matrix_mod2_dense ans
+        MS = self.matrix_space(self._nrows, right._ncols, sparse=False)
+        ans = MS.element_class(MS, None, False, False)
+        ans._set_to_product_strassen(self, <Matrix0>right, 0)
+        return ans
 
     cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
+        self._set_to_product_strassen(left, right, 0)
+
+    cdef void _set_to_product_strassen(self, Matrix0 left, Matrix0 right, int cutoff) except *:
         cdef Matrix_mod2_dense _left = <Matrix_mod2_dense>left
         cdef Matrix_mod2_dense _right = <Matrix_mod2_dense>right
 
@@ -793,7 +800,7 @@ cdef class Matrix_mod2_dense(matrix_dense.Matrix_dense):   # dense or sparse
             return
 
         sig_on()
-        self._entries = mzd_mul(self._entries, _left._entries, _right._entries, 0)
+        self._entries = mzd_mul(self._entries, _left._entries, _right._entries, cutoff)
         sig_off()
 
     cpdef Matrix_mod2_dense _multiply_m4rm(Matrix_mod2_dense self, Matrix_mod2_dense right, int k):
@@ -994,17 +1001,11 @@ cdef class Matrix_mod2_dense(matrix_dense.Matrix_dense):   # dense or sparse
         check_matrix_multiplication_sizes(self, right)
 
         cdef Matrix_mod2_dense ans
-        #ans = self.new_matrix(nrows = self._nrows, ncols = right._ncols)
+        # ans = self.new_matrix(nrows=self._nrows, ncols=right._ncols)
         # The following is a little faster:
         MS = self.matrix_space(self._nrows, right._ncols, sparse=False)
         ans = MS.element_class(MS, None, False, False)
-        if self._nrows == 0 or self._ncols == 0 or right._nrows == 0:
-            # We know right._nrows == self._ncols because check_matrix_multiplication_sizes passed
-            return ans
-
-        sig_on()
-        ans._entries = mzd_mul(ans._entries, self._entries, right._entries, cutoff)
-        sig_off()
+        ans._set_to_product_strassen(self, right, cutoff)
         return ans
 
     def __neg__(self):
