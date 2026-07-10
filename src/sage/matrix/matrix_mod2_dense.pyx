@@ -776,6 +776,8 @@ cdef class Matrix_mod2_dense(matrix_dense.Matrix_dense):   # dense or sparse
         ALGORITHM: Uses the 'Method of the Four Russians
         Multiplication', see :func:`_multiply_m4rm`.
         """
+        check_matrix_multiplication_sizes(self, right)
+
         if get_verbose() >= 2:
             verbose('matrix multiply of %s x %s matrix by %s x %s matrix' % (
                 self._nrows, self._ncols, right._nrows, right._ncols))
@@ -793,7 +795,14 @@ cdef class Matrix_mod2_dense(matrix_dense.Matrix_dense):   # dense or sparse
         cdef Matrix_mod2_dense _left = <Matrix_mod2_dense>left
         cdef Matrix_mod2_dense _right = <Matrix_mod2_dense>right
 
-        if _left._nrows == 0 or _left._ncols == 0 or _right._ncols == 0:
+        # A matrix with no output entries needs no initialization.  In
+        # particular, ``mzd_set_ui`` is not valid for a zero-column matrix.
+        if self._nrows == 0 or self._ncols == 0:
+            return
+
+        # With a zero inner dimension the product is zero, but the destination
+        # may contain entries from a previous product and must be cleared.
+        if _left._ncols == 0:
             sig_on()
             mzd_set_ui(self._entries, 0)
             sig_off()
@@ -994,6 +1003,24 @@ cdef class Matrix_mod2_dense(matrix_dense.Matrix_dense):   # dense or sparse
             sage: B = random_matrix(GF(2),3,0)
             sage: A._multiply_strassen(B, 0)
             []
+
+        A nonempty matrix with zero columns is also a valid result::
+
+            sage: A = random_matrix(GF(2), 3, 4)
+            sage: B = random_matrix(GF(2), 4, 0)
+            sage: C = matrix(GF(2), 3, 0)
+            sage: C.set_to_product(A, B)
+            sage: (C.nrows(), C.ncols(), C == A * B, C == A._multiply_strassen(B, 0))
+            (3, 0, True, True)
+
+        A reused destination is cleared when the inner dimension is zero::
+
+            sage: A = matrix(GF(2), 3, 0)
+            sage: B = matrix(GF(2), 0, 4)
+            sage: C = matrix(GF(2), 3, 4, [1] * 12)
+            sage: C.set_to_product(A, B)
+            sage: C.is_zero()
+            True
 
         ALGORITHM: Uses Strassen-Winograd matrix multiplication with
         M4RM as base case as implemented in the M4RI library.
