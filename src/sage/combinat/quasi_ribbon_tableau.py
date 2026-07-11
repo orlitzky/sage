@@ -286,9 +286,8 @@ class QuasiRibbonTableau(SkewTableau):
 
     def _rightmost_bottommost_leq(self, a):
         """
-        Find the rightmost, bottommost entry of ``self`` that is less or equal to ``a``.
-
-        Returns (entry, row_index, col_index), or ``None`` if no entry is less or equal to `a`.
+        Return rightmost, bottommost entry of ``self`` less than or equal to ``a``
+        as ``(entry, row_index, col_index)`` or ``None`` if no such entry exists.
 
         We compare positions by column first, then row. So "rightmost" means
         largest column index. If there is a tie, "bottommost" means largest
