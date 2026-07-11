@@ -86,6 +86,8 @@ class QuasiRibbonTableau(SkewTableau):
         word: 12344
         sage: QuasiRibbonTableau([[1,2],[3,4]]).evaluation()
         [1, 1, 1, 1]
+        sage: hash(tuple(Q)) == hash(Q)
+        True
         sage: TestSuite(Q).run()
     """
     @staticmethod
@@ -195,19 +197,6 @@ class QuasiRibbonTableau(SkewTableau):
 
         # We include None entries because they represent shifted positions.
         return max(len(row) for row in self.rows())
-
-    def __hash__(self):
-        r"""
-        Return the hash of ``self``.
-
-        EXAMPLES::
-
-            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
-            sage: Q = QuasiRibbonTableau([[1, 2], [3]])
-            sage: hash(tuple(Q)) == hash(Q)
-            True
-        """
-        return hash(tuple(self))
 
     def to_word_by_column(self):
         """
@@ -373,6 +362,55 @@ class QuasiRibbonTableau(SkewTableau):
         return (element_class(parent, top_rows),
                 element_class(parent, bottom_rows))
 
+    @staticmethod
+    def _insert_letter(rows, a):
+        r"""
+        Insert a letter into a list of rows.
+
+        This returns the result as a list of rows rather than a
+        quasi-ribbon tableau.
+
+        EXAMPLES::
+
+            sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
+            sage: Q = QuasiRibbonTableau([])
+            sage: Q._insert_letter(Q._filling, 3)
+            [[3]]
+
+            sage: Q = QuasiRibbonTableau([[4, 5]])
+            sage: Q._insert_letter(Q._filling, 3)
+            [[3], [4, 5]]
+
+            sage: Q = QuasiRibbonTableau([[1, 2, 3], [4, 5]])
+            sage: Q._insert_letter(Q._filling, 4)
+            [[1, 2, 3], [4, 4], [5]]
+        """
+        if not rows:
+            return [[a]]
+
+        site = None
+        for row_index, row in enumerate(rows):
+            for col_index, entry in enumerate(row):
+                if entry <= a:
+                    if site is None or (row_index, col_index) > (site[0], site[1]):
+                        site = (row_index, col_index)
+
+        if site is None:
+            new_rows = [[a]] + rows
+        else:
+            row_index, col_index = site
+
+            new_rows = rows[:row_index]
+            new_rows.append(rows[row_index][:col_index + 1] + [a])
+
+            tail = rows[row_index][col_index + 1:]
+            if tail:
+                new_rows.append(tail)
+
+            new_rows.extend(rows[row_index + 1:])
+
+        return new_rows
+
     def insert_letter(self, a):
         """
         Insert one letter a into a quasi-ribbon tableau ``self``.
@@ -403,35 +441,9 @@ class QuasiRibbonTableau(SkewTableau):
         if not isinstance(a, (int, Integer)) or a <= 0:
             raise ValueError("the inserted letter must be a positive integer")
 
-        rows = self._filling
         parent = self.parent()
         element_class = parent.element_class
-
-        if not rows:
-            return element_class(parent, [[a]])
-
-        site = None
-        for row_index, row in enumerate(rows):
-            for col_index, entry in enumerate(row):
-                if entry <= a:
-                    if site is None or (row_index, col_index) > (site[0], site[1]):
-                        site = (row_index, col_index)
-
-        if site is None:
-            new_rows = [[a]] + rows
-        else:
-            row_index, col_index = site
-
-            new_rows = rows[:row_index]
-            new_rows.append(rows[row_index][:col_index + 1] + [a])
-
-            tail = rows[row_index][col_index + 1:]
-            if tail:
-                new_rows.append(tail)
-
-            new_rows.extend(rows[row_index + 1:])
-
-        return element_class(parent, new_rows)
+        return element_class(parent, self._insert_letter(self._filling, a))
 
     def insert_word(self, word):
         """
@@ -454,12 +466,15 @@ class QuasiRibbonTableau(SkewTableau):
             sage: Q.insert_word([4,1,2])
             [[1, 1], [None, 2, 2], [None, None, 3, 4]]
         """
-        Q = self
+        rows = self._filling
         for a in word:
             if not isinstance(a, (int, Integer)) or a <= 0:
                 raise ValueError("the inserted letters must be positive integers")
-            Q = Q.insert_letter(a)
-        return Q
+            rows = self._insert_letter(rows, a)
+
+        parent = self.parent()
+        element_class = parent.element_class
+        return element_class(parent, rows)
 
     def _test_quasi_ribbon(self, **options):
         r"""
