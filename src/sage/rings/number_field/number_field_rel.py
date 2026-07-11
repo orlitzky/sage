@@ -1204,7 +1204,7 @@ class NumberField_relative(NumberField_generic):
             False
         """
         f = self.absolute_polynomial()
-        return f.galois_group(pari_group=True).order() == self.absolute_degree()
+        return f.galois_group(pari_group=f.degree() <= 11).order() == self.absolute_degree()
 
     def is_isomorphic_relative(self, other, base_isom=None) -> bool:
         r"""
