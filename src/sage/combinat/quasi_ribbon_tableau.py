@@ -648,7 +648,7 @@ class QuasiRibbonTableaux(SkewTableaux):
             if max_entry is not None and (shape is not None or size is not None):
                 category = FiniteEnumeratedSets()
             else:
-                category = Sets()
+                category = Sets().Infinite()
 
         # Initialize the inherited SkewTableaux parent class.
         SkewTableaux.__init__(self, category=category)
