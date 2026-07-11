@@ -11,20 +11,10 @@ from top to bottom. The entries in each row are weakly increasing left to right,
 entries in each column are strictly increasing top to bottom, and ``None`` entries are used
 to record the shifted positions in the ribbon shape.
 
-
 The main functionality includes constructing quasi-ribbon tableaux,
 computing their associated compositions, computing column-reading words,
 generating finite families of fixed composition shape, and performing
-Krob--Thibon insertion of letters and words.
-
-REFERENCES:
-
-- [KT1997] Daniel Krob and Jean-Yves Thibon,
-  *Noncommutative symmetric functions IV: Quantum linear groups and Hecke
-  algebras at q = 0*, Journal of Algebraic Combinatorics 6 (1997),
-  no. 4, 339--376.
-
-- [Nov2000] Jean-Christophe Novelli, *On the hypoplactic monoid*, Discrete Mathematics 217 (2000), no. 1--3, 315--336.
+Krob--Thibon insertion of letters and words. For references, see [KT1997]_ and [Nov2000]_.
 """
 
 # ****************************************************************************

@@ -6,24 +6,13 @@ This file implements the hypoplactic monoid on the alphabet
 determined by comparing the quasi-ribbon tableaux obtained from
 Krob--Thibon insertion. Multiplication is induced by concatenation of
 words, followed by replacing the product with its quasi-ribbon reading word
-representative.
+representative. For references, see [KT1997]_ and [Nov2000]_.
 
 
 AUTHORS:
 
 - Daniel Chen, Lisa Johnston, Junbok Lee, Evuilynn Nguyen, Heather Ross,
   Anne Schilling, Chenchen Zhao (2026): initial version
-
-REFERENCES:
-
-- [KT1997] Daniel Krob and Jean-Yves Thibon,
-  *Noncommutative symmetric functions IV: Quantum linear groups and Hecke
-  algebras at q = 0*, Journal of Algebraic Combinatorics 6 (1997),
-  no. 4, 339--376.
-
-- [Nov2000] Jean-Christophe Novelli, *On the hypoplactic monoid*,
-  Discrete Mathematics 217 (2000), no. 1--3, 315--336.
-
 """
 # ****************************************************************************
 #       Copyright (C) 2026 Daniel Chen, Lisa Johnston, Junbok Lee, Evuilynn Nguyen, Heather Ross, Anne Schilling, Chenchen Zhao
