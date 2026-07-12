@@ -17,8 +17,8 @@ permissions:
 
 env:
   PYTHON_VERSION: 3.12
-  SAGE_USE_CDNS: yes
-  SAGE_LIVE_DOC: yes
+  SAGE_USE_CDNS: "yes"
+  SAGE_LIVE_DOC: "yes"
   SAGE_JUPYTER_SERVER: "binder:sagemath/sage-binder-env/dev"
 
 jobs:
