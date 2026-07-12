@@ -17,6 +17,9 @@ permissions:
 
 env:
   PYTHON_VERSION: 3.12
+  SAGE_USE_CDNS: yes
+  SAGE_LIVE_DOC: yes
+  SAGE_JUPYTER_SERVER: "binder:sagemath/sage-binder-env/dev"
 
 jobs:
   livedoc:
@@ -65,21 +68,17 @@ jobs:
           export CXX="ccache $CXX"
           pip install --no-build-isolation --config-settings=builddir=builddir . -v
 
+      - name: Build live doc
+        shell: bash -l {0}
+        run: |
+          meson compile -C builddir doc-html -j1
+
       - name: Build pdf doc
         shell: bash -l {0}
         run: |
           sudo DEBIAN_FRONTEND=noninteractive sudo apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install $(build/bin/sage-get-system-packages debian texlive texlive_luatex free_fonts xindy)
           meson compile -C builddir doc-pdf
-
-      - name: Build live doc
-        shell: bash -l {0}
-        run: |
-          meson compile -C builddir doc-html -j1
-        env:
-          SAGE_USE_CDNS: yes
-          SAGE_LIVE_DOC: yes
-          SAGE_JUPYTER_SERVER: "binder:sagemath/sage-binder-env/dev"
 
       - name: Copy doc
         id: copy
