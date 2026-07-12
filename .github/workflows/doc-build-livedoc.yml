@@ -60,6 +60,12 @@ jobs:
           activate-environment: sage-dev
           environment-file: environment-${{ env.PYTHON_VERSION }}-linux.yml
 
+      - name: Patch jupyter-sphinx for live doc
+        shell: bash -l {0}
+        run: |
+          JUPYTER_SPHINX_DIR=$(python -c "import jupyter_sphinx; print(jupyter_sphinx.__path__[0])")
+          patch -p2 -d "$JUPYTER_SPHINX_DIR" < build/pkgs/jupyter_sphinx/patches/0001-Patch-for-sage-live-doc.patch
+
       - name: Build Sage
         shell: bash -l {0}
         run: |
@@ -71,7 +77,7 @@ jobs:
       - name: Build live doc
         shell: bash -l {0}
         run: |
-          meson compile -C builddir doc-html -j1
+          meson compile -C builddir doc-html -j2
 
       - name: Build pdf doc
         shell: bash -l {0}
