@@ -3524,6 +3524,20 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
 
     TESTS:
 
+    Eigenvalues are grouped even when the base ring has unhashable elements::
+
+        sage: K = Qq(9, names='a')
+        sage: set_random_seed(42)
+        sage: M = random_matrix(K, 4, algorithm='diagonalizable',
+        ....:                   eigenvalues=[K(2), K(2), K(5)],
+        ....:                   dimensions=[1, 2, 1])
+        sage: set_random_seed(42)
+        sage: M_normalized = random_matrix(K, 4, algorithm='diagonalizable',
+        ....:                              eigenvalues=[K(2), K(5)],
+        ....:                              dimensions=[3, 1])
+        sage: M == M_normalized
+        True
+
     Eigenvalues must all be elements of the ring::
 
         sage: random_matrix(QQ, 3, algorithm='diagonalizable',                          # needs sage.symbolic
@@ -3590,6 +3604,8 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
     Billy Wonderly (2010-07)
     """
 
+    from collections import defaultdict
+
     from sage.misc.prandom import randint
 
     size = parent.nrows()
@@ -3601,21 +3617,8 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
     if eigenvalues is None and dimensions is not None:
         raise ValueError("the list of dimensions must have a list of corresponding eigenvalues")
     if eigenvalues is None and dimensions is None:
-        from collections import Counter
-        values = [ring(randint(-10, 10)) for _ in range(size)]
-        try:
-            value_frequencies = list(Counter(values).items())
-        except TypeError:  # Some ring elements are unhashable.
-            value_frequencies = []
-            for value in values:
-                for i, (old_value, frequency) in enumerate(value_frequencies):
-                    if value == old_value:
-                        value_frequencies[i] = (old_value, frequency + 1)
-                        break
-                else:
-                    value_frequencies.append((value, 1))
-        eigenvalues = [value for value, _ in value_frequencies]
-        dimensions = [frequency for _, frequency in value_frequencies]
+        eigenvalues = [ring(randint(-10, 10)) for _ in range(size)]
+        dimensions = [1] * size
 
     if not all(x in ring for x in eigenvalues):
         raise TypeError("eigenvalues must be elements of the corresponding ring")
@@ -3626,23 +3629,28 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
     if len(eigenvalues) != len(dimensions):
         raise ValueError("each eigenvalue must have a corresponding dimension and each dimension a corresponding eigenvalue")
     # Merge equal eigenvalues after coercion into the base ring.
-    eigenvalue_dimensions = []
-    for raw_eigenvalue, dimension in zip(eigenvalues, dimensions):
-        eigenvalue = ring(raw_eigenvalue)
-        for i, (value, old_dimension) in enumerate(eigenvalue_dimensions):
-            if eigenvalue == value:
-                eigenvalue_dimensions[i] = (value, old_dimension + dimension)
-                break
-        else:
-            eigenvalue_dimensions.append((eigenvalue, dimension))
+    eigenvalues = [ring(eigenvalue) for eigenvalue in eigenvalues]
+    try:
+        grouped = defaultdict(int)
+        for eigenvalue, dimension in zip(eigenvalues, dimensions):
+            grouped[eigenvalue] += dimension
+        eigenvalue_dimensions = list(grouped.items())
+    except TypeError:  # e.g. Qq(9) has unhashable elements
+        eigenvalue_dimensions = []
+        for eigenvalue, dimension in zip(eigenvalues, dimensions):
+            for i, (old_eigenvalue, old_dimension) in enumerate(eigenvalue_dimensions):
+                if eigenvalue == old_eigenvalue:
+                    eigenvalue_dimensions[i] = (old_eigenvalue, old_dimension + dimension)
+                    break
+            else:
+                eigenvalue_dimensions.append((eigenvalue, dimension))
     eigenvalue_dimensions.sort(key=lambda pair: pair[1])
-    eigenvalues = [pair[0] for pair in eigenvalue_dimensions]
-    dimensions = [pair[1] for pair in eigenvalue_dimensions]
-    # Create the matrix of eigenvalues on the diagonal.  Use a lower limit and upper limit determined by the eigenvalue dimensions.
-    diag_matrix = diagonal_matrix(ring, [e for d, e in zip(dimensions, eigenvalues) for _ in range(d)])
+    dimensions = [dimension for _, dimension in eigenvalue_dimensions]
+    # Create the matrix of eigenvalues on the diagonal, each repeated according to its dimension.
+    diag_matrix = diagonal_matrix(ring, [e for e, d in eigenvalue_dimensions for _ in range(d)])
     # Create a matrix to hold each of the eigenvectors as its columns, begin with an identity matrix so that after row and column
     # operations the resulting matrix will be unimodular.
-    eigenvector_matrix = matrix.identity(ring, size)
+    eigenvector_matrix = identity_matrix(ring, size)
     cur_sum = 0
     for dim in dimensions[:-1]:
         for idx in range(dim):
