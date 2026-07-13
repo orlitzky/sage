@@ -2118,10 +2118,19 @@ cdef class Polynomial_rational_flint(Polynomial):
 
             GAP uses the "Transitive Groups Libraries" from the "TransGrp"
             GAP package which comes installed with the "gap" Sage package.
+            The library provides transitive groups through degree 48, but the
+            data for degrees 32 and 48 must be downloaded separately because
+            of their size.  Sage checks at runtime whether the data for the
+            requested degree are installed.
+
             GAP documents its Galois group computation for degrees up to 15,
             but it can compute some examples of higher degree.  Such
             computations may be expensive or fail even when GAP's transitive
             groups database contains the required degree.
+
+            Sage's MAGMA interface identifies the result using MAGMA's
+            ``TransitiveGroupIdentification``, which is supported only
+            through degree 30.
 
             MAGMA does not return a provably correct result.  Please see the
             MAGMA documentation for how to obtain a provably correct result.
@@ -2190,13 +2199,22 @@ cdef class Polynomial_rational_flint(Polynomial):
             sage: (t - 1).galois_group(algorithm='gap')
             Transitive group number 1 of degree 1
 
-        If GAP's transitive groups database does not contain the required
-        degree, a useful error is raised::
+        The data for degrees 32 and 48 are supplemental downloads.  Degrees
+        outside the range of GAP's transitive groups library give a useful
+        error::
 
-            sage: (t^32 + 1).galois_group(algorithm='gap')
+            sage: (t^49 - t - 1).galois_group(algorithm='gap')
             Traceback (most recent call last):
             ...
-            NotImplementedError: GAP's transitive groups database does not contain groups of degree 32; try algorithm='magma' if Magma is available
+            NotImplementedError: GAP's transitive groups database only covers degrees through 48; Sage's Magma interface can only identify transitive groups through degree 30
+
+        The MAGMA interface has the latter limitation even though MAGMA can
+        compute Galois groups in higher degrees::
+
+            sage: (t^31 - t - 1).galois_group(algorithm='magma')
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: Sage's Magma interface can only identify transitive groups through degree 30
 
         A request for a PARI group is never silently handled by another
         algorithm::
@@ -2265,13 +2283,30 @@ cdef class Polynomial_rational_flint(Polynomial):
             if n == 1:
                 return TransitiveGroup(1, 1)
             if not libgap.TransitiveGroupsAvailable(n):
-                raise NotImplementedError("GAP's transitive groups database "
-                                          f"does not contain groups of degree {n}; "
-                                          "try algorithm='magma' if Magma is available")
+                if n in (32, 48):
+                    raise NotImplementedError(
+                        f"GAP's transitive groups data for degree {n} are not "
+                        "installed; they are available as a supplemental "
+                        "download from the GAP TransGrp package; Sage's Magma "
+                        "interface can only identify transitive groups through "
+                        "degree 30")
+                if n > 48:
+                    raise NotImplementedError(
+                        "GAP's transitive groups database only covers degrees "
+                        "through 48; Sage's Magma interface can only identify "
+                        "transitive groups through degree 30")
+                raise NotImplementedError(
+                    f"GAP's transitive groups data for degree {n} are not "
+                    "available; Sage's Magma interface can only identify "
+                    "transitive groups through degree 30")
             fgap = libgap(self)
             return TransitiveGroup(n, fgap.GaloisType())
 
         elif algorithm == 'magma':
+            if self.degree() > 30:
+                raise NotImplementedError(
+                    "Sage's Magma interface can only identify transitive "
+                    "groups through degree 30")
             from sage.interfaces.magma import magma
             X = magma(self).GaloisGroup()
             try:
