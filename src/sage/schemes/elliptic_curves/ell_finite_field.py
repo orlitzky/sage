@@ -3209,6 +3209,15 @@ def special_supersingular_curve(F, q=None, *, endomorphism=False, maximal_order=
         ....:     numer._degree = ZZ(O.quaternion_algebra()(vec).reduced_norm())
         ....:     _ = EllipticCurveHom_fractional(numer, denom, check=True)  # fails if not divisible
 
+    Make sure it works for `p = 2` (:issue:`42535`)::
+
+        sage: special_supersingular_curve(GF(2^2), endomorphism=True, maximal_order=True)
+        (Elliptic Curve defined by y^2 + y = x^3 over Finite Field in z2 of size 2^2,
+         Elliptic-curve endomorphism of Elliptic Curve defined by y^2 + y = x^3 over Finite Field in z2 of size 2^2
+           Via:  (u,r,s,t) = (1, 1, 1, z2),
+         Order of Quaternion Algebra (-1, -2) with base ring Rational Field
+           with basis (1, i, 1/2 + 1/2*i + 1/2*j, 1/2 + 1/2*i + 1/2*k))
+
     .. NOTE::
 
         This function makes no guarantees about the distribution of the output.
@@ -3293,7 +3302,10 @@ def special_supersingular_curve(F, q=None, *, endomorphism=False, maximal_order=
     assert Quat.discriminant() == p
 
     if q == 1:
-        O = Quat.quaternion_order([1, i, (i+j)/2, (1+k)/2])
+        if p == 2:
+            O = Quat.quaternion_order([1, i, (1+i+j)/2, (1+i+k)/2])
+        else:
+            O = Quat.quaternion_order([1, i, (i+j)/2, (1+k)/2])
 
     elif q == 3:
         O = Quat.quaternion_order([1, (1+i)/2, (j+k)/2, (i+k)/3])
