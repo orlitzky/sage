@@ -789,9 +789,81 @@ cdef class Matrix_mod2_dense(matrix_dense.Matrix_dense):   # dense or sparse
         return ans
 
     cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
+        r"""
+        Set ``self`` to ``left * right`` using M4RI.
+
+        This defers to :meth:`_set_to_product_strassen` with a cutoff of ``0``,
+        which lets M4RI choose the multiplication routine, exactly as ordinary
+        multiplication does.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: A = matrix(GF(2), 2, 3, [1, 0, 1, 0, 1, 1])
+            sage: B = matrix(GF(2), 3, 2, [1, 1, 0, 1, 1, 0])
+            sage: C = matrix(GF(2), 2, 2)
+            sage: C.set_to_product(A, B)
+            sage: C == A * B
+            True
+        """
         self._set_to_product_strassen(left, right, 0)
 
     cdef void _set_to_product_strassen(self, Matrix0 left, Matrix0 right, int cutoff) except *:
+        r"""
+        Set ``self`` to ``left * right`` using M4RI.
+
+        ``mzd_mul`` takes the destination as its first argument, so the product
+        is written straight into the destination's M4RI storage.  This is the
+        shared core of :meth:`_multiply_strassen`, :meth:`_matrix_times_matrix_`
+        and :meth:`set_to_product`.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+        - ``cutoff`` -- matrix dimension where M4RM should be used instead of
+          Strassen; ``0`` lets M4RI decide
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: A = Matrix(GF(2), 4, 3, [0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1])
+            sage: B = Matrix(GF(2), 3, 4, [0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0])
+            sage: C = matrix(GF(2), 4, 4)
+            sage: C.set_to_product(A, B)
+            sage: C
+            [0 0 0 0]
+            [1 0 0 1]
+            [0 1 0 1]
+            [1 1 0 0]
+
+        TESTS:
+
+        A nonempty destination with zero columns is a valid result::
+
+            sage: A = random_matrix(GF(2), 3, 4)
+            sage: B = random_matrix(GF(2), 4, 0)
+            sage: C = matrix(GF(2), 3, 0)
+            sage: C.set_to_product(A, B)
+            sage: (C.nrows(), C.ncols(), C == A * B, C == A._multiply_strassen(B, 0))
+            (3, 0, True, True)
+
+        A reused destination is cleared when the inner dimension is zero::
+
+            sage: A = matrix(GF(2), 3, 0)
+            sage: B = matrix(GF(2), 0, 4)
+            sage: C = matrix(GF(2), 3, 4, [1] * 12)
+            sage: C.set_to_product(A, B)
+            sage: C.is_zero()
+            True
+        """
         cdef Matrix_mod2_dense _left = <Matrix_mod2_dense>left
         cdef Matrix_mod2_dense _right = <Matrix_mod2_dense>right
 
@@ -1003,24 +1075,6 @@ cdef class Matrix_mod2_dense(matrix_dense.Matrix_dense):   # dense or sparse
             sage: B = random_matrix(GF(2),3,0)
             sage: A._multiply_strassen(B, 0)
             []
-
-        A nonempty matrix with zero columns is also a valid result::
-
-            sage: A = random_matrix(GF(2), 3, 4)
-            sage: B = random_matrix(GF(2), 4, 0)
-            sage: C = matrix(GF(2), 3, 0)
-            sage: C.set_to_product(A, B)
-            sage: (C.nrows(), C.ncols(), C == A * B, C == A._multiply_strassen(B, 0))
-            (3, 0, True, True)
-
-        A reused destination is cleared when the inner dimension is zero::
-
-            sage: A = matrix(GF(2), 3, 0)
-            sage: B = matrix(GF(2), 0, 4)
-            sage: C = matrix(GF(2), 3, 4, [1] * 12)
-            sage: C.set_to_product(A, B)
-            sage: C.is_zero()
-            True
 
         ALGORITHM: Uses Strassen-Winograd matrix multiplication with
         M4RM as base case as implemented in the M4RI library.

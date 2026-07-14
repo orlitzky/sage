@@ -286,24 +286,16 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
         Return the product of the sparse integer matrices
         ``self`` and ``_right``.
 
-       EXAMPLES::
+        The result matrix is allocated and then written by
+        :meth:`_set_to_product_classical`.
+
+        EXAMPLES::
 
             sage: a = matrix(ZZ, 2, [1,2,3,4], sparse=True)
             sage: b = matrix(ZZ, 2, 3, [1..6], sparse=True)
             sage: a * b
             [ 9 12 15]
             [19 26 33]
-
-        A preallocated destination uses the same specialized sparse
-        multiplication code and may be reused::
-
-            sage: C = matrix(ZZ, 2, 3, [7] * 6, sparse=True)
-            sage: C.set_to_product(a, b)
-            sage: C == a * b
-            True
-            sage: C.set_to_product(2 * a, b)
-            sage: C == (2 * a) * b
-            True
         """
         cdef Matrix_integer_sparse right, ans
         right = _right
@@ -314,11 +306,51 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
 
     cdef void _set_to_product_classical(self, matrix0.Matrix _left,
                                         matrix0.Matrix _right) except *:
-        """
-        Set ``self`` to the product of two sparse integer matrices.
+        r"""
+        Set ``self`` to ``_left * _right`` using the specialized sparse
+        integer algorithm.
 
-        This is the destination-writing version of
-        :meth:`_matrix_times_matrix_`.
+        This overrides
+        :meth:`~sage.matrix.matrix_sparse.Matrix_sparse._set_to_product_classical`
+        so that :meth:`set_to_product` keeps the specialized ``mpz_vector``
+        algorithm used by ``*``, rather than falling back to the generic sparse
+        one.  It is the shared core of :meth:`_matrix_times_matrix_`, which
+        allocates the result and then calls this method.
+
+        The destination's rows are cleared first, since it may hold the
+        result of an earlier product.
+
+        INPUT:
+
+        - ``_left`` -- a sparse integer matrix
+        - ``_right`` -- a sparse integer matrix
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: a = matrix(ZZ, 2, [1,2,3,4], sparse=True)
+            sage: b = matrix(ZZ, 2, 3, [1..6], sparse=True)
+            sage: C = matrix(ZZ, 2, 3, [7] * 6, sparse=True)
+            sage: C.set_to_product(a, b)
+            sage: C
+            [ 9 12 15]
+            [19 26 33]
+            sage: C == a * b
+            True
+
+        TESTS:
+
+        Reusing the destination must not leave entries of the previous
+        product behind::
+
+            sage: C.set_to_product(2 * a, b)
+            sage: C == (2 * a) * b
+            True
+            sage: C.set_to_product(matrix(ZZ, 2, 0, sparse=True),
+            ....:                  matrix(ZZ, 0, 3, sparse=True))
+            sage: C.is_zero()
+            True
         """
         cdef Matrix_integer_sparse left = <Matrix_integer_sparse>_left
         cdef Matrix_integer_sparse right = <Matrix_integer_sparse>_right

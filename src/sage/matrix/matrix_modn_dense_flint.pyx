@@ -252,11 +252,6 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
             sage: A * B
             [10 13]
             [28  4]
-
-            sage: C = matrix(Zmod(36), 2, 2, implementation='flint')
-            sage: C.set_to_product(A, B)
-            sage: C == A * B
-            True
         """
         check_matrix_multiplication_sizes(left, _right)
         cdef Matrix_modn_dense_flint right = _right
@@ -267,6 +262,38 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
     cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
         r"""
         Set ``self`` to ``left * right`` using FLINT.
+
+        ``nmod_mat_mul`` takes the destination as its first argument and
+        chooses the multiplication algorithm itself, so the product is written
+        straight into the destination's FLINT storage.  This is the shared core
+        of :meth:`_matrix_times_matrix_` and of :meth:`set_to_product`.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: A = matrix(Zmod(36), 2, 3, range(6))
+            sage: B = matrix(Zmod(36), 3, 2, range(6))
+            sage: C = matrix(Zmod(36), 2, 2, implementation='flint')
+            sage: C.set_to_product(A, B)
+            sage: C
+            [10 13]
+            [28  4]
+            sage: C == A * B
+            True
+
+        TESTS:
+
+        A zero inner dimension zeroes the destination::
+
+            sage: C.set_to_product(matrix(Zmod(36), 2, 0), matrix(Zmod(36), 0, 2))
+            sage: C.is_zero()
+            True
         """
         cdef Matrix_modn_dense_flint _left = <Matrix_modn_dense_flint>left
         cdef Matrix_modn_dense_flint _right = <Matrix_modn_dense_flint>right

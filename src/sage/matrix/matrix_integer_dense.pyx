@@ -873,6 +873,45 @@ cdef class Matrix_integer_dense(Matrix_dense):
         return M
 
     cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
+        r"""
+        Set ``self`` to ``left * right`` using FLINT.
+
+        ``fmpz_mat_mul`` takes the destination as its first argument and
+        chooses the multiplication algorithm itself, so the product is written
+        straight into the destination's FLINT storage.  This is the shared core
+        of :meth:`_matrix_times_matrix_` and of :meth:`set_to_product`.
+
+        FLINT handles a zero inner dimension by zeroing the destination, so no
+        special case is needed here.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: A = matrix(ZZ, 2, 3, range(6))
+            sage: B = matrix(ZZ, 3, 2, range(6))
+            sage: C = matrix(ZZ, 2, 2)
+            sage: C.set_to_product(A, B)
+            sage: C
+            [10 13]
+            [28 40]
+            sage: C == A * B
+            True
+
+        TESTS:
+
+        A zero inner dimension zeroes the destination::
+
+            sage: C = matrix(ZZ, 3, 3, 1)
+            sage: C.set_to_product(matrix(ZZ, 3, 0), matrix(ZZ, 0, 3))
+            sage: C.is_zero()
+            True
+        """
         cdef Matrix_integer_dense _left = <Matrix_integer_dense>left
         cdef Matrix_integer_dense _right = <Matrix_integer_dense>right
 
@@ -881,6 +920,20 @@ cdef class Matrix_integer_dense(Matrix_dense):
         sig_off()
 
     cdef sage.structure.element.Matrix _matrix_times_matrix_(self, sage.structure.element.Matrix right):
+        r"""
+        Return the product ``self * right``.
+
+        The result matrix is allocated and then written by
+        :meth:`_set_to_product`.
+
+        EXAMPLES::
+
+            sage: a = matrix(ZZ, 2, 3, range(6))
+            sage: b = matrix(ZZ, 3, 2, range(6))
+            sage: a * b  # indirect doctest
+            [10 13]
+            [28 40]
+        """
         cdef Matrix_integer_dense M
         cdef Matrix_integer_dense _right = <Matrix_integer_dense>right
 

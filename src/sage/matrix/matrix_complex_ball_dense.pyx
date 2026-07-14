@@ -510,9 +510,26 @@ cdef class Matrix_complex_ball_dense(Matrix_dense):
 
             sage: matrix(CBF, [[1,2]])*matrix([[3], [4]]) # indirect doctest
             [11.00000000000000]
+        """
+        cdef Matrix_complex_ball_dense res = self._new(self._nrows, other._ncols)
+        res._set_to_product(self, <Matrix0>other)
+        return res
 
-        A preallocated destination can be reused, including for a product with
-        zero inner dimension::
+    cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
+        r"""
+        Set ``self`` to ``left * right`` using FLINT.
+
+        ``acb_mat_mul`` writes into a destination matrix, so the product is
+        computed straight into ``self`` at its own precision.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
 
             sage: A = matrix(CBF, 2, 3, range(6))
             sage: B = matrix(CBF, 3, 2, range(6, 12))
@@ -520,17 +537,14 @@ cdef class Matrix_complex_ball_dense(Matrix_dense):
             sage: C.set_to_product(A, B)
             sage: C == A * B
             True
+
+        TESTS:
+
+        A zero inner dimension zeroes the destination::
+
             sage: C.set_to_product(matrix(CBF, 2, 0), matrix(CBF, 0, 2))
             sage: C.is_zero()
             True
-        """
-        cdef Matrix_complex_ball_dense res = self._new(self._nrows, other._ncols)
-        res._set_to_product(self, <Matrix0>other)
-        return res
-
-    cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
-        """
-        Set ``self`` to ``left * right`` using FLINT.
         """
         cdef Matrix_complex_ball_dense _left = <Matrix_complex_ball_dense>left
         cdef Matrix_complex_ball_dense _right = <Matrix_complex_ball_dense>right

@@ -747,16 +747,6 @@ cdef class Matrix_cyclo_dense(Matrix_dense):
             sage: A*B == A.sparse_matrix()*B.sparse_matrix()
             True
 
-        A preallocated cyclotomic matrix can be reused as the destination::
-
-            sage: C = matrix(W, 3, 3, 1)
-            sage: C.set_to_product(A, B)
-            sage: C == A * B
-            True
-            sage: C.set_to_product(B, A)
-            sage: C == B * A
-            True
-
             sage: N1 = Matrix(CyclotomicField(6), 1, [1])
             sage: cf6 = CyclotomicField(6) ; z6 = cf6.0
             sage: N2 = Matrix(CyclotomicField(6), 1, 5, [0,1,z6,-z6,-z6+1])
@@ -791,6 +781,50 @@ cdef class Matrix_cyclo_dense(Matrix_dense):
         return C
 
     cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
+        r"""
+        Set ``self`` to ``left * right``.
+
+        ALGORITHM:
+
+        Use a multimodular algorithm that involves multiplying the two matrices
+        modulo split primes, as for ordinary multiplication.  A cyclotomic
+        matrix stores its entries in a single rational matrix ``_matrix``, so
+        the destination is reused by rebinding that matrix to the lifted
+        result.
+
+        INPUT:
+
+        - ``left`` -- a cyclotomic dense matrix over the base ring of ``self``
+        - ``right`` -- a cyclotomic dense matrix over the base ring of ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: W.<z> = CyclotomicField(5)
+            sage: A = matrix(3, 3, [1,z,z^2,z^3,z^4,2/3*z,-3*z,z,2+z])
+            sage: B = matrix(3, 3, [-1,2*z,3*z^2,5*z+1,z^4,1/3*z,2-z,3-z,5-z])
+            sage: C = matrix(W, 3, 3, 1)
+            sage: C.set_to_product(A, B)
+            sage: C == A * B
+            True
+
+        The destination can be reused::
+
+            sage: C.set_to_product(B, A)
+            sage: C == B * A
+            True
+
+        TESTS:
+
+        A degenerate inner dimension gives the zero matrix; compare
+        :issue:`5974`::
+
+            sage: C = matrix(W, 2, 2, 1)
+            sage: C.set_to_product(matrix(W, 2, 0), matrix(W, 0, 2))
+            sage: C.is_zero()
+            True
+        """
         cdef Matrix_cyclo_dense _left = <Matrix_cyclo_dense>left
         cdef Matrix_cyclo_dense _right = <Matrix_cyclo_dense>right
 

@@ -249,9 +249,47 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
             [0.0 0.0 0.0]
             [0.0 0.0 0.0]
             [0.0 0.0 0.0]
+        """
+        check_matrix_multiplication_sizes(self, right)
 
-        A destination constructed from a Fortran-contiguous NumPy array is
-        also supported::
+        cdef Matrix_double_dense M = self._new(self._nrows, right._ncols)
+        M._set_to_product(self, <Matrix0>right)
+        return M
+
+    cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
+        r"""
+        Set ``self`` to ``left * right`` using NumPy.
+
+        The product is computed by :func:`numpy.dot`, writing straight into the
+        destination's array with its ``out`` argument.  That requires a
+        C-contiguous destination; a destination built from a Fortran-contiguous
+        array (which :func:`numpy.asfortranarray` produces) is instead filled
+        by copying the result of :func:`numpy.dot` into it.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: A = matrix(RDF, 3, range(1, 10))
+            sage: B = matrix(RDF, 3, range(1, 13))
+            sage: C = matrix(RDF, 3, 4)
+            sage: C.set_to_product(A, B)
+            sage: C
+            [ 38.0  44.0  50.0  56.0]
+            [ 83.0  98.0 113.0 128.0]
+            [128.0 152.0 176.0 200.0]
+            sage: C == A * B
+            True
+
+        TESTS:
+
+        A destination constructed from a Fortran-contiguous NumPy array takes
+        the copying path, and must give the same answer::
 
             sage: import numpy
             sage: A = matrix(RDF, [[1, 2], [3, 4]])
@@ -272,25 +310,24 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
             sage: C.set_to_product(A, B)
             sage: C == A * B
             True
+
+        A zero inner dimension zeroes the destination; compare
+        :issue:`27366`::
+
+            sage: C = matrix(RDF, 3, 3, 1)
+            sage: C.set_to_product(matrix(RDF, 3, 0), matrix(RDF, 0, 3))
+            sage: C.is_zero()
+            True
         """
-        check_matrix_multiplication_sizes(self, right)
-
-        cdef Matrix_double_dense M = self._new(self._nrows, right._ncols)
-        M._set_to_product(self, <Matrix0>right)
-        return M
-
-    cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
         cdef Matrix_double_dense _left = <Matrix_double_dense>left
         cdef Matrix_double_dense _right = <Matrix_double_dense>right
-
-        if _left._nrows == 0 or _left._ncols == 0 or _right._ncols == 0:
-            self._matrix_numpy.fill(0)
-            return
 
         global numpy
         if numpy is None:
             import numpy
 
+        # ``numpy.dot`` already zeroes the destination when the inner
+        # dimension is zero, so degenerate shapes need no special case.
         if cnumpy.PyArray_IS_C_CONTIGUOUS(self._matrix_numpy):
             numpy.dot(_left._matrix_numpy, _right._matrix_numpy,
                       out=self._matrix_numpy)

@@ -225,18 +225,16 @@ cdef class Matrix_rational_sparse(Matrix_sparse):
         """
         Return the product of two sparse rational matrices.
 
-        A preallocated destination uses the same specialized sparse
-        multiplication code and may be reused::
+        The result matrix is allocated and then written by
+        :meth:`_set_to_product_classical`.
+
+        EXAMPLES::
 
             sage: a = matrix(QQ, 2, [1/2, 2, 3, 4], sparse=True)
             sage: b = matrix(QQ, 2, 3, [1..6], sparse=True)
-            sage: C = matrix(QQ, 2, 3, [7] * 6, sparse=True)
-            sage: C.set_to_product(a, b)
-            sage: C == a * b
-            True
-            sage: C.set_to_product(2 * a, b)
-            sage: C == (2 * a) * b
-            True
+            sage: a * b  # indirect doctest
+            [17/2   11 27/2]
+            [  19   26   33]
         """
         cdef Matrix_rational_sparse right, ans
         right = _right
@@ -247,11 +245,48 @@ cdef class Matrix_rational_sparse(Matrix_sparse):
 
     cdef void _set_to_product_classical(self, matrix0.Matrix _left,
                                         matrix0.Matrix _right) except *:
-        """
-        Set ``self`` to the product of two sparse rational matrices.
+        r"""
+        Set ``self`` to ``_left * _right`` using the specialized sparse
+        rational algorithm.
 
-        This is the destination-writing version of
-        :meth:`_matrix_times_matrix_`.
+        This overrides
+        :meth:`~sage.matrix.matrix_sparse.Matrix_sparse._set_to_product_classical`
+        so that :meth:`set_to_product` keeps the specialized ``mpq_vector``
+        algorithm used by ``*``, rather than falling back to the generic sparse
+        one.  It is the shared core of :meth:`_matrix_times_matrix_`, which
+        allocates the result and then calls this method.
+
+        The destination's rows are cleared first, since it may hold the
+        result of an earlier product.
+
+        INPUT:
+
+        - ``_left`` -- a sparse rational matrix
+        - ``_right`` -- a sparse rational matrix
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: a = matrix(QQ, 2, [1/2, 2, 3, 4], sparse=True)
+            sage: b = matrix(QQ, 2, 3, [1..6], sparse=True)
+            sage: C = matrix(QQ, 2, 3, [7] * 6, sparse=True)
+            sage: C.set_to_product(a, b)
+            sage: C == a * b
+            True
+
+        TESTS:
+
+        Reusing the destination must not leave entries of the previous
+        product behind::
+
+            sage: C.set_to_product(2 * a, b)
+            sage: C == (2 * a) * b
+            True
+            sage: C.set_to_product(matrix(QQ, 2, 0, sparse=True),
+            ....:                  matrix(QQ, 0, 3, sparse=True))
+            sage: C.is_zero()
+            True
         """
         cdef Matrix_rational_sparse left = <Matrix_rational_sparse>_left
         cdef Matrix_rational_sparse right = <Matrix_rational_sparse>_right

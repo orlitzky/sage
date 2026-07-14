@@ -475,19 +475,6 @@ cdef class Matrix_gf2e_dense(matrix_dense.Matrix_dense):
             sage: B = random_matrix(K, 50, 17)
             sage: A*B == A._multiply_classical(B)
             True
-
-        The product can be stored in and overwrite a preallocated matrix::
-
-            sage: K.<a> = GF(2^8)
-            sage: A = matrix(K, 2, 3, range(6))
-            sage: B = matrix(K, 3, 2, range(6, 12))
-            sage: C = matrix(K, 2, 2, [a] * 4)
-            sage: C.set_to_product(A, B)
-            sage: C == A * B
-            True
-            sage: C.set_to_product(matrix(K, 2, 0), matrix(K, 0, 2))
-            sage: C.is_zero()
-            True
         """
         check_matrix_multiplication_sizes(self, right)
 
@@ -498,8 +485,45 @@ cdef class Matrix_gf2e_dense(matrix_dense.Matrix_dense):
         return ans
 
     cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
-        """
+        r"""
         Set ``self`` to ``left * right`` using M4RIE.
+
+        ``mzed_mul`` takes the destination as its first argument, so the
+        product is written straight into the destination's M4RIE storage and
+        M4RIE still picks the multiplication routine, exactly as for ``*``.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: K.<a> = GF(2^8)
+            sage: A = matrix(K, 2, 3, range(6))
+            sage: B = matrix(K, 3, 2, range(6, 12))
+            sage: C = matrix(K, 2, 2, [a] * 4)
+            sage: C.set_to_product(A, B)
+            sage: C == A * B
+            True
+
+        TESTS:
+
+        A zero inner dimension zeroes the destination, overwriting the entries
+        it held before::
+
+            sage: C.set_to_product(matrix(K, 2, 0), matrix(K, 0, 2))
+            sage: C.is_zero()
+            True
+
+        A destination with no rows or no columns has nothing to write::
+
+            sage: D = matrix(K, 0, 2)
+            sage: D.set_to_product(matrix(K, 0, 3), matrix(K, 3, 2))
+            sage: D
+            []
         """
         cdef Matrix_gf2e_dense _left = <Matrix_gf2e_dense>left
         cdef Matrix_gf2e_dense _right = <Matrix_gf2e_dense>right

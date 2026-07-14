@@ -1191,6 +1191,45 @@ cdef class Matrix_rational_dense(Matrix_dense):
         return self._multiply_flint(right)
 
     cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
+        r"""
+        Set ``self`` to ``left * right`` using FLINT.
+
+        ``fmpq_mat_mul`` takes the destination as its first argument, so the
+        product is written straight into the destination's FLINT storage.  This
+        is the shared core of :meth:`_multiply_flint` and of
+        :meth:`set_to_product`.
+
+        FLINT handles a zero inner dimension by zeroing the destination, so no
+        special case is needed here.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: a = matrix(QQ, 3, range(9))/3
+            sage: b = matrix(QQ, 3, range(1, 10))/5
+            sage: c = matrix(QQ, 3, 3)
+            sage: c.set_to_product(a, b)
+            sage: c
+            [ 6/5  7/5  8/5]
+            [18/5 22/5 26/5]
+            [   6 37/5 44/5]
+            sage: c == a * b
+            True
+
+        TESTS:
+
+        A zero inner dimension zeroes the destination::
+
+            sage: c.set_to_product(matrix(QQ, 3, 0), matrix(QQ, 0, 3))
+            sage: c.is_zero()
+            True
+        """
         cdef Matrix_rational_dense _left = <Matrix_rational_dense>left
         cdef Matrix_rational_dense _right = <Matrix_rational_dense>right
 

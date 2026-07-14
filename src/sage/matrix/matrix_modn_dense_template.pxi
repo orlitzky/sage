@@ -1219,18 +1219,6 @@ cdef class Matrix_modn_dense_template(Matrix_dense):
 
             sage: E == F
             True
-
-        The product can also be written into a reusable destination matrix::
-
-            sage: for R in (Zmod(36), Zmod(65521)):
-            ....:     A = matrix(R, 2, 3, range(6), implementation='linbox')
-            ....:     B = matrix(R, 3, 2, range(6, 12), implementation='linbox')
-            ....:     C = matrix(R, 2, 2, [1] * 4, implementation='linbox')
-            ....:     C.set_to_product(A, B)
-            ....:     assert C == A * B
-            ....:     C.set_to_product(matrix(R, 2, 0, implementation='linbox'),
-            ....:                      matrix(R, 0, 2, implementation='linbox'))
-            ....:     assert C.is_zero()
         """
         if get_verbose() >= 2:
             verbose('mod-p multiply of %s x %s matrix by %s x %s matrix modulo %s' % (
@@ -1249,8 +1237,54 @@ cdef class Matrix_modn_dense_template(Matrix_dense):
         return ans
 
     cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
-        """
+        r"""
         Set ``self`` to ``left * right`` using LinBox.
+
+        ``linbox_matrix_matrix_multiply`` writes into a destination buffer, so
+        the product is computed straight into the destination's entries and
+        LinBox still selects the multiplication algorithm, exactly as for
+        ``*``.  This is the shared core of :meth:`_matrix_times_matrix_` and of
+        :meth:`set_to_product`.
+
+        LinBox is not called for a product with a zero dimension; the
+        destination is cleared directly instead.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: A = matrix(Zmod(36), 2, 3, range(6), implementation='linbox')
+            sage: B = matrix(Zmod(36), 3, 2, range(6, 12), implementation='linbox')
+            sage: C = matrix(Zmod(36), 2, 2, implementation='linbox')
+            sage: C.set_to_product(A, B)
+            sage: C == A * B
+            True
+
+        Both the float and the double LinBox backend are covered; ``Zmod(36)``
+        uses the former and ``Zmod(65521)`` the latter::
+
+            sage: for R in (Zmod(36), Zmod(65521)):
+            ....:     A = matrix(R, 2, 3, range(6), implementation='linbox')
+            ....:     B = matrix(R, 3, 2, range(6, 12), implementation='linbox')
+            ....:     C = matrix(R, 2, 2, [1] * 4, implementation='linbox')
+            ....:     C.set_to_product(A, B)
+            ....:     assert C == A * B
+
+        TESTS:
+
+        A zero inner dimension clears the destination, which may hold the
+        result of an earlier product::
+
+            sage: for R in (Zmod(36), Zmod(65521)):
+            ....:     C = matrix(R, 2, 2, [1] * 4, implementation='linbox')
+            ....:     C.set_to_product(matrix(R, 2, 0, implementation='linbox'),
+            ....:                      matrix(R, 0, 2, implementation='linbox'))
+            ....:     assert C.is_zero()
         """
         cdef Matrix_modn_dense_template _left = <Matrix_modn_dense_template>left
         cdef Matrix_modn_dense_template _right = <Matrix_modn_dense_template>right

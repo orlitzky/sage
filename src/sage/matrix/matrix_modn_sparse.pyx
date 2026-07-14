@@ -333,17 +333,6 @@ cdef class Matrix_modn_sparse(Matrix_sparse):
             [32770 32770 32770]
             sage: M*M.transpose() # previously returned [32738]
             [3]
-
-        A preallocated destination uses the same specialized sparse
-        multiplication code and may be reused::
-
-            sage: C = matrix(GF(43), 3, 3, [7] * 9, sparse=True)
-            sage: C.set_to_product(a, b)
-            sage: C == a * b
-            True
-            sage: C.set_to_product(2 * a, b)
-            sage: C == (2 * a) * b
-            True
         """
         cdef Matrix_modn_sparse right, ans
         right = _right
@@ -354,11 +343,53 @@ cdef class Matrix_modn_sparse(Matrix_sparse):
 
     cdef void _set_to_product_classical(self, matrix0.Matrix _left,
                                         matrix0.Matrix _right) except *:
-        """
-        Set ``self`` to the product of two sparse modular matrices.
+        r"""
+        Set ``self`` to ``_left * _right`` using the specialized sparse
+        modular algorithm.
 
-        This is the destination-writing version of
-        :meth:`_matrix_times_matrix_`.
+        This overrides
+        :meth:`~sage.matrix.matrix_sparse.Matrix_sparse._set_to_product_classical`
+        so that :meth:`set_to_product` keeps the specialized
+        ``c_vector_modint`` algorithm used by ``*``, rather than falling back
+        to the generic sparse one.  It is the shared core of
+        :meth:`_matrix_times_matrix_`, which allocates the result and then
+        calls this method.
+
+        The destination's rows are cleared first, since it may hold the
+        result of an earlier product.
+
+        INPUT:
+
+        - ``_left`` -- a sparse matrix over the base ring of ``self``
+        - ``_right`` -- a sparse matrix over the base ring of ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: a = matrix(GF(43), 3, 3, range(9), sparse=True)
+            sage: b = matrix(GF(43), 3, 3, range(10,19), sparse=True)
+            sage: C = matrix(GF(43), 3, 3, [7] * 9, sparse=True)
+            sage: C.set_to_product(a, b)
+            sage: C
+            [ 2  5  8]
+            [33  2 14]
+            [21 42 20]
+            sage: C == a * b
+            True
+
+        TESTS:
+
+        Reusing the destination must not leave entries of the previous
+        product behind::
+
+            sage: C.set_to_product(2 * a, b)
+            sage: C == (2 * a) * b
+            True
+            sage: C.set_to_product(matrix(GF(43), 3, 0, sparse=True),
+            ....:                  matrix(GF(43), 0, 3, sparse=True))
+            sage: C.is_zero()
+            True
         """
         cdef Matrix_modn_sparse left = <Matrix_modn_sparse>_left
         cdef Matrix_modn_sparse right = <Matrix_modn_sparse>_right

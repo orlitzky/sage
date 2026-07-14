@@ -298,6 +298,42 @@ cdef class Matrix_generic_dense(matrix_dense.Matrix_dense):
     @cython.wraparound(False)
     @cython.overflowcheck(False)
     cdef void _set_to_product_classical(self, matrix0.Matrix _left, matrix0.Matrix _right) except *:
+        r"""
+        Set ``self`` to ``_left * _right`` using the classical `O(n^3)`
+        algorithm.
+
+        This overrides
+        :meth:`~sage.matrix.matrix0.Matrix._set_to_product_classical` to index
+        the underlying entry lists directly, instead of going through
+        :meth:`get_unsafe` and :meth:`set_unsafe`.  It is the shared core of
+        :meth:`_multiply_classical`, which allocates the result and then calls
+        this method, and of :meth:`set_to_product`, which writes into an
+        existing destination.
+
+        INPUT:
+
+        - ``_left`` -- a generic dense matrix over the base ring of ``self``
+        - ``_right`` -- a generic dense matrix over the base ring of ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: R.<x> = QQ[]
+            sage: A = matrix(R, 2, 3, [x^i for i in range(6)], implementation='generic')
+            sage: B = matrix(R, 3, 1, [1, x, x^2], implementation='generic')
+            sage: C = matrix(R, 2, 1, implementation='generic')
+            sage: C.set_to_product(A, B)
+            sage: C == A * B
+            True
+
+        The destination may be reused, and its previous entries are
+        overwritten::
+
+            sage: C.set_to_product(2*A, B)
+            sage: C == (2*A) * B
+            True
+        """
         cdef Py_ssize_t i, j, k, m, nr, nc, snc, p
         cdef Matrix_generic_dense left = <Matrix_generic_dense>_left
         cdef Matrix_generic_dense right = <Matrix_generic_dense>_right

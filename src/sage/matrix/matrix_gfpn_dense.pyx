@@ -1344,11 +1344,72 @@ cdef class Matrix_gfpn_dense(Matrix_dense):
 
     cdef void _set_to_product(self, sage.matrix.matrix0.Matrix left,
                               sage.matrix.matrix0.Matrix right) except *:
+        r"""
+        Set ``self`` to ``left * right`` using MeatAxe.
+
+        This defers to :meth:`_set_to_product_strassen` with a cutoff of ``0``,
+        which is the default cutoff of this backend; see
+        :meth:`_strassen_default_cutoff`.  Ordinary multiplication makes the
+        same choice, so :meth:`set_to_product` keeps the Strassen-Winograd
+        algorithm.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: K.<x> = GF(9)
+            sage: A = MatrixSpace(K, 8, 5).random_element()
+            sage: B = MatrixSpace(K, 5, 7).random_element()
+            sage: C = MatrixSpace(K, 8, 7).random_element()
+            sage: C.set_to_product(A, B)
+            sage: C == A * B
+            True
+        """
         self._set_to_product_strassen(left, right, 0)
 
     cdef void _set_to_product_strassen(self, sage.matrix.matrix0.Matrix left,
                                        sage.matrix.matrix0.Matrix right,
                                        int cutoff) except *:
+        r"""
+        Set ``self`` to ``left * right`` using the asymptotically fast
+        Strassen-Winograd algorithm of MeatAxe.
+
+        ``MatMulStrassen`` takes the destination as its first argument, so the
+        product is written straight into the destination's MeatAxe storage.
+        This is the shared core of :meth:`_multiply_strassen`, which allocates
+        the result and then calls this method, and of :meth:`set_to_product`.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+        - ``cutoff`` -- integer; the minimal size of submatrices considered in
+          the divide-and-conquer algorithm, expressed as a rowsize in bytes.
+          See :meth:`_multiply_strassen`.
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: K.<x> = GF(9)
+            sage: A = MatrixSpace(K, 8, 5).random_element()
+            sage: B = MatrixSpace(K, 5, 7).random_element()
+            sage: C = MatrixSpace(K, 8, 7).random_element()
+            sage: C.set_to_product(A, B)
+            sage: C == A * B == A._multiply_strassen(B, 0)
+            True
+
+        The destination can be reused::
+
+            sage: C.set_to_product(A, 2*B)
+            sage: C == A * (2*B)
+            True
+        """
         cdef Matrix_gfpn_dense _left = <Matrix_gfpn_dense>left
         cdef Matrix_gfpn_dense _right = <Matrix_gfpn_dense>right
 
@@ -1414,20 +1475,6 @@ cdef class Matrix_gfpn_dense(Matrix_dense):
             sage: M = MatrixSpace(GF(9,'x'),1500,600).random_element()
             sage: N = MatrixSpace(GF(9,'x'),600,1500).random_element()
             sage: M._multiply_strassen(N) == M._multiply_strassen(N,80) == M._multiply_strassen(N,2)
-            True
-
-        A preallocated MeatAxe matrix uses the same multiplication and can be
-        reused::
-
-            sage: K.<x> = GF(9)
-            sage: A = MatrixSpace(K, 8, 5).random_element()
-            sage: B = MatrixSpace(K, 5, 7).random_element()
-            sage: C = MatrixSpace(K, 8, 7).random_element()
-            sage: C.set_to_product(A, B)
-            sage: C == A * B == A._multiply_strassen(B, 0)
-            True
-            sage: C.set_to_product(A, 2*B)
-            sage: C == A * (2*B)
             True
         """
         if self.Data == NULL or right.Data == NULL:
