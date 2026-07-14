@@ -370,11 +370,18 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
                          if nonzero_positions_in_columns[j]]
 
         # Clear any previous entries, while avoiding a second initialization
-        # pass for the empty rows of a freshly allocated destination.
+        # pass for the empty rows of a freshly allocated destination.  Reset
+        # each cleared row to the empty state by hand rather than calling
+        # ``mpz_vector_init``: an empty vector needs no storage, and an
+        # allocation here could raise after ``mpz_vector_clear`` has already
+        # freed the row, leaving it with a stale ``num_nonzero`` and dangling
+        # pointers for the next ``mpz_vector_clear`` to walk.
         for i in range(self._nrows):
             if self._matrix[i].num_nonzero:
                 mpz_vector_clear(&self._matrix[i])
-                mpz_vector_init(&self._matrix[i], self._ncols, 0)
+                self._matrix[i].entries = NULL
+                self._matrix[i].positions = NULL
+                self._matrix[i].num_nonzero = 0
 
         # Now do the multiplication, getting each row completely before filling it in.
         cdef set c

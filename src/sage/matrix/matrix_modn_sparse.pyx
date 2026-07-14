@@ -405,11 +405,18 @@ cdef class Matrix_modn_sparse(Matrix_sparse):
                 (<set> nonzero_positions_in_columns[v.positions[j]]).add(i)
 
         # Clear any previous entries, while avoiding a second initialization
-        # pass for the empty rows of a freshly allocated destination.
+        # pass for the empty rows of a freshly allocated destination.  Reset
+        # each cleared row to the empty state by hand rather than calling
+        # ``init_c_vector_modint``: an empty vector needs no storage, and an
+        # allocation here could raise after ``clear_c_vector_modint`` has
+        # already freed the row, leaving dangling pointers for the next
+        # ``clear_c_vector_modint`` to free a second time.
         for i in range(self._nrows):
             if self.rows[i].num_nonzero:
                 clear_c_vector_modint(&self.rows[i])
-                init_c_vector_modint(&self.rows[i], self.p, self._ncols, 0)
+                self.rows[i].entries = NULL
+                self.rows[i].positions = NULL
+                self.rows[i].num_nonzero = 0
 
         # Now do the multiplication, getting each row completely before filling it in.
         cdef int x, y, s
