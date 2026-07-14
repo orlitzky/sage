@@ -3524,19 +3524,25 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
 
     TESTS:
 
-    Eigenvalues are grouped even when the base ring has unhashable elements::
+    Grouping equal eigenvalues requires the elements of the base ring to be
+    hashable.  Rings whose elements are unhashable, such as unramified
+    `p`-adic extensions, are therefore not supported; grouping them by
+    equality would rely on inexact comparisons::
 
         sage: K = Qq(9, names='a')
-        sage: set_random_seed(42)
-        sage: M = random_matrix(K, 4, algorithm='diagonalizable',
-        ....:                   eigenvalues=[K(2), K(2), K(5)],
-        ....:                   dimensions=[1, 2, 1])
-        sage: set_random_seed(42)
-        sage: M_normalized = random_matrix(K, 4, algorithm='diagonalizable',
-        ....:                              eigenvalues=[K(2), K(5)],
-        ....:                              dimensions=[3, 1])
-        sage: M == M_normalized
-        True
+        sage: random_matrix(K, 4, algorithm='diagonalizable',
+        ....:               eigenvalues=[K(2), K(2), K(5)],
+        ....:               dimensions=[1, 2, 1])
+        Traceback (most recent call last):
+        ...
+        TypeError: unhashable type: 'sage.rings.padics.qadic_flint_CR.qAdicCappedRelativeElement'
+
+    This applies to randomly generated eigenvalues as well::
+
+        sage: random_matrix(K, 4, algorithm='diagonalizable')
+        Traceback (most recent call last):
+        ...
+        TypeError: unhashable type: 'sage.rings.padics.qadic_flint_CR.qAdicCappedRelativeElement'
 
     Eigenvalues must all be elements of the ring::
 
@@ -3628,23 +3634,14 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
         raise ValueError("eigenspaces must have a dimension of at least 1")
     if len(eigenvalues) != len(dimensions):
         raise ValueError("each eigenvalue must have a corresponding dimension and each dimension a corresponding eigenvalue")
-    # Merge equal eigenvalues after coercion into the base ring.
-    eigenvalues = [ring(eigenvalue) for eigenvalue in eigenvalues]
-    try:
-        grouped = defaultdict(int)
-        for eigenvalue, dimension in zip(eigenvalues, dimensions):
-            grouped[eigenvalue] += dimension
-        eigenvalue_dimensions = list(grouped.items())
-    except TypeError:  # e.g. Qq(9) has unhashable elements
-        eigenvalue_dimensions = []
-        for eigenvalue, dimension in zip(eigenvalues, dimensions):
-            for i, (old_eigenvalue, old_dimension) in enumerate(eigenvalue_dimensions):
-                if eigenvalue == old_eigenvalue:
-                    eigenvalue_dimensions[i] = (old_eigenvalue, old_dimension + dimension)
-                    break
-            else:
-                eigenvalue_dimensions.append((eigenvalue, dimension))
-    eigenvalue_dimensions.sort(key=lambda pair: pair[1])
+    # Merge equal eigenvalues after coercion into the base ring.  Grouping by
+    # hash is deliberate: grouping by equality instead would compare inexact
+    # elements (of p-adic rings, say), which is unreliable, so rings with
+    # unhashable elements raise a TypeError here.
+    grouped = defaultdict(int)
+    for eigenvalue, dimension in zip(eigenvalues, dimensions):
+        grouped[ring(eigenvalue)] += dimension
+    eigenvalue_dimensions = sorted(grouped.items(), key=lambda pair: pair[1])
     dimensions = [dimension for _, dimension in eigenvalue_dimensions]
     # Create the matrix of eigenvalues on the diagonal, each repeated according to its dimension.
     diag_matrix = diagonal_matrix(ring, [e for e, d in eigenvalue_dimensions for _ in range(d)])
