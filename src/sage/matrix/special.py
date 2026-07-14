@@ -3544,13 +3544,13 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
         ...
         TypeError: unhashable type: 'sage.rings.padics.qadic_flint_CR.qAdicCappedRelativeElement'
 
-    Eigenvalues must all be elements of the ring::
+    Eigenvalues must be coercible into the ring::
 
         sage: random_matrix(QQ, 3, algorithm='diagonalizable',                          # needs sage.symbolic
         ....:               eigenvalues=[2+I, 2-I, 2], dimensions=[1,1,1])
         Traceback (most recent call last):
         ...
-        TypeError: eigenvalues must be elements of the corresponding ring
+        TypeError: Unable to coerce I + 2 to a rational
 
     Diagonal matrices must be square::
 
@@ -3626,8 +3626,6 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
         eigenvalues = [ring(randint(-10, 10)) for _ in range(size)]
         dimensions = [1] * size
 
-    if not all(x in ring for x in eigenvalues):
-        raise TypeError("eigenvalues must be elements of the corresponding ring")
     if size != sum(dimensions):
         raise ValueError("the size of the matrix must equal the sum of the dimensions")
     if min(dimensions) < 1:
