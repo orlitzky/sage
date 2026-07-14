@@ -136,38 +136,6 @@ class HypoplacticMonoid(WordMonoid):
         sage: TestSuite(H).run() # long time
     """
 
-    @staticmethod
-    def __classcall_private__(cls, n):
-        """
-        Normalize the input rank.
-
-        INPUT:
-
-        - ``n`` -- an integer
-
-        OUTPUT:
-
-        The unique hypoplactic monoid of rank ``n``.
-
-        EXAMPLES::
-
-            sage: HypoplacticMonoid(4) is HypoplacticMonoid(ZZ(4))
-            True
-
-        TESTS::
-
-            sage: HypoplacticMonoid(-1)
-            Traceback (most recent call last):
-            ...
-            ValueError: the rank must be a positive integer
-        """
-        if not isinstance(n, (int, Integer)):
-            raise ValueError("the rank must be a positive integer")
-        n = ZZ(n)
-        if n <= 0:
-            raise ValueError("the rank must be a positive integer")
-        return super().__classcall__(cls, n)
-
     def _repr_(self):
         """
         Return a string representation of ``self``.

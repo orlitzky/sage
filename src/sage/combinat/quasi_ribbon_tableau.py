@@ -60,9 +60,6 @@ class QuasiRibbonTableau(SkewTableau):
         sage: Q
         [[1, 2, 3], [None, None, 4, 5]]
         sage: Q.pp()
-        .  .  4  5
-        1  2  3
-        sage: print(Q)
         1  2  3
               4  5
         sage: Q.to_composition()
@@ -74,7 +71,7 @@ class QuasiRibbonTableau(SkewTableau):
 
         sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
         sage: Q = QuasiRibbonTableau([[1, 2, 3], [4, 5]])
-        sage: print(Q)
+        sage: Q.pp()
         1  2  3
               4  5
 
@@ -244,16 +241,16 @@ class QuasiRibbonTableau(SkewTableau):
         # entries explicitly.
         return repr(self.rows())
 
-    def __str__(self):
+    def pp(self):
         """
-        Return a readable string version of ``self``.
+        Return a pretty print of ``self``.
 
         EXAMPLES::
 
             sage: from sage.combinat.quasi_ribbon_tableau import QuasiRibbonTableau
             sage: Q = QuasiRibbonTableau([[1, 2, 3],
             ....:                         [None, None, 4, 5]])
-            sage: print(Q)
+            sage: Q.pp()
             1  2  3
                   4  5
         """
@@ -262,7 +259,7 @@ class QuasiRibbonTableau(SkewTableau):
             # Print None entries as blank spaces rather than the word "None".
             line = "  ".join(" " if entry is None else str(entry) for entry in row)
             lines.append(line)
-        return "\n".join(lines)
+        print("\n".join(lines))
 
     def _entries_with_positions(self):
         """

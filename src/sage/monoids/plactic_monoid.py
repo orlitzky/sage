@@ -62,6 +62,7 @@ class WordMonoid(UniqueRepresentation, Parent):
     It is assumed that the methods `to_tableau`, `to_word` and `equivalence_class` are
     implemented. Equality is determined by methods `to_tableau`.
     """
+
     def __init__(self, n):
         """
         Initialize ``self``.
@@ -72,13 +73,26 @@ class WordMonoid(UniqueRepresentation, Parent):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: P = PlacticMonoid(4)
             sage: P.rank()
             4
             sage: TestSuite(PlacticMonoid(2)).run()
+
+        TESTS::
+
+            sage: PlacticMonoid(4) is PlacticMonoid(ZZ(4))
+            True
+            sage: PlacticMonoid(-1)
+            Traceback (most recent call last):
+            ...
+            ValueError: the rank must be a positive integer
         """
         from sage.categories.monoids import Monoids
+        if not isinstance(n, (int, Integer)):
+            raise ValueError("the rank must be a positive integer")
+        n = ZZ(n)
+        if n <= 0:
+            raise ValueError("the rank must be a positive integer")
         self._n = n
         Parent.__init__(self, category=(Monoids().FinitelyGenerated().Infinite(),
                                         SetsWithGrading().Infinite()))
@@ -89,7 +103,6 @@ class WordMonoid(UniqueRepresentation, Parent):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: PlacticMonoid(4).rank()
             4
             sage: from sage.monoids.hypoplactic_monoid import HypoplacticMonoid
@@ -105,7 +118,6 @@ class WordMonoid(UniqueRepresentation, Parent):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
             sage: G = M.monoid_generators()
             sage: G[1], G[2], G[3], G[4]
@@ -129,7 +141,6 @@ class WordMonoid(UniqueRepresentation, Parent):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(3)
             sage: M.one() == M([])
             True
@@ -151,7 +162,6 @@ class WordMonoid(UniqueRepresentation, Parent):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(3)
             sage: M.an_element()
             1
@@ -172,7 +182,6 @@ class WordMonoidElement(ElementWrapper):
 
     EXAMPLES::
 
-        sage: from sage.monoids.plactic_monoid import PlacticMonoid
         sage: M = PlacticMonoid(4)
         sage: M([2, 1, 3])
         213
@@ -197,7 +206,6 @@ class WordMonoidElement(ElementWrapper):
 
         TESTS::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
             sage: M([1, 2, 4])
             124
@@ -230,7 +238,6 @@ class WordMonoidElement(ElementWrapper):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
             sage: M([2, 1, 3])
             213
@@ -253,7 +260,6 @@ class WordMonoidElement(ElementWrapper):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
             sage: len(M([3, 1, 2]))
             3
@@ -270,7 +276,6 @@ class WordMonoidElement(ElementWrapper):
         """
         TESTS::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
             sage: x = M([3, 1, 2])
             sage: hash(x) == hash(M([3,1,2]))
@@ -296,7 +301,6 @@ class WordMonoidElement(ElementWrapper):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
             sage: list(M([3, 1, 2]))
             [3, 1, 2]
@@ -339,7 +343,6 @@ class WordMonoidElement(ElementWrapper):
             sage: c * d
             43
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
             sage: a = M([2, 1]); b = M([3, 2])
             sage: a * b
@@ -366,7 +369,6 @@ class WordMonoidElement(ElementWrapper):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
             sage: M([2, 1, 3]) == M([2, 3, 1])
             True
@@ -396,7 +398,6 @@ class WordMonoidElement(ElementWrapper):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
             sage: M([2, 1, 3]).shape()
             [2, 1]
@@ -411,7 +412,6 @@ class WordMonoidElement(ElementWrapper):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(3)
             sage: M([3, 2, 1]).is_canonical()
             True
@@ -465,7 +465,6 @@ class PlacticMonoid(WordMonoid):
 
     EXAMPLES::
 
-        sage: from sage.monoids.plactic_monoid import PlacticMonoid
         sage: M = PlacticMonoid(4)
         sage: M
         Plactic monoid of rank 4
@@ -482,7 +481,6 @@ class PlacticMonoid(WordMonoid):
 
     TESTS::
 
-        sage: from sage.monoids.plactic_monoid import PlacticMonoid
         sage: M = PlacticMonoid(4)
         sage: M([]) == M.one()
         True
@@ -490,7 +488,7 @@ class PlacticMonoid(WordMonoid):
         Traceback (most recent call last):
         ...
         ValueError: the rank must be a positive integer
-        sage: PlacticMonoid(4.0)
+        sage: PlacticMonoid(4.1)
         Traceback (most recent call last):
         ...
         ValueError: the rank must be a positive integer
@@ -499,35 +497,12 @@ class PlacticMonoid(WordMonoid):
         ...
         ValueError: letters must be integers from 1 to 4
     """
-    @staticmethod
-    def __classcall_private__(cls, n):
-        """
-        Normalize the input rank.
-
-        TESTS::
-
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
-            sage: PlacticMonoid(4) is PlacticMonoid(ZZ(4))
-            True
-            sage: PlacticMonoid(-1)
-            Traceback (most recent call last):
-            ...
-            ValueError: the rank must be a positive integer
-        """
-        if not isinstance(n, (int, Integer)):
-            raise ValueError("the rank must be a positive integer")
-        n = ZZ(n)
-        if n <= 0:
-            raise ValueError("the rank must be a positive integer")
-        return super().__classcall__(cls, n)
-
     def _repr_(self):
         """
         Return a string representation of ``self``.
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: PlacticMonoid(4)
             Plactic monoid of rank 4
         """
@@ -542,7 +517,6 @@ class PlacticMonoid(WordMonoid):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(2)
             sage: M.subset(1)
             Lazy family (to_word(i))_{i in Semistandard tableaux of size 1 and maximum entry 2}
@@ -570,7 +544,6 @@ class PlacticMonoid(WordMonoid):
 
         EXAMPLES::
 
-            sage: from sage.monoids.plactic_monoid import PlacticMonoid
             sage: M = PlacticMonoid(4)
             sage: M([2, 1, 3])
             213
@@ -581,7 +554,6 @@ class PlacticMonoid(WordMonoid):
 
             EXAMPLES::
 
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
                 sage: M = PlacticMonoid(4)
                 sage: M([2, 3, 1]).to_word()
                 213
@@ -597,7 +569,6 @@ class PlacticMonoid(WordMonoid):
 
             EXAMPLES::
 
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
                 sage: M = PlacticMonoid(4)
                 sage: M([1, 3, 2]).to_tableau()
                 [[1, 2], [3]]
@@ -615,7 +586,6 @@ class PlacticMonoid(WordMonoid):
 
             EXAMPLES::
 
-                sage: from sage.monoids.plactic_monoid import PlacticMonoid
                 sage: M = PlacticMonoid(3)
                 sage: M([2, 1, 3]).equivalence_class()
                 [213, 231]
