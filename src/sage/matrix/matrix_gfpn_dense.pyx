@@ -1409,6 +1409,20 @@ cdef class Matrix_gfpn_dense(Matrix_dense):
             sage: C.set_to_product(A, 2*B)
             sage: C == A * (2*B)
             True
+
+        TESTS:
+
+        The destination must be zeroed before ``MatMulStrassen`` is called:
+        it stores temporary results in the destination and adds into it, so
+        a destination still holding a previous product would corrupt the
+        result rather than overwrite it::
+
+            sage: K.<a> = GF(9)
+            sage: M = MatrixSpace(K, 1)
+            sage: C = M([1])
+            sage: C.set_to_product(M([1]), M([1]))
+            sage: C == M([1])
+            True
         """
         cdef Matrix_gfpn_dense _left = <Matrix_gfpn_dense>left
         cdef Matrix_gfpn_dense _right = <Matrix_gfpn_dense>right
@@ -1417,8 +1431,13 @@ cdef class Matrix_gfpn_dense(Matrix_dense):
             raise ValueError("The matrices must not be empty")
         if self._nrows == 0 or self._ncols == 0:
             return
+
+        # ``MatMulStrassen`` stores temporary results in parts of the
+        # destination, so it requires the destination to be zero on entry.  A
+        # result matrix freshly allocated by ``MatAlloc`` already is, but a
+        # destination reused by ``set_to_product`` may hold a previous product.
+        memset(self.Data.Data, FF_ZERO, self.Data.RowSize * self.Data.Nor)
         if _left._ncols == 0:
-            memset(self.Data.Data, FF_ZERO, self.Data.RowSize * self.Data.Nor)
             return
 
         StrassenSetCutoff(cutoff // sizeof(long))
