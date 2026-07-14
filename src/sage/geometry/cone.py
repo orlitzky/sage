@@ -1000,7 +1000,7 @@ class IntegralRayCollection(SageObject, Hashable, Iterable):
         The dual lattice of the dual lattice of a random cone should be
         the original lattice::
 
-            sage: K = random_cone(max_ambient_dim=8, max_rays=10)
+            sage: K = random_cone()
             sage: K.dual_lattice().dual() is K.lattice()
             True
         """
@@ -1194,7 +1194,7 @@ class IntegralRayCollection(SageObject, Hashable, Iterable):
         The codimension of a cone should be an integer between zero and
         the dimension of the ambient space, inclusive::
 
-            sage: K = random_cone(max_ambient_dim = 8)
+            sage: K = random_cone()
             sage: c = K.codim()
             sage: c in ZZ
             True
@@ -1203,13 +1203,13 @@ class IntegralRayCollection(SageObject, Hashable, Iterable):
 
         A solid cone should have codimension zero::
 
-            sage: K = random_cone(max_ambient_dim = 8, solid = True)
+            sage: K = random_cone(solid=True)
             sage: K.codim()
             0
 
         The codimension of a cone is equal to the lineality of its dual::
 
-            sage: K = random_cone(max_ambient_dim = 8)
+            sage: K = random_cone()
             sage: K.codim() == K.dual().lineality()
             True
         """
@@ -1266,7 +1266,7 @@ class IntegralRayCollection(SageObject, Hashable, Iterable):
 
         The span of a solid cone is the entire ambient space::
 
-            sage: K = random_cone(max_ambient_dim=6, max_rays=8, solid=True)
+            sage: K = random_cone(solid=True)
             sage: K.span().vector_space() == K.lattice().vector_space()
             True
         """
@@ -2295,7 +2295,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
         The dual cone of a (random) dual cone is the original cone::
 
-            sage: K = random_cone(max_ambient_dim=8, max_rays=10)
+            sage: K = random_cone(max_ambient_dim=6, max_rays=15)
             sage: K.dual().dual() is K
             True
         """
@@ -3100,7 +3100,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
         A random cone is equivalent to itself::
 
-            sage: K = random_cone(max_ambient_dim=8, max_rays=10)
+            sage: K = random_cone()
             sage: K.is_equivalent(K)
             True
         """
@@ -3147,7 +3147,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
         Any cone is a face of itself::
 
-            sage: K = random_cone(max_ambient_dim=8, max_rays=10)
+            sage: K = random_cone()
             sage: K.is_face_of(K)
             True
         """
@@ -3238,7 +3238,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
         A random (strictly convex) cone is isomorphic to itself::
 
-            sage: K = random_cone(max_ambient_dim=6, strictly_convex=True)
+            sage: K = random_cone(strictly_convex=True)
             sage: K.is_isomorphic(K)                                                    # needs sage.graphs
             True
         """
@@ -3408,7 +3408,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
         Random test for the claim made in the ``OUTPUT`` block::
 
-            sage: K = random_cone(max_ambient_dim = 8)
+            sage: K = random_cone()
             sage: K.is_pointed() == K.lineality().is_zero()
             True
 
@@ -3435,7 +3435,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         The linear subspace of any closed convex cone can be identified
         with the orthogonal complement of the span of its dual::
 
-            sage: K = random_cone(max_ambient_dim = 8)
+            sage: K = random_cone()
             sage: expected = K.dual().span().vector_space().complement()
             sage: K.linear_subspace() == expected
             True
@@ -3477,7 +3477,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         responses.) By testing it here, we "guarantee" that it is a
         safe assumption to make in user code::
 
-            sage: K = random_cone(max_ambient_dim=12, max_rays=10)
+            sage: K = random_cone()
             sage: V = K.lattice().vector_space()
             sage: L = [V(l) for l in K.lines()]
             sage: all( L[i].inner_product(L[j]).is_zero()
@@ -3487,9 +3487,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
             True
 
             sage: K = random_cone(strictly_convex=False,
-            ....:                 min_ambient_dim=4,
-            ....:                 max_ambient_dim=12,
-            ....:                 max_rays=15)
+            ....:                 min_ambient_dim=4)
             sage: V = K.lattice().vector_space()
             sage: L = [V(l) for l in K.lines()]
             sage: all( L[i].inner_product(L[j]).is_zero()
@@ -3500,8 +3498,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
             sage: K = random_cone(strictly_convex=False,
             ....:                 min_ambient_dim=8,
-            ....:                 max_ambient_dim=12,
-            ....:                 min_rays=4, max_rays=15)
+            ....:                 min_rays=4)
             sage: V = K.lattice().vector_space()
             sage: L = [V(l) for l in K.lines()]
             sage: all( L[i].inner_product(L[j]).is_zero()
@@ -3654,19 +3651,19 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
         The strict quotient of any cone should be strictly convex::
 
-            sage: K = random_cone(max_ambient_dim=6)
+            sage: K = random_cone()
             sage: K.strict_quotient().is_strictly_convex()
             True
 
         If the original cone is solid, then its strict quotient is proper::
 
-            sage: K = random_cone(max_ambient_dim=6, solid=True)
+            sage: K = random_cone(solid=True)
             sage: K.strict_quotient().is_proper()
             True
 
         The strict quotient of a strictly convex cone is itself::
 
-            sage: K = random_cone(max_ambient_dim=6, strictly_convex=True)
+            sage: K = random_cone(strictly_convex=True)
             sage: K.strict_quotient() is K
             True
 
@@ -3674,13 +3671,13 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         our dual, so the strict quotient cannot have a larger dimension
         than our dual::
 
-            sage: K = random_cone(max_ambient_dim=6)
+            sage: K = random_cone()
             sage: K.strict_quotient().dim() <= K.dual().dim()
             True
 
         The strict quotient is idempotent::
 
-            sage: K = random_cone(max_ambient_dim=6)
+            sage: K = random_cone()
             sage: K1 = K.strict_quotient()
             sage: K2 = K1.strict_quotient()
             sage: K1 is K2
@@ -3765,42 +3762,42 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
         The solid restriction of any cone is solid::
 
-            sage: K = random_cone(max_ambient_dim=6)
+            sage: K = random_cone()
             sage: K.solid_restriction().is_solid()
             True
 
         If a cone :meth:`is_strictly_convex`, then its solid restriction
         :meth:`is_proper`::
 
-            sage: K = random_cone(max_ambient_dim=6, strictly_convex=True)
+            sage: K = random_cone(strictly_convex=True)
             sage: K.solid_restriction().is_proper()
             True
 
         The solid restriction of a cone has the same dimension as the
         original::
 
-            sage: K = random_cone(max_ambient_dim=6)
+            sage: K = random_cone()
             sage: K.solid_restriction().dim() == K.dim()
             True
 
         The solid restriction of a cone has the same number of rays as
         the original::
 
-            sage: K = random_cone(max_ambient_dim=6)
+            sage: K = random_cone()
             sage: K.solid_restriction().n_rays() == K.n_rays()
             True
 
         The solid restriction of a cone has the same lineality as the
         original::
 
-            sage: K = random_cone(max_ambient_dim=6)
+            sage: K = random_cone()
             sage: K.solid_restriction().lineality() == K.lineality()
             True
 
         The solid restriction of a cone has the same number of facets as
         the original::
 
-            sage: K = random_cone(max_ambient_dim=6)
+            sage: K = random_cone()
             sage: len(K.solid_restriction().facets()) == len(K.facets())                # needs sage.graphs
             True
         """
@@ -4717,7 +4714,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         A closed convex cone is solid if and only if its dual is
         strictly convex::
 
-            sage: K = random_cone(max_ambient_dim=8)
+            sage: K = random_cone()
             sage: K.is_solid() == K.dual().is_strictly_convex()
             True
         """
@@ -4869,7 +4866,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         The lineality of a cone should be an integer between zero and the
         dimension of the ambient space, inclusive::
 
-            sage: K = random_cone(max_ambient_dim=8)
+            sage: K = random_cone()
             sage: l = K.lineality()
             sage: l in ZZ
             True
@@ -4878,7 +4875,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
         A strictly convex cone should have lineality zero::
 
-            sage: K = random_cone(max_ambient_dim=8, strictly_convex=True)
+            sage: K = random_cone(strictly_convex=True)
             sage: K.lineality()
             0
         """
@@ -5284,7 +5281,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
         Any cone should contain a random element of itself::
 
-            sage: K = random_cone(max_ambient_dim=8)
+            sage: K = random_cone()
             sage: K.contains(K.random_element())
             True
             sage: K.contains(K.random_element(ring=QQ))
@@ -5293,7 +5290,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         The ambient vector space of the cone should contain a random
         element of the cone::
 
-            sage: K = random_cone(max_ambient_dim=8)
+            sage: K = random_cone()
             sage: K.random_element() in K.lattice().vector_space()
             True
             sage: K.random_element(ring=QQ) in K.lattice().vector_space()
@@ -5301,21 +5298,21 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
         By default, the random element should live in this cone's lattice::
 
-            sage: K = random_cone(max_ambient_dim=8)
+            sage: K = random_cone()
             sage: K.random_element() in K.lattice()
             True
 
         A strictly convex cone contains no lines, and thus no negative
         multiples of any of its elements besides zero::
 
-            sage: K = random_cone(max_ambient_dim=8, strictly_convex=True)
+            sage: K = random_cone(strictly_convex=True)
             sage: x = K.random_element()
             sage: x.is_zero() or not K.contains(-x)
             True
 
         The sum of random elements of a cone lies in the cone::
 
-            sage: K = random_cone(max_ambient_dim=8)
+            sage: K = random_cone()
             sage: K.contains(sum(K.random_element() for i in range(10)))
             True
             sage: K.contains(sum(K.random_element(QQ) for i in range(10)))
@@ -5324,7 +5321,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         The sum of random elements of a cone belongs to its ambient
         vector space::
 
-            sage: K = random_cone(max_ambient_dim=8)
+            sage: K = random_cone()
             sage: V = K.lattice().vector_space()
             sage: sum(K.random_element() for i in range(10)) in V
             True
@@ -5334,7 +5331,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         By default, the sum of random elements of the cone should live
         in the cone's lattice::
 
-            sage: K = random_cone(max_ambient_dim=8)
+            sage: K = random_cone()
             sage: sum(K.random_element() for i in range(10)) in K.lattice()
             True
         """
@@ -6338,8 +6335,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         Reducibility is preserved under linear isomorphisms::
 
             sage: # long time
-            sage: K = random_cone(strictly_convex=True,
-            ....:                 max_ambient_dim=6)
+            sage: K = random_cone(strictly_convex=True)
             sage: n = K.ambient_dim()
             sage: q = QQ._random_nonzero_element()
             sage: A = q*matrix.random(QQ, n, algorithm='unimodular')
@@ -6355,7 +6351,6 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
             sage: # long time
             sage: K = random_cone(strictly_convex=True,
             ....:                 solid=True,
-            ....:                 max_ambient_dim=6,
             ....:                 min_rays=1)
             sage: K.is_reducible() == (K.lyapunov_rank() != 1)
             True
@@ -6599,7 +6594,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
     It's hard to test the output of a random process, but we can at
     least make sure that we get a cone back::
 
-        sage: K = random_cone(max_ambient_dim=6, max_rays=10)
+        sage: K = random_cone()
         sage: isinstance(K, sage.geometry.abc.ConvexRationalPolyhedralCone)
         True
 

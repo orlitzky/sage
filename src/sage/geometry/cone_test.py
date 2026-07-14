@@ -103,17 +103,14 @@ def K():
     The baseline random cone fixture, meant to be used in tests
     that do not explode computationally.
     """
-    return random_cone(max_ambient_dim=12, max_rays=15)
+    return random_cone()
 
 @pytest.fixture
 def P():
     r"""
     Like :func:`K`, but guaranteed to be proper.
     """
-    return random_cone(max_ambient_dim=12,
-                       max_rays=15,
-                       solid=True,
-                       strictly_convex=True)
+    return random_cone(solid=True, strictly_convex=True)
 
 @pytest.fixture
 def J():
@@ -122,17 +119,14 @@ def J():
     similar nature.
 
     """
-    return random_cone(max_ambient_dim=12, max_rays=15)
+    return random_cone()
 
 @pytest.fixture
 def Q():
     r"""
     Like :func:`J`, but guaranteed to be proper.
     """
-    return random_cone(max_ambient_dim=12,
-                       max_rays=15,
-                       solid=True,
-                       strictly_convex=True)
+    return random_cone(solid=True, strictly_convex=True)
 
 @pytest.fixture
 def K2_and_K3():
