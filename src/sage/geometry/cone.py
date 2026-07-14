@@ -6366,23 +6366,22 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         return len(self.irreducible_factors()) > 1
 
 
-def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
-                min_rays=0, max_rays=None, strictly_convex=None, solid=None):
+def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
+                min_rays=0, max_rays=16, strictly_convex=None, solid=None):
     r"""
     Generate a random convex rational polyhedral cone.
 
-    Lower and upper bounds may be provided for both the dimension of the
-    ambient space and the number of generating rays of the cone. If a
-    lower bound is left unspecified, it defaults to zero. Unspecified
-    upper bounds will be chosen randomly, unless you set ``solid``, in
-    which case they are chosen a little more wisely.
+    Lower and upper bounds may be provided for both the dimension of
+    the ambient space and the number of generating rays that the cone
+    will possess. If lower bounds are not provided, they default to
+    zero. Unspecified upper bounds default to reasonable values. You
+    can additionally request that the cone be strictly convex (or
+    not) or solid (or not).
 
-    You may specify the ambient ``lattice`` for the returned cone. In
-    that case, the ``min_ambient_dim`` and ``max_ambient_dim``
-    parameters are ignored.
-
-    You may also request that the returned cone be strictly convex (or
-    not). Likewise you may request that it be (non-)solid.
+    As an alternative to the dimension bounds, you can provide a
+    ``lattice`` for the returned cone to live in. In that case, the
+    ``min_ambient_dim`` and ``max_ambient_dim`` parameters are
+    ignored.
 
     .. WARNING::
 
@@ -6416,14 +6415,16 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
     - ``min_ambient_dim`` -- (default: zero) a nonnegative integer
       representing the minimum dimension of the ambient lattice
 
-    - ``max_ambient_dim`` -- (default: random) a nonnegative integer
-      representing the maximum dimension of the ambient lattice
+    - ``max_ambient_dim`` -- (default: 8) a nonnegative integer
+      representing the maximum dimension of the ambient lattice,
+      or ``None`` for no maximum.
 
     - ``min_rays`` -- (default: zero) a nonnegative integer representing
       the minimum number of generating rays of the cone
 
-    - ``max_rays`` -- (default: random) a nonnegative integer representing
-      the maximum number of generating rays of the cone
+    - ``max_rays`` -- (default: 16) a nonnegative integer representing
+      the maximum number of generating rays of the cone, or ``None``
+      for no maximum.
 
     - ``strictly_convex`` -- (default: random) whether or not to make the
       returned cone strictly convex. Specify ``True`` for a strictly convex
@@ -6433,6 +6434,22 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
     - ``solid`` -- (default: random) whether or not to make the returned
       cone solid. Specify ``True`` for a solid cone, ``False`` for a
       non-solid cone, or ``None`` if you don't care.
+
+    The ``max_ambient_dim`` and ``max_rays`` should be chosen
+    carefully. While in theory it is possible for `n+1` rays to
+    generate an `n`-dimensional vector space, if you actually try it,
+    they will normalized to a set containing `2n` rays (plus/minus a
+    basis). If the ambient space is to be generated randomly,
+    ``max_rays`` must therefore be at least twice ``max_ambient_dim``.
+
+    On the other hand, the higher ``max_rays`` is, the less likely we
+    are in a given iteration (see the ALGORITHM) to find a satisfatory
+    cone. As we attempt to find more than `2n` independent rays in an
+    `n`-dimensional space, it becomes increasingly likely that we will
+    generate the entire vector space, fail, and be forced start
+    over. While there do exist pointed cones (solid or not) in `n \ge
+    3` dimensions with more than `2n` rays, they are unusually hard to
+    find, and not comparably interesting.
 
     OUTPUT: a new, randomly generated cone
 
@@ -6496,6 +6513,30 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
     requirements; if it does, it is returned. If not, we throw it away
     and start over. This process repeats indefinitely until an
     appropriate cone is generated.
+
+    The default upper bounds on the ambient dimension and number of
+    rays are chosen so that each iteration of this process remains
+    fast. The following should be considered an implementation detail,
+    but at the beginning of each iteration we fix the number of
+    rays to attempt for the duration of that iteration. This is
+    necessary because we add rays to the cone one at a time: if we did
+    not have a fixed number of rays in mind, we would often stop as
+    soon as we reached the minimum allowable number of rays. That
+    would be legal, but not what people expect.
+
+    Adding a ray to the cone consists of appending a vector to the ray
+    set, and calling :func:`Cone` on the result. This can be quite
+    slow, and we may have to do it many times. As the speed of
+    :func:`Cone` depends mainly on the degree and number of rays given
+    to it, those are the critical factors in the worst-case
+    performance.
+
+    Keep in mind however that if you are looking for a cone with
+    hard-to-generate properties (a strictly-convex cone with at least
+    twenty extreme rays, for example), we can make no promises about
+    the overall runtime. The default bounds ensure that each
+    unsatisfactory cone can be contructed/discarded quickly, but we
+    may have to construct/discard them for eternity.
 
     EXAMPLES:
 
