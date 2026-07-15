@@ -835,7 +835,7 @@ class EllipticCurveHom(Morphism):
         """
         return [g.element() for g in self.kernel_subgroup(**kwds).gens()]
 
-    def dual(self):
+    def dual(self, algorithm=None):
         r"""
         Return the dual of this elliptic-curve morphism.
 

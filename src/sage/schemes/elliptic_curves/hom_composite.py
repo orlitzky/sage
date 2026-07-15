@@ -822,7 +822,7 @@ class EllipticCurveHom_composite(EllipticCurveHom):
         return self.x_rational_map().denominator().radical()
 
     @cached_method
-    def dual(self):
+    def dual(self, algorithm=None):
         """
         Return the dual of this composite isogeny.
 
@@ -851,7 +851,7 @@ class EllipticCurveHom_composite(EllipticCurveHom):
         """
         if not self._phis:
             return self
-        return prod(phi.dual() for phi in self._phis)
+        return prod(phi.dual(algorithm=algorithm) for phi in self._phis)
 
     def formal(self, prec=20):
         """
