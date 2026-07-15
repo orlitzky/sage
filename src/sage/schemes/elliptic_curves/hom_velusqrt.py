@@ -740,6 +740,8 @@ class EllipticCurveHom_velusqrt(EllipticCurveHom):
         if self._degree % 2 != 1 or self._degree < 9:
             raise NotImplementedError('only implemented for odd degrees >= 9')
 
+        self._kernel_gens = P,  # cache for .kernel_gens()
+
         try:
             self._raw_domain = E.short_weierstrass_model()
         except ValueError:

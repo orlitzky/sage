@@ -1912,6 +1912,8 @@ class EllipticCurveIsogeny(EllipticCurveHom):
         self.__kernel_mod_sign = {}
         self.__v = self.__w = 0
 
+        self._kernel_gens = tuple(kernel_gens)  # cache for .kernel_gens()
+
         # Fast path: The kernel is given by a single generating point.
         if len(kernel_gens) == 1 and kernel_gens[0]:
             self.__init_from_kernel_point(kernel_gens[0])

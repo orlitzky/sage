@@ -390,6 +390,8 @@ class EllipticCurveHom_composite(EllipticCurveHom):
             if P not in E:
                 raise ValueError(f'given point {P} does not lie on {E}')
 
+        self._kernel_gens = tuple(kernel)  # cache for .kernel_gens()
+
         self._phis = _compute_factored_isogeny(kernel, velu_sqrt_bound=velu_sqrt_bound)
 
         if not self._phis:
