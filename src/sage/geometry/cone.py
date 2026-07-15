@@ -6584,8 +6584,20 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         else:
             d = L.dimension()
 
+        _min_rays_this_iter = min_rays
+        if solid:
+            # If a solid cone was requested, then before the loop, we
+            # set max_ambient_dim to max_rays as a performance hint.
+            # Without more information, that was the best we could do,
+            # but now we know the dimension that we are seeking for
+            # this iteration. If min_rays it too low to achieve it,
+            # we can use a higher lower bound (but still within
+            # max_rays). Note: the aforementioned hint guarantees
+            # that d <= max_rays.
+            _min_rays_this_iter = d
+
         # The number of rays that we will try to attain in this iteration.
-        r = random_min_max(min_rays, max_rays)
+        r = random_min_max(_min_rays_this_iter, max_rays)
 
         # The rays are trickier to generate, since we could generate v and
         # 2*v as our "two rays." In that case, the resulting cone would
