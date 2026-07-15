@@ -6550,14 +6550,6 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
                 # since we already checked that
                 # min_ambient_dim <= min_rays = max_ambient_dim.
                 max_ambient_dim = min_rays
-        else:
-            if max_rays is None and max_ambient_dim is not None:
-                # This is an upper limit on the number of rays in a
-                # non-solid cone.
-                max_rays = 2*(max_ambient_dim - 1)
-            if max_rays is None and lattice is not None:
-                # Same thing, except when we're given a lattice.
-                max_rays = 2*(lattice.dimension() - 1)
 
     def random_min_max(l, u):
         r"""
