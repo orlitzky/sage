@@ -91,7 +91,7 @@ jobs:
           zip -r livedoc.zip doc
 
       - name: Upload livedoc
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: livedoc
           path: livedoc.zip
