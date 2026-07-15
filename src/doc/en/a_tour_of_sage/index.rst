@@ -59,7 +59,9 @@ The result is a list of equalities.
     sage: S[0].rhs()  # right hand side of the equation
     -1/2*sqrt(4*a + 1) - 1/2
 
-Sage can plot various useful functions, of course.
+Sage can plot various useful functions, of course. (In the Jupyter
+notebook or the Sage Cell Server the figure appears inline; at the
+``sage`` terminal prompt, ``show`` opens it with an external viewer.)
 
 ::
 
