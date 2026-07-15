@@ -49,8 +49,9 @@ The most useful methods that apply to isogenies are:
 
 .. WARNING::
 
-    This class only implements separable isogenies. When using Kohel's
-    algorithm, only cyclic isogenies can be computed (except for `[2]`).
+    This class only implements separable isogenies. The direct Kohel
+    implementation handles odd-degree kernel polynomials and kernel
+    polynomials contained in the 2-torsion.
 
     Working with other kinds of isogenies may be possible using other
     child classes of :class:`EllipticCurveHom`.
@@ -421,6 +422,16 @@ def compute_codomain_kohel(E, kernel):
         sage: compute_codomain_kohel(E, x^3 + 7*x^2 + 15*x + 12)
         Elliptic Curve defined by y^2 + x*y + 3*y = x^3 + 2*x^2 + 3*x + 15
          over Finite Field of size 19
+        sage: F = GF(419)
+        sage: E = EllipticCurve(F, [1, 0])
+        sage: R.<x> = F[]
+        sage: compute_codomain_kohel(E, x^3 - 25*x^2 + x)
+        Elliptic Curve defined by y^2 = x^3 + 141*x + 269 over Finite Field of size 419
+
+        sage: F = GF(3); R.<x> = F[]
+        sage: E = EllipticCurve(F, [1, 2, 0, 1, 0])
+        sage: compute_codomain_kohel(E, x^2 + x)
+        Elliptic Curve defined by y^2 + x*y = x^3 + 2*x^2 + x + 1 over Finite Field of size 3
 
     ALGORITHM:
 
@@ -443,7 +454,9 @@ def compute_codomain_kohel(E, kernel):
         psi_quo = psi//psi_2tor
 
         if psi_quo.degree() != 0:
-            raise NotImplementedError("Kohel's algorithm currently only supports cyclic isogenies (except for [2])")
+            phi_even = EllipticCurveIsogeny(E, psi_2tor)
+            psi_odd = phi_even.push_subgroup(psi_quo)
+            return compute_codomain_kohel(phi_even.codomain(), psi_odd)
 
         n = psi_2tor.degree()
 
@@ -521,6 +534,81 @@ def two_torsion_part(E, psi):
     return psi.gcd(psi_2)
 
 
+def _factored_isogeny_from_kernel_polynomial(E, kernel_polynomial,
+                                             codomain=None, model=None,
+                                             check=True):
+    r"""
+    Construct an isogeny from a kernel polynomial with both a nontrivial
+    2-torsion part and another component, recursively extracting
+    2-torsion factors.
+
+    This handles the case where the direct Kohel implementation can compute
+    each 2-torsion factor and the final residual kernel, but not the full
+    kernel polynomial in a single step.
+
+    EXAMPLES::
+
+        sage: from sage.schemes.elliptic_curves.ell_curve_isogeny import _factored_isogeny_from_kernel_polynomial
+        sage: F = GF(419)
+        sage: E = EllipticCurve(F, [1, 0])
+        sage: R.<x> = F[]
+        sage: phi = _factored_isogeny_from_kernel_polynomial(E, x^3 - 25*x^2 + x)
+        sage: [f.degree() for f in phi.factors()]
+        [2, 3]
+        sage: phi.codomain()
+        Elliptic Curve defined by y^2 = x^3 + 141*x + 269 over Finite Field of size 419
+
+    The pushed-forward quotient can still have a nontrivial 2-torsion
+    part, in which case the construction recurses::
+
+        sage: h = (x^6 + 336*x^5 + 252*x^4 + 167*x^3
+        ....:      + 83*x^2 + 418*x)
+        sage: phi = E.isogeny(h)
+        sage: [f.degree() for f in phi.factors()]
+        [2, 2, 3]
+        sage: phi.kernel_polynomial() == h
+        True
+
+    TESTS:
+
+    Check that a polynomial which does not define a subgroup is rejected::
+
+        sage: E.isogeny((x^3 + x) * (x^2 - 25*x + 1))
+        Traceback (most recent call last):
+        ...
+        ValueError: the polynomial x^5 + 394*x^4 + 2*x^3 + 394*x^2 + x
+        does not define a finite subgroup of
+        Elliptic Curve defined by y^2 = x^3 + x over Finite Field of size 419
+    """
+    polynomial_ring = PolynomialRing(E.base_ring(), 'x')
+    psi = polynomial_ring(kernel_polynomial)
+
+    if not psi.is_monic():
+        raise ValueError("given kernel polynomial is not monic")
+
+    psi_2tor = two_torsion_part(E, psi)
+    if psi_2tor.degree() == 0:
+        return EllipticCurveIsogeny(E, psi, codomain=codomain, model=model,
+                                    check=check)
+
+    psi_quotient = psi // psi_2tor
+    if psi_quotient.degree() == 0:
+        return EllipticCurveIsogeny(E, psi_2tor, codomain=codomain,
+                                    model=model, check=check)
+
+    phi_2tor = EllipticCurveIsogeny(E, psi_2tor, check=check)
+    psi_image = phi_2tor.push_subgroup(psi_quotient)
+    phi_quotient = _factored_isogeny_from_kernel_polynomial(
+        phi_2tor.codomain(), psi_image, codomain=codomain, model=model,
+        check=check)
+    factored_isogeny = phi_quotient * phi_2tor
+
+    if check and factored_isogeny.kernel_polynomial() != psi:
+        raise ValueError(f"the polynomial {psi} does not define a finite subgroup of {E}")
+
+    return factored_isogeny
+
+
 class EllipticCurveIsogeny(EllipticCurveHom):
     r"""
     This class implements separable isogenies of elliptic curves.
@@ -537,8 +625,8 @@ class EllipticCurveIsogeny(EllipticCurveHom):
       isogenies.  This algorithm is selected by giving as the
       ``kernel`` parameter a monic polynomial (or a coefficient list)
       which will define the kernel of the isogeny.
-      Kohel's algorithm is currently only implemented for cyclic
-      isogenies, with the exception of `[2]`.
+      The direct Kohel implementation handles odd-degree kernel
+      polynomials and kernel polynomials contained in the 2-torsion.
 
     INPUT:
 
@@ -2212,7 +2300,10 @@ class EllipticCurveIsogeny(EllipticCurveHom):
             psi_quo = psi//psi_G
 
             if psi_quo.degree() != 0:
-                raise NotImplementedError("Kohel's algorithm currently only supports cyclic isogenies (except for [2])")
+                raise NotImplementedError(
+                    "the direct Kohel implementation requires kernel "
+                    "polynomials that are coprime to the 2-division "
+                    "polynomial or divide it")
 
             phi, omega, v, w, _, d = self.__init_even_kernel_polynomial(E, psi_G)
 
