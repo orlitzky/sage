@@ -24340,7 +24340,7 @@ class GenericGraph(GenericGraph_pyx):
 
         if not inplace:
             G = copy(self)
-            perm2 = G.relabel(perm,
+            perm2 = GenericGraph.relabel(G, perm,
                               return_map=return_map,
                               check_input=check_input,
                               complete_partial_function=complete_partial_function)
