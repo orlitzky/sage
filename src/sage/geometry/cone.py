@@ -6537,19 +6537,21 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
                 msg = 'all cones in the given lattice are solid.'
                 raise ValueError(msg)
 
-    # Now that we've sanity-checked our parameters, we can massage the
-    # min/maxes for (non-)solid cones. It doesn't violate the user's
-    # expectation to increase a minimum, decrease a maximum, or fix an
-    # "I don't care" parameter.
-    if solid is not None:
-        if solid:
-            # If max_ambient_dim is "I don't care", we can set it so that we
-            # guaranteed to generate a solid cone.
-            if max_rays is not None and max_ambient_dim is None:
-                # We won't make max_ambient_dim less than min_ambient_dim,
-                # since we already checked that
-                # min_ambient_dim <= min_rays = max_ambient_dim.
-                max_ambient_dim = min_rays
+    if solid and max_rays is not None:
+        # If the user wants a solid cone, we need at least as many
+        # rays as the dimension. If max_rays was specified, then
+        # above we have already verified that
+        #
+        # (a) max_rays >= min_ambient_dim
+        # (b) max_ambient_dim >= min_ambient_dim, if max_ambient_dim
+        #     is set
+        #
+        # As a result we can fudge the max_ambient_dim down to
+        # max_rays, ensuring that we don't perform any pointless
+        # iterations in a space that's too big for max_rays to
+        # generate a solid cone.
+        if max_ambient_dim is None or max_ambient_dim > max_rays:
+            max_ambient_dim = max_rays
 
     def random_min_max(l, u):
         r"""
