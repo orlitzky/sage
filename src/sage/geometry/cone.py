@@ -6187,9 +6187,6 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
 
     * A non-solid cone is requested but ``lattice`` has dimension zero.
 
-    * A non-solid cone is requested but ``min_rays`` is so large that
-      it guarantees a solid cone.
-
     ALGORITHM:
 
     First, a lattice is determined from ``min_ambient_dim`` and
@@ -6437,20 +6434,6 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         ValueError: max_rays must be at least 5 for a solid cone in this
         lattice.
 
-    A :exc:`ValueError` is thrown if a non-solid cone is requested but
-    ``min_rays`` guarantees a solid cone::
-
-        sage: random_cone(max_ambient_dim=4, min_rays=10, solid=False)
-        Traceback (most recent call last):
-        ...
-        ValueError: every cone is solid when min_rays > 2*(max_ambient_dim - 1).
-
-        sage: L = ToricLattice(4)
-        sage: random_cone(lattice=L, min_rays=10, solid=False)
-        Traceback (most recent call last):
-        ...
-        ValueError: every cone is solid when min_rays > 2*(d - 1) where d
-        is the dimension of the given lattice.
     """
 
     # Catch obvious mistakes so that we can generate clear error
@@ -6549,18 +6532,9 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
             if max_ambient_dim is not None and max_ambient_dim == 0:
                 msg = 'all cones are solid when max_ambient_dim is zero.'
                 raise ValueError(msg)
-            if (max_ambient_dim is not None and
-                    min_rays > 2 * (max_ambient_dim - 1)):
-                msg = 'every cone is solid when '
-                msg += 'min_rays > 2*(max_ambient_dim - 1).'
-                raise ValueError(msg)
         else:
             if lattice.dimension() == 0:
                 msg = 'all cones in the given lattice are solid.'
-                raise ValueError(msg)
-            if min_rays > 2 * (lattice.dimension() - 1):
-                msg = 'every cone is solid when min_rays > 2*(d - 1) '
-                msg += 'where d is the dimension of the given lattice.'
                 raise ValueError(msg)
 
     # Now that we've sanity-checked our parameters, we can massage the
