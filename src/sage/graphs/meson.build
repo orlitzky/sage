@@ -1,9 +1,12 @@
 bliss = cc.find_library('bliss', required: get_option('bliss'), disabler: true)
 
 mcqd = disabler()
-if cc.has_header('mcqd.h', required: get_option('mcqd'))
-  # mcqd is a header-only library
-  mcqd = declare_dependency()
+mcqd = dependency('Mcqd', method: 'cmake', required: false, disabler: true)
+if not mcqd.found()
+  if cc.has_header('mcqd.h', required: get_option('mcqd'))
+    # mcqd is a header-only library
+    mcqd = declare_dependency()
+  endif
 endif
 
 cliquer = dependency('libcliquer', required: false, disabler: true)
