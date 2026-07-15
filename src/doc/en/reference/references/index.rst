@@ -3190,6 +3190,11 @@ REFERENCES:
               Algorithm Engineering and Experiments (ALENEX), pp 85-97, 2021.
               :doi:`10.1137/1.9781611976472.7`
 
+.. [GKMN2022] Loukas Georgiadis, Dionysios Kefallinos, Anna Mpanti, Stavros D.
+              Nikolopoulos. *An Experimental Study of Algorithms for Packing
+              Arborescences*. Symposium on Experimental Algorithms (SEA), 2022.
+              :doi:`10.4230/LIPIcs.SEA.2022.14`
+
 .. [GKP2011] Sylvain Gravier, Matjaz Kovse and Aline Parreau.
              *Generalized Sierpinski graphs*. Poster, European Conference on
              Combinatorics, Graph Theory and Applications (EuroComb’11),
