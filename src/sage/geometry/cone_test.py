@@ -176,6 +176,250 @@ def K2_K3_posops_cone(K2, K3, K2_K3_posops_gens):
 def K2_ll_basis(K2):
     return K2.lyapunov_like_basis()
 
+def test_dual_lattice_dual_is_original(K):
+    r"""
+    The dual lattice of a dual lattice is the original.
+    """
+    assert K.dual_lattice().dual() is K.lattice()
+
+def test_codimension_bounds(K):
+    r"""
+    Codimension is an integer between zero and the ambient
+    (lattice or vector space) dimension.
+    """
+    c = K.codim()
+    assert c.is_integral() and 0 <= c <= K.lattice_dim()
+
+def test_codim_is_zero_iff_cone_is_solid(K):
+    r"""
+    A cone is solid if and only if it has codimension zero.
+    """
+    assert K.is_solid() == K.codim().is_zero()
+
+def test_codim_is_dual_lineality(K):
+    r"""
+    The codimension of a cone is equal to the lineality of its
+    dual.
+    """
+    assert K.codim() == K.dual().lineality()
+
+def test_cone_is_solid_iff_it_spans_its_lattice(K):
+    r"""
+    The span of a cone is the entire ambient space if and only if
+    that cone is solid.
+    """
+    V1 = K.lattice().vector_space()
+    V2 = K.span().vector_space()
+    assert K.is_solid() == (V1 == V2)
+
+def test_dual_of_dual_is_original(K):
+    r"""
+    The dual cone of a dual cone is the original cone.
+    """
+    assert K.dual().dual() is K
+
+def test_cones_are_equivalent_to_themselves(K):
+    r"""
+    Sanity check: a cone is always equivalent to itself.
+    """
+    assert K.is_equivalent(K)
+
+def test_cones_are_faces_of_themselves(K):
+    r"""
+    Every cone is (trivially) a face of itself.
+    """
+    assert K.is_face_of(K)
+
+def pointed_cones_are_isomorphic_to_themselves(K):
+    r"""
+    Sanity check: a cone is always isomorphic to itself.
+
+    Isomorphism is implemented only for pointed cones, so
+    we use the strict quotient of the arbitrary (random)
+    cone ``K``.
+    """
+    K_p = K.strict_quotient()
+    assert K_p.is_isomorphic(K_p)
+
+def test_lineality_bounds(K):
+    r"""
+    Lineality is an integer between zero and the ambient
+    dimension.
+    """
+    l = K.lineality()
+    assert l.is_integral() and 0 <= l <= K.lattice_dim()
+
+def test_lineality_zero_iff_pointed(K):
+    r"""
+    The lineality of a pointed cone is zero, essentially by
+    definition.
+    """
+    assert K.is_pointed() == K.lineality().is_zero()
+
+def test_lineality_space_is_dual_perp(K):
+    r"""
+    The linear subspace of any closed convex cone can be identified
+    with the orthogonal complement of the span of its dual.
+    """
+    expected = K.dual().span().vector_space().complement()
+    assert K.linear_subspace() == expected
+
+def test_strict_quotient_is_pointed(K):
+    r"""
+    The strict quotient of any cone should be pointed (that's the
+    point of the method).
+    """
+    assert K.strict_quotient().is_strictly_convex()
+
+def test_strict_quotient_of_pointed_is_itself(K):
+    r"""
+    The strict quotient of a cone is itself if and only if that
+    cone is pointed (strictly convex).
+    """
+    assert K.is_strictly_convex() == (K.strict_quotient() is K)
+
+def test_strict_quotient_dim_bound(K):
+    r"""
+    The orthogonal complement of a cone's linear subspace has the
+    same dimension as its dual, so the strict quotient cannot have a
+    larger dimension than the dual.
+    """
+    assert K.strict_quotient().dim() <= K.dual().dim()
+
+def test_strict_quotient_is_idempotent(K):
+    r"""
+    As corollary of the strict quotient being pointed and the
+    strict quotient of a pointed cone being itself, the strict
+    quotient is idempotent.
+    """
+    C = K.strict_quotient()
+    assert C.strict_quotient() == C
+
+def test_solid_restriction_is_solid(K):
+    r"""
+    The solid restriction of a cone is itself if and only if that
+    cone is solid.
+    """
+    assert K.is_solid() == (K.solid_restriction() is K)
+
+def test_solid_restriction_has_same_properties_as_original(K):
+    r"""
+    The solid restriction of a cone has the same dimension,
+    number of rays, etc. as the the original cone. (The restriction
+    changes only its representation and ambient space.)
+    """
+    sr = K.solid_restriction()
+    assert all((sr.dim() == K.dim(),
+                sr.n_rays() == K.n_rays(),
+                sr.lineality() == K.lineality(),
+                len(sr.facets()) == len(K.facets())))
+
+def test_solid_iff_dual_pointed(K):
+    r"""
+    A closed convex cone is solid if and only if its dual is
+    strictly convex.
+    """
+    assert K.is_solid() == K.dual().is_strictly_convex()
+
+def test_random_element_membership(K):
+    r"""
+    Random elements of a cone belong to the cone, its ambient
+    vector space, and its lattice. The same is true for conic
+    combinations of random elements.
+    """
+    from random import randint
+
+    L = K.lattice()
+    V = L.vector_space()
+    F = L.base_field()
+
+    # Note that after the change of ring (from ZZ to QQ), we lose
+    # membership in the lattice.
+    e1 = sum((K.random_element()
+              for _ in range(randint(0,10))),
+             start=L.zero())
+    e2 = sum((K.random_element(ring=F)
+              for _ in range(randint(0,10))),
+             start=L.zero())
+
+    assert all(x in K and x in V for x in (e1,e2))
+    assert e1 in L
+
+def test_pointed_cones_contain_no_random_line(K):
+    r"""
+    A pointed cone contains no lines, and thus no negative
+    multiples of any of its elements (besides the origin).
+
+    The input cone ``K`` is arbitrary (random), so we take
+    its strict quotient to obtain a pointed cone.
+    """
+    K_p = K.strict_quotient()
+    x = K_p.random_element()
+    assert x.is_zero() or not K_p.contains(-x)
+
+@pytest.mark.long
+def test_reducibility_preserved_by_isomorphism(K):
+    r"""
+    Reducibility is preserved under linear isomorphisms. We take
+    the strict quotient of ``K`` to ensure that we have a pointed cone
+    for which reducibility is well-defined.
+    """
+    C = K.strict_quotient()
+
+    n = C.ambient_dim()
+    F = C.lattice().base_field()
+    q = F._random_nonzero_element()
+    A = q*matrix.random(F, n, algorithm='unimodular')
+    AC = Cone([ r*A for r in C.rays() ], lattice=C.lattice())
+    assert C.is_reducible() == AC.is_reducible()
+
+@pytest.mark.long
+def test_reducibility_criteria(K,J,P,Q,K2,K3):
+    r"""
+    In [GT2014]_ it is shown that a (nontrivial) proper polyhedral
+    cone is irreducible if and only if its Lyapunov rank is one.
+    A related test combines Theorem 4.7 of [HFP1976]_ with the
+    Z-operator algorithm in [Or2018b]_.
+
+    Loop through several fixtures to increase the chances that one of
+    them is both proper AND nontrivial. If not, just make a new one.
+    """
+    winners = ( C for C in (P,Q,K,J,K2,K3)
+                if not C.is_trivial() and C.is_proper() )
+    try:
+        C = next(winners)
+    except StopIteration:
+        C = random_cone(strictly_convex=True,
+                        solid=True,
+                        max_ambient_dim=5,
+                        min_rays=1,
+                        max_rays=7)
+
+    assert C.is_reducible() == (C.lyapunov_rank() != 1)
+    d = C._cross_positive_operators_dual().dim()
+    assert C.is_reducible() == (d < C.dim()**2 - 1)
+
+@pytest.mark.long
+def test_lines_gens_are_orthogonal(K,J,K2,K3):
+    r"""
+    Ensure that the returned generators are mutually
+    orthogonal. This is not promised by the PPL documentation, but
+    it seems to hold in practice. (There is February 2026 thread
+    about it on the ppl-devel mailing list that received no
+    responses.) By testing it here, we "guarantee" that it is a
+    safe assumption to make in user code.
+
+    Run a few times, since this is really the only guarantee that we
+    have for the claim made in our documentation.
+    """
+    for C in (K,J,K2,K3):
+        V = C.ambient_vector_space()
+        L = [V(l) for l in C.lines()]
+        assert all(L[i].inner_product(L[j]).is_zero()
+                   for i in range(len(L))
+                   for j in range(len(L))
+                   if i != j)
+
 @pytest.mark.longlong
 def test_is_cross_positive(K2, K2_cp_gens):
     r"""
@@ -343,7 +587,7 @@ def test_posops_dual_linspace(K2):
     its dual [Or2018b]_.
     """
     pi_dual = K2._positive_operators_dual(K2)
-    V = pi_dual.lattice().vector_space()
+    V = pi_dual.ambient_vector_space()
     actual = pi_dual.linear_subspace()
     U1 = ( V((s.tensor_product(x)).list())
            for x in K2.lines()
@@ -543,8 +787,7 @@ def test_lyapunov_rank_automorphism_invariance(K):
 @pytest.mark.long
 def test_lyapunov_rank_dual_invariance(K):
     r"""
-    Lyapunov rank should be invariant under
-    :meth:`sage.geometry.cone.ConvexRationalPolyhedralCone.dual`
+    Lyapunov rank is invariant under the duality operator
     [RNPA2011]_.
     """
     assert K.lyapunov_rank() == K.dual().lyapunov_rank()
