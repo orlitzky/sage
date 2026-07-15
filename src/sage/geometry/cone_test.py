@@ -28,11 +28,8 @@ def _gen_ops_test_cones():
     J2 = random_cone(max_ambient_dim=5, max_rays=10)
     J3 = random_cone(max_ambient_dim=5, max_rays=10)
 
-    J2_dual = J2.dual()
-    J3_dual = J3.dual()
-
-    worst_dim = J2.dim() * max(J2_dual.dim(), J3_dual.dim())
-    worst_npairs = J2.nrays() * max(J2_dual.nrays(), J2_dual.nrays())
+    worst_dim = J2.dim() * max(J2.dual().dim(), J3.dual().dim())
+    worst_npairs = J2.nrays() * max(J2.dual().nrays(), J2.dual().nrays())
 
     # How many pairs is too many pairs, in a given dimension? Note
     # that the maximum ambient dimension for both cones is 5, so there
@@ -56,13 +53,6 @@ def _gen_ops_test_cones():
             if worst_npairs >= limits[worst_dim]:
                 return _gen_ops_test_cones()
 
-
-    # Monkey patch both dual() methods with the already-computed
-    # (cached) values, so we don't have recompute them later.
-    J2_dual_meth = lambda s: J2_dual
-    J3_dual_meth = lambda s: J3_dual
-    J2.dual = J2_dual_meth.__get__(J2)
-    J3.dual = J3_dual_meth.__get__(J3)
 
     # We _also_ need to check that the dual we're going to take a dual
     # of is not too complicated: the complexity of dual() is bad in
