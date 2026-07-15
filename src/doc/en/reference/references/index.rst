@@ -1277,6 +1277,10 @@ REFERENCES:
              functions*.
              :arxiv:`0907.4652v2`.
 
+.. [Bri2022] Brinkmann, Gunnar. (2022). *A practical algorithm for
+             the computation of the genus*. Ars Mathematica Contemporanea. 22.
+             #P4.01. :doi:`10.26493/1855-3974.2320.c2d`.
+
 .. [Bou1989] \N. Bourbaki. *Lie Groups and Lie Algebras*. Chapters 1-3.
              Springer. 1989.
 
@@ -3491,7 +3495,7 @@ REFERENCES:
 .. [Haj2000] \M. Hajiaghayi, *Consecutive Ones Property*, 2000.
              https://web.archive.org/web/20040401033532/http://www-math.mit.edu/~hajiagha/pp11.ps
 
-.. [HJ2020]  U. Hartl and A.-K. Juschka, 
+.. [HJ2020]  U. Hartl and A.-K. Juschka,
              *Pink’s theory of Hodge structures and the Hodge conjecture over function fields*,
              in `t`\ *-motives: Hodge structures, transcendence and other motivic aspects*
              EMS Ser. Congr. Rep. (2020), 31-182
@@ -5298,6 +5302,11 @@ REFERENCES:
               Pages 177--227,
               :doi:`10.1016/j.aam.2013.02.003`,
               :arxiv:`1109.1634v2`.
+
+.. [MetUlr2026] \Alexander Metzger, Austin Ulrigg, *An efficient genus algorithm
+                based on graph rotations*, Discrete Mathematics, Volume 349,
+                Issue 12, 2026, 115308, ISSN 0012-365X,
+                :doi:`10.1016/j.disc.2026.115308`, :arxiv:`2411.07347`.
 
 .. [MF1999] \J.H. Mathews and K.D. Fink. *Numerical Methods Using
             MATLAB*.  3rd edition, Prentice-Hall, 1999.
