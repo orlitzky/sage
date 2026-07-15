@@ -4,6 +4,12 @@
 Welcome to Sage
 ===============
 
+.. note::
+
+   You can try the examples below in your browser right away, with nothing
+   to install: just type them into the Sage Cell Server at
+   https://sagecell.sagemath.org.
+
 This is a short tour of Sage as a calculator.
 
 The Sage command line has a prompt "``sage:``". To experiment with the
