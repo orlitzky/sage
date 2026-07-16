@@ -6191,7 +6191,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
     First, a lattice is determined from ``min_ambient_dim`` and
     ``max_ambient_dim`` (or from the supplied ``lattice``).
 
-    Then, lattice elements are generated one at a time and added to a
+    Then, lattice elements are generated in batches and added to a
     cone. This continues until either the cone meets the user's
     requirements, or the cone is equal to the entire space (at which
     point it is futile to generate more).
@@ -6204,14 +6204,15 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
     The default upper bounds on the ambient dimension and number of
     rays are chosen so that each iteration of this process remains
     fast. The following should be considered an implementation detail,
-    but at the beginning of each iteration we fix the number of
-    rays to attempt for the duration of that iteration. This is
-    necessary because we add rays to the cone one at a time: if we did
-    not have a fixed number of rays in mind, we would often stop as
-    soon as we reached the minimum allowable number of rays. That
-    would be legal, but not what people expect.
+    but at the beginning of each iteration we fix the number of rays
+    to attempt for the duration of that iteration. This is necessary
+    because we begin with a cone that likely has too few rays, and add
+    rays to it in batches: if we did not have a fixed number of rays
+    in mind, we would tend to stop as soon as we reached the minimum
+    allowable number of rays. That would be legal, but not what people
+    expect.
 
-    Adding a ray to the cone consists of appending a vector to the ray
+    Adding rays to the cone consists of appending vectors to the ray
     set, and calling :func:`Cone` on the result. This can be quite
     slow, and we may have to do it many times. As the speed of
     :func:`Cone` depends mainly on the degree and number of rays given
@@ -6221,9 +6222,9 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
     Keep in mind however that if you are looking for a cone with
     hard-to-generate properties (a strictly-convex cone with at least
     twenty extreme rays, for example), we can make no promises about
-    the overall runtime. The default bounds ensure that each
-    unsatisfactory cone can be contructed/discarded quickly, but we
-    may have to construct/discard them for eternity.
+    the overall runtime. The default bounds allow unsatisfactory cones
+    to be contructed/discarded quickly, but we may have to
+    construct/discard them for eternity.
 
     EXAMPLES:
 
@@ -6611,11 +6612,11 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         # adding e.g. (1,1) to [(0,1), (0,-1)]. Rather than trying to
         # mangle what we have, we just start over if we get a cone
         # that won't work.
-        #
         while r > K.n_rays() and not K.is_full_space():
-            rays.append(L.random_element())
+            rays = list(K.rays())
+            rays.extend(L.random_element()
+                        for _ in range(r - K.n_rays()))
             K = Cone(rays, lattice=L)
-            rays = list(K.rays()) # Avoid re-normalizing next time around
 
         if strictly_convex is not None:
             if strictly_convex:
