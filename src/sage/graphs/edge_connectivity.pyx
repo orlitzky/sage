@@ -262,7 +262,7 @@ cdef class GabowEdgeConnectivity:
         from sage.graphs.digraph import DiGraph
         if not isinstance(G, DiGraph):
             raise ValueError("this method is for directed graphs only")
-        G._scream_if_not_simple(allow_loops=True)
+        G._scream_if_not_simple(allow_loops=True, allow_multiple_edges=True)
         if G.size() > INT_MAX - 2:
             raise ValueError("the graph is too large for this code")
 
@@ -371,18 +371,20 @@ cdef class GabowEdgeConnectivity:
             self.g_out[i].clear()
             self.g_in[i].clear()
 
+        # Iterate over edges (not out-neighbours) so that parallel arcs each
+        # get their own edge id. Loops (x == y) are skipped.
         cdef int x, y
         cdef int e_id = 0
-        for x, u in enumerate(self.int_to_vertex):
-            for v in self.G.neighbor_out_iterator(u):
-                y = vertex_to_int[v]
-                if x != y:
-                    self.g_out[x].push_back(e_id)
-                    self.g_in[y].push_back(e_id)
-                    self.tail[e_id] = x
-                    self.head[e_id] = y
-                    e_id += 1
-        # Loops have been removed, so we update the number of edges
+        for u, v in self.G.edge_iterator(labels=False):
+            x = vertex_to_int[u]
+            y = vertex_to_int[v]
+            if x != y:
+                self.g_out[x].push_back(e_id)
+                self.g_in[y].push_back(e_id)
+                self.tail[e_id] = x
+                self.head[e_id] = y
+                e_id += 1
+        # Loops (and, before, collapsed parallels) removed -> update edge count
         self.m = e_id
 
     cdef bint compute_edge_connectivity(self) except -1:
