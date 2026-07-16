@@ -15,7 +15,7 @@ def _gen_ops_test_cones():
     Generate two cones that are suitable for testing (cross)
     positive, Lyapunov-like, and Z-operators.
 
-    This extends :meth:`sage.geomtry.cone.random_cone` by choosing
+    This extends :func:`sage.geometry.cone.random_cone` by choosing
     conservative parameters, and by rejecting any cone that looks too
     complicated for these methods to be computed in a reasonable
     amount of time. We generate two cones simultaneously because,
