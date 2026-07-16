@@ -41,11 +41,9 @@ cdef class GabowEdgeConnectivity:
     edge connectivity of a directed graph and `k` edge disjoint spanning trees
     if the digraph is `k` edge connected.
 
-    .. WARNING::
-
-        Multiple edges are currently not supported. The current implementation
-        act as if the digraph is simple and so the return results might not be
-        correct. We therefore raise an error if the digraph has multiple edges.
+    Digraphs with multiple edges are supported: every parallel arc counts
+    separately, both for the edge connectivity and for the arborescence
+    packing. Loops are tolerated and ignored.
 
     INPUT:
 
@@ -116,7 +114,8 @@ cdef class GabowEdgeConnectivity:
         sage: GabowEdgeConnectivity(D).edge_connectivity()
         1
 
-    Looped digraphs are supported but not digraphs with multiple edges::
+    Loops are ignored, and parallel arcs each count separately: doubling
+    every arc of a complete digraph doubles its edge connectivity::
 
         sage: D = digraphs.Complete(5, loops=True)
         sage: GabowEdgeConnectivity(D).edge_connectivity()
@@ -124,9 +123,12 @@ cdef class GabowEdgeConnectivity:
         sage: D.allow_multiple_edges(True)
         sage: D.add_edges(D.edges(sort=False))
         sage: GabowEdgeConnectivity(D).edge_connectivity()
-        Traceback (most recent call last):
-        ...
-        ValueError: This method is not known to work on graphs with multiedges. ...
+        8
+        sage: trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=8)
+        sage: len(trees)
+        8
+        sage: all(not T.has_loops() for T in trees)
+        True
     """
     cdef MemoryAllocator mem
     cdef Py_ssize_t n  # number of nodes
