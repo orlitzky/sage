@@ -31,11 +31,13 @@ When you do arithmetic with::
     sage: f + g
     (x, y, t, w) |--> t + w + x + y
 
-Unicode art uses the mapsto arrow (:issue:`30374`)::
+Unicode art uses the mapsto arrow (:issue:`30374`). At the Sage prompt,
+``%display unicode_art`` enables this representation as the default display
+mode::
 
     sage: from sage.typeset.unicode_art import unicode_art
     sage: s(t) = t^3
-    sage: print(format(unicode_art(s)).rstrip())                                       # needs sympy
+    sage: unicode_art(s)                                                                # needs sympy
          3
     t ↦ t
 
