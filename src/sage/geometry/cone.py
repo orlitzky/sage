@@ -6425,6 +6425,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         lattice.
 
     """
+    from sage.misc.prandom import choice, randint
 
     # Catch obvious mistakes so that we can generate clear error
     # messages.
@@ -6538,19 +6539,6 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         if max_rays < max_ambient_dim:
             max_ambient_dim = max_rays
 
-    def random_min_max(l, u):
-        r"""
-        We need to handle two cases for the upper bounds, and we need
-        to do the same thing for max_ambient_dim/max_rays. So we consolidate
-        the logic here.
-        """
-        # We have an upper bound, and it's greater than or equal
-        # to our lower bound. So we generate a random integer in
-        # [0,u-l], and then add it to l to get something in
-        # [l,u]. To understand the "+1", check the
-        # ZZ.random_element() docs.
-        return l + ZZ.random_element(u - l + 1)
-
     def is_valid(K):
         r"""
         Check if the given cone is valid; that is, if its ambient
@@ -6579,7 +6567,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
 
         if lattice is None:
             # No lattice given, make our own.
-            d = random_min_max(min_ambient_dim, max_ambient_dim)
+            d = randint(min_ambient_dim, max_ambient_dim)
             L = ToricLattice(d)
         else:
             d = L.dimension()
@@ -6597,7 +6585,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
             _min_rays_this_iter = d
 
         # The number of rays that we will try to attain in this iteration.
-        r = random_min_max(_min_rays_this_iter, max_rays)
+        r = randint(_min_rays_this_iter, max_rays)
 
         # The rays are trickier to generate, since we could generate v and
         # 2*v as our "two rays." In that case, the resulting cone would
@@ -6656,7 +6644,6 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
                     # cone strictly convex. Whether or not those
                     # coordinates become positive/negative is chosen
                     # randomly.
-                    from sage.misc.prandom import choice
                     pm = choice([-1,1])
 
                     # rays has immutable elements
