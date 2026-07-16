@@ -6425,7 +6425,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         lattice.
 
     """
-    from sage.misc.prandom import choice, randint
+    from sage.misc.prandom import randint
 
     # Catch obvious mistakes so that we can generate clear error
     # messages.
@@ -6627,7 +6627,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
                     # cone strictly convex. Whether or not those
                     # coordinates become positive/negative is chosen
                     # randomly.
-                    pm = choice([-1,1])
+                    pm = 1 - 2*randint(0,1)  # plus or minus one
 
                     # rays has immutable elements
                     rays = [copy(ray) for ray in rays]
