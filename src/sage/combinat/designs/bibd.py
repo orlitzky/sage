@@ -547,7 +547,8 @@ def steiner_triple_system(n, algorithm=None, seed=None, check=True):
             [[(i,k),(j,k),(L(i,j),(k+1) % 3)] for k in [0,1,2] for i in N for j in N if i < j]
 
     else:
-        raise EmptySetError("Steiner triple systems only exist for n = 1 mod 6 or n = 3 mod 6")
+        raise EmptySetError("Steiner triple systems only exist "
+                            "for n = 1 mod 6 or n = 3 mod 6")
 
     # apply T and remove duplicates
     sts = set(frozenset(T(xx) for xx in x) for x in sts)
@@ -562,7 +563,8 @@ def _stinson_steiner_triple_system(n, seed=None, check=True):
     The distribution of the resulting systems is not claimed to be uniform.
     """
     if n % 6 not in (1, 3):
-        raise EmptySetError("Steiner triple systems only exist for n = 1 mod 6 or n = 3 mod 6")
+        raise EmptySetError("Steiner triple systems only exist "
+                            "for n = 1 mod 6 or n = 3 mod 6")
 
     n = int(n)
     name = f"Randomized Steiner Triple System on {n} elements"
