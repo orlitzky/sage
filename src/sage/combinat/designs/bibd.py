@@ -565,7 +565,7 @@ def _stinson_steiner_triple_system(n, seed=None, check=True):
         raise EmptySetError("Steiner triple systems only exist for n = 1 mod 6 or n = 3 mod 6")
 
     n = int(n)
-    name = "Randomized Steiner Triple System on " + str(n) + " elements"
+    name = f"Randomized Steiner Triple System on {n} elements"
     if n == 1:
         return BIBD(n, [], name=name, check=False)
 
