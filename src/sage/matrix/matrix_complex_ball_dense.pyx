@@ -553,10 +553,7 @@ cdef class Matrix_complex_ball_dense(Matrix_dense):
             return
 
         sig_on()
-        if _left._ncols == 0:
-            acb_mat_zero(self.value)
-        else:
-            acb_mat_mul(self.value, _left.value, _right.value, prec(self))
+        acb_mat_mul(self.value, _left.value, _right.value, prec(self))
         sig_off()
 
     cpdef _pow_int(self, n):

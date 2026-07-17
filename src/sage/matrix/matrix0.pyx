@@ -5769,11 +5769,11 @@ cdef class Matrix(sage.structure.element.Matrix):
         :meth:`_set_to_product_classical` exactly as
         :meth:`_will_use_strassen` does for ordinary multiplication.
 
-        The arguments are validated by :meth:`set_to_product`, which is the
-        only caller: ``left`` and ``right`` have the same type and base ring
-        as ``self``, ``self`` is mutable and distinct from both, and the
-        dimensions are those of the product.  Implementations may therefore
-        cast without further checks.
+        The arguments are assumed to be valid as described by
+        :meth:`set_to_product`: ``left`` and ``right`` have the same type and
+        base ring as ``self``, ``self`` is mutable and distinct from both, and
+        the dimensions are those of the product.  Implementations may
+        therefore cast without further checks.
 
         INPUT:
 
@@ -5798,9 +5798,9 @@ cdef class Matrix(sage.structure.element.Matrix):
 
             :meth:`set_to_product`
         """
-        cdef int cutoff = left._strassen_default_cutoff(right)
-        if cutoff > 0 and left._nrows > cutoff and left._ncols > cutoff and \
-                right._nrows > cutoff and right._ncols > cutoff:
+        cdef int cutoff
+        if left._will_use_strassen(right):
+            cutoff = left._strassen_default_cutoff(right)
             self._set_to_product_strassen(left, right, cutoff)
         else:
             self._set_to_product_classical(left, right)
@@ -5895,8 +5895,9 @@ cdef class Matrix(sage.structure.element.Matrix):
         TESTS:
 
         The cutoff must be positive, otherwise the recursion would not
-        terminate.  A cutoff of ``0`` means "let the class decide", so an
-        invalid cutoff has to be negative::
+        terminate.  This validation is exercised indirectly through
+        :meth:`~sage.matrix.matrix2.Matrix._multiply_strassen`, which
+        delegates its resolved cutoff to this method::
 
             sage: a._multiply_strassen(a, -1)
             Traceback (most recent call last):

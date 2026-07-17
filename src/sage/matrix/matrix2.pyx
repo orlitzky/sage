@@ -9521,9 +9521,8 @@ cdef class Matrix(Matrix1):
         if cutoff == 0:
             cutoff = self._strassen_default_cutoff(right)
 
-        if cutoff <= 0:
-            raise ValueError("cutoff must be at least 1")
-
+        # ``_set_to_product_strassen`` validates the resolved cutoff, so do
+        # not duplicate that check here.
         cdef Matrix output = self.new_matrix(self._nrows, right._ncols)
         output._set_to_product_strassen(self, right, cutoff)
         return output
