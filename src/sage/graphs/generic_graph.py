@@ -7367,15 +7367,20 @@ class GenericGraph(GenericGraph_pyx):
         st.delete_vertices(v for v in g if not st.degree(v))
         return st
 
-    def edge_disjoint_spanning_trees(self, k, algorithm=None, root=None, solver=None, verbose=0,
-                                     *, integrality_tolerance=1e-3):
+    def edge_disjoint_spanning_trees(self, k=None, algorithm=None, root=None, solver=None, verbose=0,
+                                     *, integrality_tolerance=1e-3, labels=False):
         r"""
         Return the desired number of edge-disjoint spanning trees/arborescences.
 
         INPUT:
 
-        - ``k`` -- integer; the required number of edge-disjoint spanning
-          trees/arborescences
+        - ``k`` -- integer or ``None`` (default: ``None``); the required
+          number of edge-disjoint spanning trees/arborescences. If ``None``:
+          for directed graphs, return as many arborescences as the edge
+          connectivity of the digraph (such a packing always exists by
+          Edmonds' theorem); for undirected graphs with
+          ``'Roskind-Tarjan'``, return a maximum packing of edge-disjoint
+          spanning trees.
 
         - ``algorithm`` -- string (default: ``None``); specify the
           algorithm to use among:
@@ -7389,7 +7394,8 @@ class GenericGraph(GenericGraph_pyx):
 
           * ``'Gabow'`` -- use the combinatorial algorithm of Gabow
             [Gabow1995]_ for packing edge-disjoint spanning arborescences.
-            Only available for directed simple graphs.
+            Only available for directed graphs; digraphs with loops and
+            multiple edges are supported.
 
           * ``None`` -- use ``'Roskind-Tarjan'`` for undirected graphs and
             ``'MILP'`` for directed graphs.
@@ -7412,6 +7418,12 @@ class GenericGraph(GenericGraph_pyx):
         - ``integrality_tolerance`` -- float; parameter for use with MILP
           solvers over an inexact base ring; see
           :meth:`MixedIntegerLinearProgram.get_values`.
+
+        - ``labels`` -- boolean (default: ``False``); only for directed
+          graphs with ``algorithm='Gabow'``. Whether the edges of the
+          returned arborescences carry the labels of the corresponding
+          input edges, so that parallel edges of a digraph with multiple
+          edges remain distinguishable in the output.
 
         ALGORITHM:
 
@@ -7560,12 +7572,53 @@ class GenericGraph(GenericGraph_pyx):
             sage: all_edges = sum((t.edges(labels=False, sort=False) for t in trees), [])
             sage: len(all_edges) == len(set(all_edges))
             True
+
+        With ``k=None``, a directed graph yields as many arborescences as its
+        edge connectivity, and an undirected graph a maximum packing of
+        spanning trees (`K_4` is 3-edge-connected but packs only 2 trees)::
+
+            sage: len(digraphs.Complete(4).edge_disjoint_spanning_trees(algorithm='Gabow'))
+            3
+            sage: len(digraphs.Complete(4).edge_disjoint_spanning_trees())              # needs sage.numerical.mip
+            3
+            sage: len(graphs.CompleteGraph(4).edge_disjoint_spanning_trees())
+            2
+            sage: graphs.PathGraph(3).edge_disjoint_spanning_trees()
+            [Graph on 3 vertices]
+            sage: DiGraph().edge_disjoint_spanning_trees(algorithm='Gabow')
+            []
+
+        The ``'Gabow'`` algorithm supports digraphs with multiple edges; with
+        ``labels=True``, parallel copies remain distinguishable in the
+        output::
+
+            sage: D = DiGraph([(0, 1, 'a'), (0, 1, 'b'), (1, 0, 'c'), (1, 0, 'd')],
+            ....:             multiedges=True)
+            sage: trees = D.edge_disjoint_spanning_trees(2, algorithm='Gabow', labels=True)
+            sage: sorted(e[2] for T in trees for e in T.edge_iterator())
+            ['a', 'b']
+            sage: D.edge_disjoint_spanning_trees(2, algorithm='MILP')
+            Traceback (most recent call last):
+            ...
+            ValueError: This method is not known to work on graphs with multiedges. ...
+            sage: graphs.CompleteGraph(4).edge_disjoint_spanning_trees(labels=True)
+            Traceback (most recent call last):
+            ...
+            ValueError: labels is only supported for directed graphs with algorithm "Gabow"
         """
-        self._scream_if_not_simple()
+        if self.is_directed() and algorithm == "Gabow":
+            # the Gabow backend supports loops and multiple edges
+            self._scream_if_not_simple(allow_loops=True, allow_multiple_edges=True)
+        else:
+            self._scream_if_not_simple()
         from sage.categories.sets_cat import EmptySetError
         from sage.graphs.digraph import DiGraph
         from sage.graphs.graph import Graph
         from sage.numerical.mip import MIPSolverException, MixedIntegerLinearProgram
+
+        if labels and (not self.is_directed() or algorithm != "Gabow"):
+            raise ValueError('labels is only supported for directed graphs '
+                             'with algorithm "Gabow"')
 
         if self.is_directed():
             if algorithm is not None and algorithm not in ("MILP", "Gabow"):
@@ -7573,20 +7626,46 @@ class GenericGraph(GenericGraph_pyx):
                                  'for directed graphs')
         elif algorithm is None or algorithm == "Roskind-Tarjan":
             from sage.graphs.spanning_tree import edge_disjoint_spanning_trees
+            if k is None:
+                # Return a maximum packing. Feasibility is monotone in k, so
+                # we binary search using the Roskind-Tarjan algorithm, with
+                # the trivial upper bound m // (n - 1).
+                n = self.order()
+                lo = 0
+                hi = self.size() // (n - 1) if n > 1 else 0
+                while lo < hi:
+                    mid = (lo + hi + 1) // 2
+                    try:
+                        edge_disjoint_spanning_trees(self, mid)
+                        lo = mid
+                    except EmptySetError:
+                        hi = mid - 1
+                k = lo
+                if not k:
+                    return []
             return edge_disjoint_spanning_trees(self, k)
         elif algorithm != "MILP":
             raise ValueError('algorithm must be None, "Roskind-Tarjan" or "MILP" '
                              'for undirected graphs')
+
+        if self.is_directed() and algorithm == "Gabow":
+            from sage.graphs.edge_connectivity import GabowEdgeConnectivity
+            # the backend resolves k=None to the edge connectivity
+            return GabowEdgeConnectivity(self).edge_disjoint_spanning_trees(
+                k, root=root, labels=labels)
+
+        if k is None:
+            if not self.is_directed():
+                raise ValueError('k=None is not supported with algorithm '
+                                 '"MILP" for undirected graphs')
+            # By Edmonds' theorem, a packing of this size always exists
+            k = int(self.edge_connectivity())
 
         G = self
         n = G.order()
 
         if not n or not k:
             return []
-
-        if self.is_directed() and algorithm == "Gabow":
-            from sage.graphs.edge_connectivity import GabowEdgeConnectivity
-            return GabowEdgeConnectivity(self).edge_disjoint_spanning_trees(k, root=root)
 
         if root is None:
             root = next(G.vertex_iterator())
