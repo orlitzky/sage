@@ -6656,6 +6656,31 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
                 # We had to stop because we hit max_rays
                 continue
 
+        if solid is False and K.is_solid():
+            # To go from not-solid to solid, we add rays. But to go
+            # from solid to not-solid? Removing rays sounds like a
+            # good idea at first, but thanks to the normalization that
+            # happens in Cone(), you are likely to wind up with more
+            # boring rays than you would have otherwise. (The ambient
+            # space is a solid cone, but every cone obtained by
+            # deleting generators from it has only orthogonal standard
+            # basis vectors as generators.) In any case, that's why
+            # there is no fallback here for when K is already of
+            # maximum dimension or a lattice was specified.
+            if lattice is None and K.dim() < max_ambient_dim:
+                # Embed what we've got into a space of one greater
+                # dimension. Afterward we hit the cone with a random
+                # unitary matrix, so that the form of the result is
+                # not so predictable.
+                K = Cone([r.list() + [0] for r in K.rays()],
+                         check=False)
+                A = matrix.random(K.lattice().base_field(),
+                                  K.lattice_dim(),
+                                  algorithm="unitary")
+                K = Cone([A*r.dense_vector() for r in K.rays()],
+                         check=False)
+                L = K.lattice()
+
         if strictly_convex is False and K.is_strictly_convex():
             # The user requested that the cone be NOT strictly
             # convex. So it should contain some line, but it
