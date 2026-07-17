@@ -42,6 +42,10 @@ jobs:
             xbps-install -yu
             # node-based actions require libstdc++.so.6
             xbps-install -Sy libstdc++ bash git
+            # setup-uv needs a version field in os-release to build its cache
+            # key, but rolling-release Void ships none (only ID); give it the
+            # same BUILD_ID that Arch uses (see astral-sh/setup-uv#773)
+            echo 'BUILD_ID=rolling' >> /etc/os-release
           fi
           if [ "${{ matrix.container }}" = "archlinux" ]; then
             # The archlinux container is configured to not install docs by default
