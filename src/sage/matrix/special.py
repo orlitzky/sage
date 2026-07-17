@@ -3526,8 +3526,7 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
 
     Grouping equal eigenvalues requires the elements of the base ring to be
     hashable.  Rings whose elements are unhashable, such as unramified
-    `p`-adic extensions, are therefore not supported; grouping them by
-    equality would rely on inexact comparisons::
+    `p`-adic extensions, are therefore not supported::
 
         sage: K = Qq(9, names='a')
         sage: random_matrix(K, 4, algorithm='diagonalizable',
@@ -3632,10 +3631,11 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
         raise ValueError("eigenspaces must have a dimension of at least 1")
     if len(eigenvalues) != len(dimensions):
         raise ValueError("each eigenvalue must have a corresponding dimension and each dimension a corresponding eigenvalue")
-    # Merge equal eigenvalues after coercion into the base ring.  Grouping by
-    # hash is deliberate: grouping by equality instead would compare inexact
-    # elements (of p-adic rings, say), which is unreliable, so rings with
-    # unhashable elements raise a TypeError here.
+    # Merge equal eigenvalues after coercion into the base ring.  The dict
+    # groups by equality (hash only selects the bucket), so this still relies
+    # on the ring having meaningful equality; rings that signal otherwise by
+    # making their elements unhashable (p-adic extensions, say) raise a
+    # TypeError here instead of being grouped unreliably.
     grouped = defaultdict(int)
     for eigenvalue, dimension in zip(eigenvalues, dimensions):
         grouped[ring(eigenvalue)] += dimension
