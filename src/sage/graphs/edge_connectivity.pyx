@@ -147,6 +147,7 @@ cdef class GabowEdgeConnectivity:
     # The graph is stored as lists of incident edges
     cdef GenericGraph_pyx G  # the original graph
     cdef list int_to_vertex  # mapping from integers to vertex labels
+    cdef list edge_labels  # mapping from edge ids to input edge labels
     cdef vector[vector[int]] g_out
     cdef vector[vector[int]] g_in
     cdef vector[vector[int]] my_g  # either g_out or g_in
@@ -374,10 +375,12 @@ cdef class GabowEdgeConnectivity:
             self.g_in[i].clear()
 
         # Iterate over edges (not out-neighbours) so that parallel arcs each
-        # get their own edge id. Loops (x == y) are skipped.
+        # get their own edge id. Loops (x == y) are skipped. The label of
+        # edge ``e_id`` is stored in ``edge_labels[e_id]``.
         cdef int x, y
         cdef int e_id = 0
-        for u, v in self.G.edge_iterator(labels=False):
+        self.edge_labels = []
+        for u, v, label in self.G.edge_iterator(labels=True):
             x = vertex_to_int[u]
             y = vertex_to_int[v]
             if x != y:
@@ -385,8 +388,9 @@ cdef class GabowEdgeConnectivity:
                 self.g_in[y].push_back(e_id)
                 self.tail[e_id] = x
                 self.head[e_id] = y
+                self.edge_labels.append(label)
                 e_id += 1
-        # Loops (and, before, collapsed parallels) removed -> update edge count
+        # Loops have been removed, so we update the number of edges
         self.m = e_id
 
     cdef bint compute_edge_connectivity(self) except -1:
@@ -2283,7 +2287,7 @@ cdef class GabowEdgeConnectivity:
 
         return self.A_size == self.n
 
-    def edge_disjoint_spanning_trees(self, k=None, root=None):
+    def edge_disjoint_spanning_trees(self, k=None, root=None, labels=False):
         r"""
         Return ``k`` edge-disjoint spanning arborescences rooted at ``root``.
 
@@ -2307,6 +2311,12 @@ cdef class GabowEdgeConnectivity:
           arborescences. If ``None``, defaults to the first vertex of the
           digraph (the same convention used by the MILP backend in
           :meth:`~sage.graphs.generic_graph.GenericGraph.edge_disjoint_spanning_trees`).
+
+        - ``labels`` -- boolean (default: ``False``); whether the edges of
+          the returned arborescences carry the labels of the corresponding
+          input edges. With labels, parallel edges of a digraph with
+          multiple edges remain distinguishable in the output: every
+          returned edge corresponds to a distinct input edge.
 
         OUTPUT:
 
@@ -2390,6 +2400,16 @@ cdef class GabowEdgeConnectivity:
             1
             sage: sorted(trees[0].edges(labels=False, sort=False))
             [(0, 1), (1, 2), (2, 3)]
+
+        On a digraph with multiple edges, ``labels=True`` shows which copy
+        of a parallel edge each arborescence uses; every returned edge
+        corresponds to a distinct input edge::
+
+            sage: D = DiGraph([(0, 1, 'a'), (0, 1, 'b'), (1, 0, 'c'), (1, 0, 'd')],
+            ....:             multiedges=True)
+            sage: trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=2, root=0, labels=True)
+            sage: sorted(e[2] for T in trees for e in T.edge_iterator())
+            ['a', 'b']
 
         Trivial case::
 
@@ -2491,8 +2511,14 @@ cdef class GabowEdgeConnectivity:
         cdef int i
         result = []
         for i in range(k):
-            edges = ((self.int_to_vertex[self.tail[e_id]], self.int_to_vertex[self.head[e_id]])
-                     for e_id in self.arborescence_F[i])
+            if labels:
+                edges = ((self.int_to_vertex[self.tail[e_id]],
+                          self.int_to_vertex[self.head[e_id]],
+                          self.edge_labels[e_id])
+                         for e_id in self.arborescence_F[i])
+            else:
+                edges = ((self.int_to_vertex[self.tail[e_id]], self.int_to_vertex[self.head[e_id]])
+                         for e_id in self.arborescence_F[i])
             result.append(DiGraph([self.int_to_vertex, edges], format='vertices_and_edges'))
 
         return result
