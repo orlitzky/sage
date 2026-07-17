@@ -6546,18 +6546,15 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         dimension and number of rays meet the upper and lower bounds
         provided by the user.
         """
-        if lattice is None:
-            # We only care about min/max_ambient_dim when no lattice is given.
-            if not (min_ambient_dim <= K.lattice_dim() <= max_ambient_dim):
-                return False
-        else:
-            if K.lattice() is not lattice:
-                return False
-        return all([K.n_rays() >= min_rays,
-                    K.n_rays() <= max_rays,
-                    solid is None or K.is_solid() == solid,
-                    strictly_convex is None or
-                    K.is_strictly_convex() == strictly_convex])
+        return all((
+          lattice is None or K.lattice() is lattice,
+          lattice is not None
+            or min_ambient_dim <= K.lattice_dim() <= max_ambient_dim,
+          min_rays <= K.n_rays() <= max_rays,
+          solid is None or K.is_solid() == solid,
+          strictly_convex is None
+            or K.is_strictly_convex() == strictly_convex
+        ))
 
     # Now we actually compute the thing. To avoid recursion (and the
     # associated "maximum recursion depth exceeded" error), we loop
