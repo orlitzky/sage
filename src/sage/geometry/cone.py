@@ -6644,6 +6644,21 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
             else:
                 continue
 
+        if solid and not K.is_solid():
+            # Just add rays until we get a solid cone? Adding rays is
+            # allowed. The solid_restriction() would also give us a
+            # solid cone with the same number of rays, but it does a
+            # change of basis that results in extremely boring
+            # generators.
+            while K.n_rays() <= max_rays and not K.is_solid():
+                dim_gap = d - K.dim()
+                rays = list(K.rays())
+                rays.extend(L.random_element() for _ in range(dim_gap))
+                K = Cone(rays, lattice=L)
+            if not K.is_solid():
+                # We had to stop because we hit max_rays
+                continue
+
         if strictly_convex is False and K.is_strictly_convex():
             # The user requested that the cone be NOT strictly
             # convex. So it should contain some line, but it
