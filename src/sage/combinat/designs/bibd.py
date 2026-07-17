@@ -617,20 +617,18 @@ def _stinson_steiner_triple_system(n, seed=None, check=True):
 
     target_blocks = n * (n - 1) // 6
     while num_blocks < target_blocks:
-        x = rand.choice(sorted(live_points))
-        y, z = rand.sample(sorted(live_pairs[x]), 2)
+        x = rand.choice(list(live_points))
+        y, z = rand.sample(list(live_pairs[x]), 2)
         if other[y][z] == -1:
             add_block(x, y, z)
             num_blocks += 1
         else:
             exchange_block(x, y, z, other[y][z])
 
-    blocks = []
-    for x in range(n):
-        for y in range(x + 1, n):
-            z = other[x][y]
-            if z > y:
-                blocks.append([x, y, z])
+    blocks = [[x, y, z]
+             for x in range(n)
+             for y in range(x+1, n)
+             if (z := other[x][y]) > y]
 
     return BIBD(n, blocks, k=3, lambd=1, name=name, check=check, copy=False)
 
