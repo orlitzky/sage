@@ -6633,6 +6633,17 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
             rays.extend(L.random_element() for _ in range(ray_gap))
             K = Cone(rays, lattice=L)
 
+        if K.is_full_space():
+            # When K is the full space, Cone() normalizes its rays to
+            # plus/minus the standard basis. If the full space is an
+            # acceptable result, OK, whatever, return it. But
+            # otherwise, do not try to tweak the world's most
+            # uninteresting set of generators.
+            if is_valid(K):
+                return K
+            else:
+                continue
+
         if strictly_convex is False and K.is_strictly_convex():
             # The user requested that the cone be NOT strictly
             # convex. So it should contain some line, but it
