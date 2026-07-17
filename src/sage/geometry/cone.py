@@ -6633,36 +6633,16 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
             rays.extend(L.random_element() for _ in range(ray_gap))
             K = Cone(rays, lattice=L)
 
-        if strictly_convex is not None:
-            if strictly_convex:
-                if not K.is_strictly_convex():
-                    # The user wants a strictly convex cone, but
-                    # didn't get one. So let's take our rays, and give
-                    # them all either (strictly) positive or negative
-                    # leading coordinates. This makes the resulting
-                    # cone strictly convex. Whether or not those
-                    # coordinates become positive/negative is chosen
-                    # randomly.
-                    pm = 1 - 2*randint(0,1)  # plus or minus one
-
-                    # rays has immutable elements
-                    rays = [copy(ray) for ray in rays]
-
-                    for i, ray in enumerate(rays):
-                        rays[i][0] = pm * (ray[0].abs() + 1)
-
-                    K = Cone(rays, lattice=L)
-            else:
-                # The user requested that the cone be NOT strictly
-                # convex. So it should contain some line...
-                if K.is_strictly_convex():
-                    # ...but it doesn't. If K has at least two rays,
-                    # we can just make the second one a multiple of
-                    # the first -- then K will contain a line. If K
-                    # has fewer than two rays, we punt.
-                    if len(rays) >= 2:
-                        rays[1] = -rays[0]
-                        K = Cone(rays, lattice=L)
+        if strictly_convex is False and K.is_strictly_convex():
+            # The user requested that the cone be NOT strictly
+            # convex. So it should contain some line, but it
+            # doesn't. If K has at least two rays, we can just
+            # make the second one a multiple of the first -- then
+            # K will contain a line. If K has fewer than two rays,
+            # we punt.
+            if len(rays) >= 2:
+                rays[1] = -rays[0]
+                K = Cone(rays, lattice=L)
 
         if is_valid(K):
             # Loop if we don't have a valid cone.
