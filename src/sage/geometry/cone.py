@@ -6602,9 +6602,9 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         # making a strictly convex cone).
         K = Cone(rays, lattice=L)
 
-        # Now, some of the rays that we generated were probably redundant,
-        # so we need to come up with more. We can obviously stop if K
-        # becomes the entire ambient vector space.
+        # Now, some of the rays that we generated were probably
+        # redundant, so we need to come up with more. We can obviously
+        # stop if K becomes the entire ambient vector space.
         #
         # We're still not guaranteed to have the correct number of
         # rays after this! Since we normalize the generators in the
@@ -6612,10 +6612,25 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         # adding e.g. (1,1) to [(0,1), (0,-1)]. Rather than trying to
         # mangle what we have, we just start over if we get a cone
         # that won't work.
-        while r > K.n_rays() and not K.is_full_space():
+        while True:
+            # How many more rays do we need? *At least* this many.
+            ray_gap = r - K.n_rays()
+
+            if solid:
+                # But if we need a solid cone, and if the
+                # corresponding "dimension gap" is larger than the
+                # ray_gap, we should use the dimension gap instead
+                # because each additional ray can occupy at most one
+                # vacant dimension.
+                ray_gap = max(ray_gap, d - K.dim())
+
+            # ray_gap can be negative if e.g. r=3 rays that generate
+            # R^2 get normalized to four plus/minus basis vectors.
+            if ray_gap <= 0 or K.is_full_space():
+                break
+
             rays = list(K.rays())
-            rays.extend(L.random_element()
-                        for _ in range(r - K.n_rays()))
+            rays.extend(L.random_element() for _ in range(ray_gap))
             K = Cone(rays, lattice=L)
 
         if strictly_convex is not None:
