@@ -156,6 +156,7 @@ jobs:
           token: ${{ secrets.RELEASE_CREATION_TOKEN }}
           body_path: release_notes
           prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+          max_retries: 3
 
   build_wheels:
     # Temporarily disabled due to build errors
