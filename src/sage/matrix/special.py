@@ -3479,10 +3479,11 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
     Repeated eigenvalues describe a single eigenspace, so their dimensions
     are added before constructing the matrix::
 
-        sage: set_random_seed(42)
+        sage: s = randint(0, 2^32)
+        sage: set_random_seed(s)
         sage: B = random_matrix(QQ, 4, algorithm='diagonalizable',
         ....:                   eigenvalues=[0, 0, 1], dimensions=[1, 1, 2])
-        sage: set_random_seed(42)
+        sage: set_random_seed(s)
         sage: B_normalized = random_matrix(QQ, 4, algorithm='diagonalizable',
         ....:                              eigenvalues=[0, 1], dimensions=[2, 2])
         sage: B == B_normalized
@@ -3509,10 +3510,11 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
 
         sage: K(0) == K(3)
         True
-        sage: set_random_seed(42)
+        sage: s = randint(0, 2^32)
+        sage: set_random_seed(s)
         sage: M = random_matrix(K, 4, algorithm='diagonalizable',
         ....:                   eigenvalues=[0, 3, 1], dimensions=[1, 2, 1])
-        sage: set_random_seed(42)
+        sage: set_random_seed(s)
         sage: M_normalized = random_matrix(K, 4, algorithm='diagonalizable',
         ....:                              eigenvalues=[0, 1], dimensions=[3, 1])
         sage: M == M_normalized
