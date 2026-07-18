@@ -3534,14 +3534,14 @@ def random_diagonalizable_matrix(parent, eigenvalues=None, dimensions=None):
         ....:               dimensions=[1, 2, 1])
         Traceback (most recent call last):
         ...
-        TypeError: unhashable type: 'sage.rings.padics.qadic_flint_CR.qAdicCappedRelativeElement'
+        TypeError: ...unhashable type: 'sage.rings.padics.qadic_flint_CR.qAdicCappedRelativeElement'...
 
     This applies to randomly generated eigenvalues as well::
 
         sage: random_matrix(K, 4, algorithm='diagonalizable')
         Traceback (most recent call last):
         ...
-        TypeError: unhashable type: 'sage.rings.padics.qadic_flint_CR.qAdicCappedRelativeElement'
+        TypeError: ...unhashable type: 'sage.rings.padics.qadic_flint_CR.qAdicCappedRelativeElement'...
 
     Eigenvalues must be coercible into the ring::
 
