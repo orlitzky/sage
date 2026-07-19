@@ -1064,7 +1064,7 @@ def make_nice_tree_decomposition(graph, tree_decomp):
     return nice_tree_decomp
 
 
-def label_nice_tree_decomposition(nice_TD, root, directed=False):
+def label_nice_tree_decomposition(nice_TD, root=None, directed=False):
     r"""
     Return a nice tree decomposition with nodes labelled accordingly.
 
@@ -1072,7 +1072,9 @@ def label_nice_tree_decomposition(nice_TD, root, directed=False):
 
     - ``nice_TD`` -- a nice tree decomposition
 
-    - ``root`` -- the root of the nice tree decomposition
+    - ``root`` -- the root of the nice tree decomposition (default:
+      ``min(nice_TD)``). The default value is suitable for the output of
+      :meth:`make_nice_tree_decomposition`.
 
     - ``directed`` -- boolean (default: ``False``); whether to return the nice
       tree decomposition as a directed graph rooted at vertex ``root`` or as an
@@ -1086,8 +1088,7 @@ def label_nice_tree_decomposition(nice_TD, root, directed=False):
         sage: claw = graphs.CompleteBipartiteGraph(1, 3)
         sage: claw_TD = claw.treewidth(certificate=True)
         sage: nice_TD = make_nice_tree_decomposition(claw, claw_TD)
-        sage: root = sorted(nice_TD.vertices())[0]
-        sage: label_TD = label_nice_tree_decomposition(nice_TD, root, directed=True)
+        sage: label_TD = label_nice_tree_decomposition(nice_TD, directed=True)
         sage: label_TD.name()
         'Labelled Nice tree decomposition of Tree decomposition'
         sage: for node in sorted(label_TD):  # random
@@ -1104,6 +1105,9 @@ def label_nice_tree_decomposition(nice_TD, root, directed=False):
     """
     from sage.graphs.digraph import DiGraph
     from sage.graphs.graph import Graph
+
+    if root is None:
+        root = min(nice_TD)
 
     directed_TD = DiGraph(nice_TD.breadth_first_search(start=root, edges=True),
                           format='list_of_edges',
