@@ -467,7 +467,9 @@ def treewidth(g, k=None, kmin=None, certificate=False, algorithm=None, nice=Fals
 
     When ``certificate=True``, the tree decomposition is returned.
 
-    When ``nice=True``, the nice tree decomposition is returned.
+    When ``nice=True``, the nice tree decomposition is returned. See
+    :meth:`~sage.graphs.graph_decompositions.tree_decomposition.make_nice_tree_decomposition`
+    for details.
 
     ALGORITHM:
 
@@ -490,9 +492,13 @@ def treewidth(g, k=None, kmin=None, certificate=False, algorithm=None, nice=Fals
 
     .. SEEALSO::
 
-        :meth:`~sage.graphs.graph_decompositions.vertex_separation.path_decomposition`
-        computes the pathwidth of a graph. See also the
-        :mod:`~sage.graphs.graph_decompositions.vertex_separation` module.
+        - The utility functions in the
+          :mod:`~sage.graphs.graph_decompositions.tree_decomposition`
+          module, especially
+          :meth:`~sage.graphs.graph_decompositions.tree_decomposition.label_nice_tree_decomposition`.
+        - :meth:`~sage.graphs.graph_decompositions.vertex_separation.path_decomposition`
+          computes the pathwidth of a graph.
+        - module :mod:`~sage.graphs.graph_decompositions.vertex_separation`.
 
     EXAMPLES:
 
@@ -810,7 +816,7 @@ def make_nice_tree_decomposition(graph, tree_decomp):
 
     A *nice* TD `NT` is a rooted tree with four types of nodes:
 
-    - *Leaf* nodes have no children and bag size 1;
+    - *Leaf* nodes have no children and bag size 0;
     - *Introduce* nodes have one child: If `v \in NT` is an introduce node and
       `w \in NT` its child, then `Bag(v) = Bag(w) \cup \{ x \}`, where `x` is the
       introduced node;
@@ -825,7 +831,8 @@ def make_nice_tree_decomposition(graph, tree_decomp):
 
     - ``tree_decomp`` -- a tree decomposition
 
-    OUTPUT: a nice tree decomposition
+    OUTPUT: a nice tree decomposition whose root vertex is a tuple of the form
+    ``(0, bag)``.
 
     .. WARNING::
 
@@ -1077,8 +1084,8 @@ def label_nice_tree_decomposition(nice_TD, root=None, directed=False):
       :meth:`make_nice_tree_decomposition`.
 
     - ``directed`` -- boolean (default: ``False``); whether to return the nice
-      tree decomposition as a directed graph rooted at vertex ``root`` or as an
-      undirected graph
+      tree decomposition as a directed graph rooted at vertex ``root`` (with
+      edges oriented away from the root) or as an undirected graph
 
     OUTPUT: a nice tree decomposition with nodes labelled
 
