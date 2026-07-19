@@ -1700,6 +1700,83 @@ class PlanePartitions_box(PlanePartitions):
                             for j in range(1, B + 1)
                             for k in range(1, C + 1)))
 
+    def generating_polynomial(self, q=None):
+        r"""
+        Return the generating polynomial of plane partitions in this box.
+
+        The generating function of plane partitions inside an `a \times b \times c`
+        box is equal to
+
+        .. MATH::
+            \prod_{i=1}^{a} \prod_{j=1}^{b} \frac{1-q^{i+j+c-1}}{1-q^{i+j-1}}.
+
+        INPUT:
+
+        - ``q`` -- (default: ``None``) the variable `q`; if ``None``, then use a
+          default variable in `\ZZ[q]`
+
+        ALGORITHM:
+
+        This function computes the generating polynomial `N_q(a,b,c)` by factoring it
+        into cyclotomic polynomials:
+
+        .. MATH::
+
+            N_q(a, b, c) = \prod_{d=1}^{a+b+c-1} \Phi_d(q)^{e_d}
+
+        where
+
+        .. MATH::
+            e_d = \sum_{i=0}^{a-1} \left\lfloor \frac{b+c+i}{d} \right\rfloor -
+            \left\lfloor \frac{c+i}{d} \right\rfloor +
+            \left\lfloor \frac{i}{d} \right\rfloor -
+            \left\lfloor \frac{b+i}{d} \right\rfloor.
+
+        EXAMPLES::
+
+            sage: P = PlanePartitions([2, 2, 2])
+            sage: P.generating_polynomial()
+            q^8 + q^7 + 3*q^6 + 3*q^5 + 4*q^4 + 3*q^3 + 3*q^2 + q + 1
+
+            sage: R.<t> = ZZ[]
+            sage: P = PlanePartitions([3, 1, 1])
+            sage: P.generating_polynomial(q=t)
+            t^3 + t^2 + t + 1
+
+        TESTS::
+
+            sage: PlanePartitions([1, 1, 1]).generating_polynomial()
+            q + 1
+
+            sage: PlanePartitions([0, 1, 1]).generating_polynomial()
+            1
+
+            sage: PlanePartitions([1, 8, 5]).generating_polynomial() == q_binomial(8+5, 5)
+            True
+
+            sage: P = PlanePartitions([4, 6, 3])
+            sage: P.cardinality() == P.generating_polynomial()(1)
+            True
+        """
+        if q is None:
+            R = ZZ['q']
+        else:
+            R = q.parent()
+
+        a, b, c = sorted(self._box)
+
+        if a == 0:
+            return R.one()
+
+        factors = []
+
+        for d in range(1, a + b + c):
+            e = sum((b+c+i)//d + i//d - (c+i)//d - (b+i)//d for i in range(a))
+            if e > 0:
+                factors.append(R.cyclotomic_polynomial(d) ** e)
+
+        return prod(factors)
+
     def random_element(self) -> PP:
         r"""
         Return a uniformly random plane partition inside a box.
