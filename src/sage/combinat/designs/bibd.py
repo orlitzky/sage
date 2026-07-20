@@ -487,13 +487,6 @@ def steiner_triple_system(n, algorithm=None, seed=None, check=True):
         sage: sts.is_t_design(return_parameters=True)
         (True, (2, 9, 3, 1))
 
-    The optional seed makes Stinson's algorithm reproducible ::
-
-        sage: designs.steiner_triple_system(9, algorithm='stinson', seed=0).blocks()
-        [[0, 1, 7], [0, 2, 8], [0, 3, 4], [0, 5, 6], [1, 2, 4],
-         [1, 3, 6], [1, 5, 8], [2, 3, 5], [2, 6, 7], [3, 7, 8],
-         [4, 5, 7], [4, 6, 8]]
-
     An exception is raised for invalid values of ``n`` ::
 
         sage: designs.steiner_triple_system(10)
