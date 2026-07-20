@@ -399,27 +399,6 @@ def test_reducibility_criteria(K,J,P,Q,K2,K3):
     d = C._cross_positive_operators_dual().dim()
     assert C.is_reducible() == (d < C.dim()**2 - 1)
 
-@pytest.mark.long
-def test_lines_gens_are_orthogonal(K,J,K2,K3):
-    r"""
-    Ensure that the returned generators are mutually
-    orthogonal. This is not promised by the PPL documentation, but
-    it seems to hold in practice. (There is February 2026 thread
-    about it on the ppl-devel mailing list that received no
-    responses.) By testing it here, we "guarantee" that it is a
-    safe assumption to make in user code.
-
-    Run a few times, since this is really the only guarantee that we
-    have for the claim made in our documentation.
-    """
-    for C in (K,J,K2,K3):
-        V = C.ambient_vector_space()
-        L = [V(l) for l in C.lines()]
-        assert all(L[i].inner_product(L[j]).is_zero()
-                   for i in range(len(L))
-                   for j in range(len(L))
-                   if i != j)
-
 @pytest.mark.longlong
 def test_is_cross_positive(K2, K2_cp_gens):
     r"""

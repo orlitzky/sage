@@ -3374,8 +3374,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
         - :class:`tuple` of primitive vectors in the lattice of ``self``
           giving directions of lines that span the linear subspace of
-          ``self``. These lines are arbitrary, but fixed and orthogonal
-          to one another.
+          ``self``.
 
         EXAMPLES::
 
@@ -3388,6 +3387,21 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
             N(0, 1),
             N(1, 0)
             in 2-d lattice N
+
+        TESTS:
+
+        The line generators are not necessary orthogonal to one
+        another::
+
+            sage: K = Cone([(-1, 0, 0),
+            ....:           (1, 0, 1),
+            ....:           (-1, 0, -1),
+            ....:           (1, 1, 0),
+            ....:           (-1, -1, 0)])
+            sage: K.lines()
+            N(1, 0, 1),
+            N(1, 1, 0)
+            in 3-d lattice N
 
         """
         lines = []
