@@ -6426,7 +6426,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         lattice.
 
     """
-    from sage.misc.prandom import randint
+    from sage.misc.prandom import randint, sample
 
     # Catch obvious mistakes so that we can generate clear error
     # messages.
@@ -6682,14 +6682,31 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
                 L = K.lattice()
 
         if strictly_convex is False and K.is_strictly_convex():
-            # The user requested that the cone be NOT strictly
-            # convex. So it should contain some line, but it
-            # doesn't. If K has at least two rays, we can just
-            # make the second one a multiple of the first -- then
-            # K will contain a line. If K has fewer than two rays,
-            # we punt.
-            if len(rays) >= 2:
-                rays[1] = -rays[0]
+            # To make a pointed cone not-pointed is easy: add a
+            # negative multiple of an existing ray. Or if you're at
+            # max_rays already, replace an existing ray. Below we do
+            # this with a random number of new rays or replacements.
+            ray_slots = max_rays - K.n_rays()
+            if ray_slots == 0:
+                # Replace some rays with flipped copies of other rays.
+                if K.n_rays() >= 2:
+                    # Divide by four because highly un-pointed cones
+                    # are also un-interesting. (We have to divide by
+                    # at least two: if we flip half, we need the other
+                    # half for storage.)
+                    num_to_flip = randint(1, max(1, K.n_rays()//4))
+                    rays = [
+                        -K.ray(K.n_rays() - i - 1) if i <= num_to_flip
+                        else K.ray(i)
+                        for i in range(K.n_rays())
+                    ]
+                    K = Cone(rays, lattice=L)
+            elif K.n_rays() >= 1:
+                # Append negative multiples of some existing rays to
+                # guarantee that the cone contains lines.
+                num_to_flip = randint(1, min(K.n_rays(), ray_slots))
+                rays = list(K.rays())
+                rays.extend( -r for r in sample(rays, num_to_flip) )
                 K = Cone(rays, lattice=L)
 
         if is_valid(K):
