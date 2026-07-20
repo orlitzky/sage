@@ -912,6 +912,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
 
         The automorphism group of a Drinfeld module is of the form `(\GF{q^M})^\times`
         for some integer `M`. Note that this always is a cyclic group.
+
         - If ``level`` is set to ``True``, the method returns this `M`, otherwise it
         returns the order `q^M-1`.
         - If ``absolute`` is set to ``True``, the method returns the size or level
@@ -926,12 +927,12 @@ class DrinfeldModule(Parent, UniqueRepresentation):
 
         - ``level`` (default: ``False``) -- boolean
         - ``absolute`` (default: ``False``) -- boolean
-        - ``extension`` (default: ``None``) -- an extension of the base field `K`; 
-            when `K` is a finite field, an integer (interpreted as the degree 
+        - ``extension`` (default: ``None``) -- an extension of the base field `K`;
+            when `K` is a finite field, an integer (interpreted as the degree
             of the extension) is also allowed.
 
         EXAMPLES::
-            
+
             sage: Fq = GF(25)
             sage: A.<T> = Fq[]
             sage: K.<z12> = Fq.extension(6)
@@ -945,8 +946,8 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             sage: Fq = GF(3^2)
             sage: A.<T> = Fq[]
             sage: K.<z> = Fq.extension(3)
-            sage: t = DrinfeldModule(A, [z, 1]).ore_variable() 
-            sage: phi = DrinfeldModule(A, z+t^12) 
+            sage: t = DrinfeldModule(A, [z, 1]).ore_variable()
+            sage: phi = DrinfeldModule(A, z+t^12)
             sage: phi.automorphism_group_order()
             728
             sage: phi.automorphism_group_order(absolute=True)
@@ -960,7 +961,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             6
             sage: phi.automorphism_group_order(level=True, extension=2)
             6
-        
+
         ::
 
             sage: Fq = GF(7)
@@ -982,14 +983,14 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             Traceback (most recent call last):
             ...
             NotImplementedError: Drinfeld module must be over a finite field for non absolute automorphism group computations
-        
+
         TESTS::
-        
+
             sage: Fq = GF(3^2)
             sage: A.<T> = Fq[]
             sage: K.<z> = Fq.extension(3)
-            sage: t = DrinfeldModule(A, [z, 1]).ore_variable() 
-            sage: phi = DrinfeldModule(A, z+t^12) 
+            sage: t = DrinfeldModule(A, [z, 1]).ore_variable()
+            sage: phi = DrinfeldModule(A, z+t^12)
             sage: phi.automorphism_group_order(absolute=True, extension=2)
             Traceback (most recent call last):
             ...
@@ -1004,7 +1005,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             Traceback (most recent call last):
             ...
             ValueError: extension must be a field extension of the base field
-        
+
         ::
 
             sage: Fq = GF(2^7)
@@ -1017,7 +1018,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             127
             sage: phi.automorphism_group_order(extension=2)
             127
-        
+
         ::
 
             sage: Fq = GF(3)
@@ -1028,12 +1029,13 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             2
 
         ::
+
             sage: Fq = GF(2^2)
             sage: A.<T> = Fq[]
             sage: K.<z> = Fq.extension(4)
-            sage: t = DrinfeldModule(A, [z, 1]).ore_variable() 
+            sage: t = DrinfeldModule(A, [z, 1]).ore_variable()
             sage: phi = DrinfeldModule(A, z+t^8)
-            sage: L = K.extension(2);
+            sage: L = K.extension(2)
             sage: phi.automorphism_group_order(extension=L)
             65535
 
@@ -1061,9 +1063,8 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             level_ = gcd(level_, n)
         if level:
             return level_
-        else:
-            return q**level_ - 1
-    
+        return q**level_ - 1
+
     def basic_j_invariant_parameters(self, coeff_indices=None, nonzero=False):
         r"""
         Return the list of basic `j`-invariant parameters.
