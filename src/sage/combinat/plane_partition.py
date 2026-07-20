@@ -1679,8 +1679,7 @@ class PlanePartitions_box(PlanePartitions):
 
         .. MATH::
 
-            \prod_{i=1}^{a} \prod_{j=1}^{b} \prod_{k=1}^{c}
-            \frac{i+j+k-1}{i+j+k-2}.
+            \prod_{i=1}^{a} \prod_{j=1}^{b} \frac{i+j+c-1}{i+j-1}.
 
         EXAMPLES::
 
@@ -1688,17 +1687,13 @@ class PlanePartitions_box(PlanePartitions):
             sage: P.cardinality()
             116424
         """
-        A = self._box[0]
-        B = self._box[1]
-        C = self._box[2]
-        return Integer(prod(i + j + k - 1
-                            for i in range(1, A + 1)
-                            for j in range(1, B + 1)
-                            for k in range(1, C + 1)) //
-                       prod(i + j + k - 2
-                            for i in range(1, A + 1)
-                            for j in range(1, B + 1)
-                            for k in range(1, C + 1)))
+        a, b, c = sorted(self._box)
+        return Integer(prod(i + j + c - 1
+                            for i in range(1, a + 1)
+                            for j in range(1, b + 1)) //
+                       prod(i + j - 1
+                            for i in range(1, a + 1)
+                            for j in range(1, b + 1)))
 
     def generating_series(self, q=None):
         r"""
