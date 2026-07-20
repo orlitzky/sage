@@ -6366,7 +6366,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
 
         sage: # long time
         sage: _initial_seed = initial_seed()
-        sage: set_random_seed(8)
+        sage: set_random_seed(12)
         sage: K = random_cone(max_ambient_dim=3, min_rays=7)
         sage: K.n_rays() >= 7
         True
