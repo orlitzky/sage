@@ -145,7 +145,7 @@ jobs:
 
       - name: Build Docker image
         id: image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           push:       true
           load:       false
@@ -262,7 +262,7 @@ jobs:
 
       - name: Build Docker image
         id: image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           push:       true
           load:       false
