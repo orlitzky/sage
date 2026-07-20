@@ -38,7 +38,7 @@ possible cases of `(v,4,1)`-BIBD.
 
 **Construction of BIBD when** `k=5`
 
-Decompositions of `K_v` into `K_4` (i.e. `(v,4,1)`-BIBD) are built following
+Decompositions of `K_v` into `K_5 (i.e. `(v,5,1)`-BIBD) are built following
 Clayton Smith's construction [ClaytonSmith]_.
 
 
