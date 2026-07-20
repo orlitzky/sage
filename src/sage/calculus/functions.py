@@ -137,7 +137,7 @@ def jacobian(functions, variables):
         [    x^3*cos(y)   3*x^2*sin(y)]
         [ cos(x)*cos(y) -sin(x)*sin(y)]
         [             0            e^x]
-        
+
     We verify Alpoge's counterexample to the Jacobian conjecture::
 
         sage: x,y,z = var('x,y,z')
