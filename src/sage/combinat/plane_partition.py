@@ -1753,7 +1753,6 @@ class PlanePartitions_box(PlanePartitions):
             sage: P.cardinality() == P.generating_series()(1)
             True
         """
-
         from sage.rings.polynomial.cyclotomic import cyclotomic_value
 
         if q is None:
