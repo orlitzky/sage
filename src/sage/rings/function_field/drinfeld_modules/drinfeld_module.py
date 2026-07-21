@@ -915,6 +915,7 @@ class DrinfeldModule(Parent, UniqueRepresentation):
 
         - If ``level`` is set to ``True``, the method returns this `M`, otherwise it
         returns the order `q^M-1`.
+
         - If ``absolute`` is set to ``True``, the method returns the size or level
         (depending on the input ``level``) of the absolute automorphism group.
         Otherwise, the method returns the size or level (depending on the input
@@ -926,7 +927,9 @@ class DrinfeldModule(Parent, UniqueRepresentation):
         INPUT:
 
         - ``level`` (default: ``False``) -- boolean
+
         - ``absolute`` (default: ``False``) -- boolean
+
         - ``extension`` (default: ``None``) -- an extension of the base field `K`;
             when `K` is a finite field, an integer (interpreted as the degree
             of the extension) is also allowed.
