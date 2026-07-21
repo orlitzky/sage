@@ -6160,45 +6160,44 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
 
     A :exc:`ValueError` will be thrown under the following conditions:
 
-    * Any of ``min_ambient_dim``, ``max_ambient_dim``, ``min_rays``, or
-      ``max_rays`` are negative.
+    * Any of ``min_ambient_dim``, ``max_ambient_dim``, ``min_rays``,
+      or ``max_rays`` are negative.
 
     * ``max_ambient_dim`` is less than ``min_ambient_dim``.
 
     * ``max_rays`` is less than ``min_rays``.
 
-
-    * ``min_rays`` is greater than four but ``max_ambient_dim`` is less than
-      three.
-
-    * ``min_rays`` is greater than four but ``lattice`` has dimension
-      less than three.
-
-    * ``min_rays`` is greater than two but ``max_ambient_dim`` is less than
-      two.
-
-    * ``min_rays`` is greater than two but ``lattice`` has dimension less
-      than two.
-
-    * ``min_rays`` is positive but ``max_ambient_dim`` is zero.
-
-    * ``min_rays`` is positive but ``lattice`` has dimension zero.
-
-    * A trivial lattice is supplied and a non-strictly-convex cone
-      is requested.
-
     * A non-strictly-convex cone is requested but ``max_rays`` is less
       than two.
+
+    * ``max_ambient_dim`` is two or less, and ``min_rays`` is
+      greater than ``2*max_ambient_dim``.
+
+    * ``lattice`` has dimension two or less, and ``min_rays`` is
+      larger than twice that dimension.
+
+    * A strictly-convex cone is requested with ``max_ambient_dim <=
+      2``, and ``min_rays`` is greater than ``max_ambient_dim``.
+
+    * A strictly-convex cone is requested in a ``lattice`` that has
+      dimension two or less, and ``min_rays`` is greater than that
+      dimension.
+
+    * A non-strictly-convex cone is requested and ``max_ambient_dim``
+      is zero.
+
+    * A non-strictly-convex cone is requested in a trivial lattice.
+
+    * A non-solid cone is requested but ``max_ambient_dim`` is zero.
+
+    * A non-solid cone is requested but ``lattice`` has dimension
+      zero.
 
     * A solid cone is requested but ``max_rays`` is less than
       ``min_ambient_dim``.
 
     * A solid cone is requested but ``max_rays`` is less than the
       dimension of ``lattice``.
-
-    * A non-solid cone is requested but ``max_ambient_dim`` is zero.
-
-    * A non-solid cone is requested but ``lattice`` has dimension zero.
 
     ALGORITHM:
 
@@ -6333,43 +6332,43 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         sage: random_cone(max_ambient_dim=0, min_rays=1)
         Traceback (most recent call last):
         ...
-        ValueError: all cones in zero dimensions have no generators.
-        Please increase max_ambient_dim to at least 1, or decrease min_rays.
+        ValueError: all cones in dimension d <= 2 have 2d or fewer rays.
+        Please increase max_ambient_dim or decrease min_rays.
 
         sage: random_cone(max_ambient_dim=1, min_rays=3)
         Traceback (most recent call last):
         ...
-        ValueError: all cones in zero/one dimensions have two or fewer
-        generators. Please increase max_ambient_dim to at least 2, or decrease
-        min_rays.
+        ValueError: all cones in dimension d <= 2 have 2d or fewer rays.
+        Please increase max_ambient_dim or decrease min_rays.
 
         sage: random_cone(max_ambient_dim=2, min_rays=5)
         Traceback (most recent call last):
         ...
-        ValueError: all cones in zero/one/two dimensions have four or fewer
-        generators. Please increase max_ambient_dim to at least 3, or decrease
-        min_rays.
+        ValueError: all cones in dimension d <= 2 have 2d or fewer rays.
+        Please increase max_ambient_dim or decrease min_rays.
+
+    This happens with a lattice, too::
 
         sage: L = ToricLattice(0)
         sage: random_cone(lattice=L, min_rays=1)
         Traceback (most recent call last):
         ...
-        ValueError: all cones in the given lattice have no generators.
+        ValueError: all cones in this lattice have 0 or fewer rays.
         Please decrease min_rays.
 
         sage: L = ToricLattice(1)
         sage: random_cone(lattice=L, min_rays=3)
         Traceback (most recent call last):
         ...
-        ValueError: all cones in the given lattice have two or fewer
-        generators. Please decrease min_rays.
+        ValueError: all cones in this lattice have 2 or fewer rays.
+        Please decrease min_rays.
 
         sage: L = ToricLattice(2)
         sage: random_cone(lattice=L, min_rays=5)
         Traceback (most recent call last):
         ...
-        ValueError: all cones in the given lattice have four or fewer
-        generators. Please decrease min_rays.
+        ValueError: all cones in this lattice have 4 or fewer
+        rays. Please decrease min_rays.
 
     Ensure that we can obtain a cone in three dimensions with a large
     number (in particular, more than 2*dim) rays. Note that at least
@@ -6388,20 +6387,35 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         3
         sage: set_random_seed(_initial_seed)
 
-    It is an error to request a non-strictly-convex trivial cone::
+    It is an error to request a non-strictly-convex cone in a trivial
+    lattice::
+
+        sage: random_cone(max_ambient_dim=0, strictly_convex=False)
+        Traceback (most recent call last):
+        ...
+        ValueError: all cones are strictly convex when max_ambient_dim
+        is zero.
 
         sage: L = ToricLattice(0, "L")
         sage: random_cone(lattice=L, strictly_convex=False)
         Traceback (most recent call last):
         ...
-        ValueError: all cones in this lattice are strictly convex (trivial).
+        ValueError: all cones in the trivial lattice are strictly
+        convex (trivial).
 
     Or a non-strictly-convex cone with fewer than two rays::
 
         sage: random_cone(max_rays=1, strictly_convex=False)
         Traceback (most recent call last):
         ...
-        ValueError: all cones are strictly convex when ``max_rays`` is
+        ValueError: all cones are strictly convex when max_rays is
+        less than two.
+
+        sage: L = ToricLattice(5)
+        sage: random_cone(lattice=L, max_rays=1, strictly_convex=False)
+        Traceback (most recent call last):
+        ...
+        ValueError: all cones are strictly convex when max_rays is
         less than two.
 
     But fine to ask for a strictly convex trivial cone::
@@ -6417,7 +6431,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         sage: random_cone(lattice=L, solid=False)
         Traceback (most recent call last):
         ...
-        ValueError: all cones in the given lattice are solid.
+        ValueError: all cones in the trivial lattice are solid.
 
         sage: random_cone(max_ambient_dim=0, solid=False)
         Traceback (most recent call last):
@@ -6430,7 +6444,8 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         sage: random_cone(min_ambient_dim=4, max_rays=3, solid=True)
         Traceback (most recent call last):
         ...
-        ValueError: max_rays must be at least min_ambient_dim for a solid cone.
+        ValueError: max_rays must be at least min_ambient_dim for a
+        solid cone.
 
         sage: L = ToricLattice(5)
         sage: random_cone(lattice=L, max_rays=3, solid=True)
@@ -6439,104 +6454,122 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         ValueError: max_rays must be at least 5 for a solid cone in this
         lattice.
 
+    A :exc:`ValueError` is thrown if a cone with too many rays is
+    requested in dimension less than three::
+
+        sage: K = random_cone(max_ambient_dim=1,
+        ....:                 min_rays=3,
+        ....:                 max_rays=3)
+        Traceback (most recent call last):
+        ...
+        ValueError: all cones in dimension d <= 2 have 2d or fewer
+        rays. Please increase max_ambient_dim or decrease min_rays.
+
+    A :exc:`ValueError` is thrown if a strictly convex cone is
+    requested with too many rays in dimension less than three (the
+    bound is lower than if we did not specify
+    ``strictly_convex=True``)::
+
+        sage: K = random_cone(max_ambient_dim=2,
+        ....:                 min_rays=3,
+        ....:                 max_rays=3,
+        ....:                 strictly_convex=True)
+        Traceback (most recent call last):
+        ...
+        ValueError: in dimension d <= 2, all strictly convex cones
+        have d rays. Please increase max_ambient_dim, or decrease
+        min_rays.
+
     """
     from sage.misc.prandom import randint, sample
 
     # Catch obvious mistakes so that we can generate clear error
-    # messages.
-
-    if min_ambient_dim < 0:
-        raise ValueError('min_ambient_dim must be nonnegative.')
+    # messages. We sanity check the min_rays and max_rays parameters
+    # first, since they do not depend on whether or not a lattice
+    # was specified.
 
     if min_rays < 0:
-        raise ValueError('min_rays must be nonnegative.')
-
-    if max_ambient_dim < 0:
-        raise ValueError('max_ambient_dim must be nonnegative.')
-
-    if (max_ambient_dim < min_ambient_dim):
-        msg = 'max_ambient_dim cannot be less than min_ambient_dim.'
-        raise ValueError(msg)
-
-    # The next three checks prevent an infinite loop (a futile
-    # search for more rays) in zero, one, or two dimensions.
-    if min_rays > 4 and max_ambient_dim < 3:
-        msg = 'all cones in zero/one/two dimensions have four or fewer '
-        msg += 'generators. Please increase max_ambient_dim to at least '
-        msg += '3, or decrease min_rays.'
-        raise ValueError(msg)
-
-    if min_rays > 2 and max_ambient_dim < 2:
-        msg = 'all cones in zero/one dimensions have two or fewer '
-        msg += 'generators. Please increase max_ambient_dim to at least '
-        msg += '2, or decrease min_rays.'
-        raise ValueError(msg)
-
-    if min_rays > 0 and max_ambient_dim == 0:
-        msg = 'all cones in zero dimensions have no generators. '
-        msg += 'Please increase max_ambient_dim to at least 1, or '
-        msg += 'decrease min_rays.'
-        raise ValueError(msg)
+        raise ValueError("min_rays must be nonnegative.")
 
     if max_rays < 0:
-        raise ValueError('max_rays must be nonnegative.')
+        raise ValueError("max_rays must be nonnegative.")
 
-    if (max_rays < min_rays):
-        raise ValueError('max_rays cannot be less than min_rays.')
+    if max_rays < min_rays:
+        raise ValueError("max_rays cannot be less than min_rays.")
 
-    # Also perform the "futile search" checks when a lattice is given,
-    # using its dimension rather than max_ambient_dim as the indicator.
-    if lattice is not None:
-        if min_rays > 4 and lattice.dimension() < 3:
-            msg = 'all cones in the given lattice have four or fewer '
-            msg += 'generators. Please decrease min_rays.'
-            raise ValueError(msg)
+    if strictly_convex is False and max_rays < 2:
+        raise ValueError("all cones are strictly convex when "
+                         "max_rays is less than two.")
 
-        if min_rays > 2 and lattice.dimension() < 2:
-            msg = 'all cones in the given lattice have two or fewer '
-            msg += 'generators. Please decrease min_rays.'
-            raise ValueError(msg)
+    if lattice is None:
+        if min_ambient_dim < 0:
+            raise ValueError("min_ambient_dim must be nonnegative.")
 
-        if min_rays > 0 and lattice.dimension() == 0:
-            msg = 'all cones in the given lattice have no generators. '
-            msg += 'Please decrease min_rays.'
-            raise ValueError(msg)
+        if max_ambient_dim < 0:
+            raise ValueError("max_ambient_dim must be nonnegative.")
 
-    # Sanity checks for strictly_convex.
-    if strictly_convex is not None and not strictly_convex:
-        if lattice is not None and lattice.dimension() == 0:
-            msg = 'all cones in this lattice are strictly convex (trivial).'
-            raise ValueError(msg)
-        if max_rays < 2:
-            msg = 'all cones are strictly convex when ``max_rays`` is '
-            msg += 'less than two.'
-            raise ValueError(msg)
+        if max_ambient_dim < min_ambient_dim:
+            raise ValueError("max_ambient_dim cannot be less than "
+                             "min_ambient_dim.")
 
-    # Sanity checks for solid cones.
-    if solid is not None and solid:
-        # The user wants a solid cone.
-        if lattice is None:
-            if max_rays < min_ambient_dim:
-                msg = 'max_rays must be at least min_ambient_dim for '
-                msg += 'a solid cone.'
-                raise ValueError(msg)
-        else:
-            # Repeat the checks above when a lattice is given.
-            if max_rays < lattice.dimension():
-                msg = "max_rays must be at least {0} for a solid cone "
-                msg += "in this lattice."
-                raise ValueError(msg.format(lattice.dimension()))
+        # The next check prevents an infinite loop (a futile search
+        # for more rays) in zero, one, or two dimensions.
+        if max_ambient_dim <= 2:
+            if min_rays > 2*max_ambient_dim:
+                raise ValueError("all cones in dimension d <= 2 have "
+                                 "2d or fewer rays. Please increase "
+                                 "max_ambient_dim or decrease "
+                                 "min_rays.")
 
-    # Sanity checks for non-solid cones.
-    if solid is not None and not solid:
-        if lattice is None:
+            elif strictly_convex and min_rays > max_ambient_dim:
+                raise ValueError("in dimension d <= 2, all strictly "
+                                 "convex cones have d rays. Please "
+                                 "increase max_ambient_dim, or "
+                                 "decrease min_rays.")
+
             if max_ambient_dim == 0:
-                msg = 'all cones are solid when max_ambient_dim is zero.'
-                raise ValueError(msg)
-        else:
-            if lattice.dimension() == 0:
-                msg = 'all cones in the given lattice are solid.'
-                raise ValueError(msg)
+                if strictly_convex is False:
+                    raise ValueError("all cones are strictly convex "
+                                     "when max_ambient_dim is zero.")
+                if solid is False:
+                    raise ValueError("all cones are solid when "
+                                     "max_ambient_dim is zero.")
+
+        if solid and max_rays < min_ambient_dim:
+            raise ValueError("max_rays must be at least "
+                             "min_ambient_dim for a solid cone.")
+    else:
+        # Also perform the "futile search" checks when a lattice is
+        # given, using its dimension rather than max_ambient_dim.
+        d = lattice.dimension()
+
+        if d <= 2:
+            if min_rays > 2*d:
+                raise ValueError("all cones in this lattice have "
+                                 f"{2*d} or fewer rays. Please "
+                                 "decrease min_rays.")
+            elif strictly_convex and min_rays > d:
+                raise ValueError("all strictly convex cones in "
+                                 f"this lattice have {d} or fewer "
+                                 "rays. Please decrease min_rays.")
+
+            if d.is_zero():
+                if strictly_convex is False:
+                    raise ValueError("all cones in the trivial lattice "
+                                     "are strictly convex (trivial).")
+                if solid is False:
+                    raise ValueError("all cones in the trivial lattice "
+                                     "are solid.")
+
+        if solid and max_rays < d:
+            raise ValueError(f"max_rays must be at least {d} for a "
+                             "solid cone in this lattice.")
+
+
+    # Parameter adjustment. In some cases are are able to adjust the
+    # dim/ray bounds to eliminate impossible combinations. We are
+    # going to attempt those combinations at random, so avoiding the
+    # ones that are doomed to fail should improve the average runtime.
 
     if solid:
         # If the user wants a solid cone, we need at least as many
@@ -6575,14 +6608,14 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
     # until we have a valid cone and occasionally throw everything out
     # and start over from scratch.
     while True:
+        # d = lattice.dimension() is already set above if
+        # the lattice is not None
         L = lattice
 
         if lattice is None:
             # No lattice given, make our own.
             d = randint(min_ambient_dim, max_ambient_dim)
             L = ToricLattice(d)
-        else:
-            d = L.dimension()
 
         _min_rays_this_iter = min_rays
         if solid:
