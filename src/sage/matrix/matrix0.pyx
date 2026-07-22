@@ -611,7 +611,23 @@ cdef class Matrix(sage.structure.element.Matrix):
             sage: m
             [0 2]
             [0 0]
+
+        The cache is cleared and immutable matrices cannot be changed
+        (:issue:`42532`)::
+
+            sage: m = matrix(ZZ, [[1, 2], [3, 4]])
+            sage: m.det()
+            -2
+            sage: m.add_to_entry(0, 0, 10)
+            sage: m.det()
+            38
+            sage: m.set_immutable()
+            sage: m.add_to_entry(0, 0, 1)
+            Traceback (most recent call last):
+            ...
+            ValueError: matrix is immutable; please change a copy instead (i.e., use copy(M) to change a copy of M).
         """
+        self.check_mutability()
         elt = self.base_ring()(elt)
         if i < 0:
             i += self._nrows
