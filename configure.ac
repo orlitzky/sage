@@ -343,10 +343,10 @@ m4_pushdef([SAGE_BOOTSTRAP_URL],[See https://doc.sagemath.org/html/en/reference/
 
 # choose BLAS/LAPACK on Darwin
 AC_ARG_WITH([darwin-accelerate],
-            [AS_HELP_STRING([--with-darwin-accelerate={no (default)},yes}],
+            [AS_HELP_STRING([--with-darwin-accelerate={yes (default)},no}],
                             [use Darwin (macOS) Accelerate BLAS/LAPACK])],
             [SAGE_DARWIN_ACCELERATE="$withval"],
-            [SAGE_DARWIN_ACCELERATE="no"])
+            [SAGE_DARWIN_ACCELERATE="yes"])
 AC_SUBST([SAGE_DARWIN_ACCELERATE])
 
 SAGE_DARWIN_PKG_CONFIG_PATH=
