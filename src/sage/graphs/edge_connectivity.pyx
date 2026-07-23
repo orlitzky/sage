@@ -266,6 +266,11 @@ cdef class GabowEdgeConnectivity:
         if not isinstance(G, DiGraph):
             raise ValueError("this method is for directed graphs only")
         G._scream_if_not_simple(allow_loops=True, allow_multiple_edges=True)
+        # The DFS-based speed-up initialization of [GKLP2021]_ assumes a simple
+        # digraph and miscounts on parallel arcs; disable it when the digraph
+        # has multiple edges (the base algorithm handles them correctly).
+        if G.has_multiple_edges():
+            self.dfs_preprocessing = False
         if G.size() > INT_MAX - 2:
             raise ValueError("the graph is too large for this code")
 
