@@ -927,9 +927,9 @@ class DrinfeldModule(Parent, UniqueRepresentation):
         INPUT:
 
         - ``level`` (default: ``False``) -- boolean
-        
+
         - ``absolute`` (default: ``False``) -- boolean
-        
+
         - ``extension`` (default: ``None``) -- an extension of the base field `K`;
           when `K` is a finite field, an integer (interpreted as the degree
           of the extension) is also allowed.
