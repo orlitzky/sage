@@ -914,25 +914,25 @@ class DrinfeldModule(Parent, UniqueRepresentation):
         for some integer `M`. Note that this always is a cyclic group.
 
         - If ``level`` is set to ``True``, the method returns this `M`, otherwise it
-        returns the order `q^M-1`.
+          returns the order `q^M-1`.
 
         - If ``absolute`` is set to ``True``, the method returns the size or level
-        (depending on the input ``level``) of the absolute automorphism group.
-        Otherwise, the method returns the size or level (depending on the input
-        ``level``) of the automorphism group in the field ``extension`` or the
-        extension of degree ``extension`` of the base field.
+          (depending on the input ``level``) of the absolute automorphism group.
+          Otherwise, the method returns the size or level (depending on the input
+          ``level``) of the automorphism group in the field ``extension`` or the
+          extension of degree ``extension`` of the base field.
 
         This code is based on Lemma 3.8.2 of [Pap2023]_.
 
         INPUT:
 
         - ``level`` (default: ``False``) -- boolean
-
+        
         - ``absolute`` (default: ``False``) -- boolean
-
+        
         - ``extension`` (default: ``None``) -- an extension of the base field `K`;
-            when `K` is a finite field, an integer (interpreted as the degree
-            of the extension) is also allowed.
+          when `K` is a finite field, an integer (interpreted as the degree
+          of the extension) is also allowed.
 
         EXAMPLES::
 
