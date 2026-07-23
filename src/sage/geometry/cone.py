@@ -6091,24 +6091,16 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
     .. WARNING::
 
         If you request a large number of rays in a low-dimensional
-        space, you might be waiting for a while. For example, in three
-        dimensions, it is possible to obtain an octagon raised up to height
-        one (all z-coordinates equal to one). But in practice, we usually
-        generate the entire three-dimensional space with six rays before we
-        get to the eight rays needed for an octagon. We therefore have to
-        throw the cone out and start over from scratch. This process repeats
-        until we get lucky.
+        space, you may be waiting for a while.
 
-        We also refrain from "adjusting" the min/max parameters given to
-        us when a (non-)strictly convex or (non-)solid cone is
-        requested. This means that it may take a long time to generate
-        such a cone if the parameters are chosen unwisely.
-
-        For example, you may want to set ``min_rays`` close to
-        ``min_ambient_dim`` if you desire a solid cone. Or, if you desire a
-        non-strictly-convex cone, then they all contain at least two
-        generating rays. So that might be a good candidate for
-        ``min_rays``.
+        In three dimensions, and ignoring for the moment the need for
+        rational coordinates, it is possible to obtain an "octagon"
+        raised up to height one (all z-coordinates equal to one). But
+        in practice we usually generate the entire three-dimensional
+        ambient vector space (having six rays) before we obtain the
+        eight that we want. At that point it is futile to add more
+        rays; we have to throw the cone out and start from
+        scratch. This process repeats until we get lucky.
 
     INPUT:
 
