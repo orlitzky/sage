@@ -6587,6 +6587,11 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         if max_rays < max_ambient_dim:
             max_ambient_dim = max_rays
 
+    if strictly_convex is False and min_rays < 2:
+        # We've already verified that max_rays >= 2. Increase min_rays
+        # to avoid pointless loops with r=0 or r=1
+        min_rays = 2
+
     def is_valid(K):
         r"""
         Check if the given cone is valid; that is, if its ambient
