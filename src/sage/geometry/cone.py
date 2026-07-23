@@ -6193,43 +6193,92 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
 
     ALGORITHM:
 
-    First, a lattice is determined from ``min_ambient_dim`` and
-    ``max_ambient_dim`` (or from the supplied ``lattice``).
+    Loop until a valid cone is found.
 
-    Then, lattice elements are generated in batches and added to a
-    cone. This continues until either the cone meets the user's
-    requirements, or the cone is equal to the entire space (at which
-    point it is futile to generate more).
+    The first step inside the loop is to decide on a lattice. If a
+    ``lattice`` was supplied, it is used. Otherwise, we construct a new
+    lattice whose dimension is sampled randomly from the interval
+    ``[min_ambient_dim, max_ambient_dim]``.
 
-    We check whether or not the resulting cone meets the user's
-    requirements; if it does, it is returned. If not, we throw it away
-    and start over. This process repeats indefinitely until an
-    appropriate cone is generated.
+    Next we decide the number of rays to seek in this iteration. This
+    number is chosen randomly from ``[min_rays, max_rays]``. In both
+    cases (dimension and number of rays), minor adjustments may be
+    made to the interval to avoid impossible combinations.
+
+    With the lattice dimension and number of rays fixed, random
+    lattice elements (rays) are generated in batches and added to a
+    cone. This continues until the cone either has enough rays or
+    becomes the entire ambient space, at which point it is futile to
+    append more.
+
+    If the cone is equal to the ambient space, we check to see if it
+    meets the user's requirements. If it does, it is returned; if not,
+    we throw it away and start over with a new (random, admissible)
+    dimension and number of rays in mind.
+
+    If the cone is *not* equal to the ambient space, and if ``solid``
+    or ``strictly_convex`` is not ``None``, we attempt some
+    adjustments:
+
+    * make a non-solid cone solid by adding more rays,
+
+    * make a solid cone non-solid by embedding it in a space
+      of higher dimension,
+
+    * make a pointed cone non-pointed by appending negative
+      multiples of existing rays (if there's room for more rays),
+
+    * make a pointed cone non-pointed by replacing existing rays
+      with negative multiples of others (if we are at max_rays).
+
+    (We do *not* use
+    :meth:`ConvexRationalPolyhedralCone.solid_restriction` to make a
+    non-solid cone solid. The solid restriction does not affect the
+    ray count, but it does involve a change of basis that turns your
+    existing rays into boring standard basis vectors.)
+
+    Afterwards the cone is checked against the requirements. If it is
+    valid, we return it; otherwise we throw it out and begin anew.
+
+    Building a cone that meets the user's critereia is inherently a
+    bottom-up process. We cannot know how many rays in a given set are
+    extreme until we reduce them with :func:`Cone`, but in the
+    current implementation, reducing the rays also happens to
+    normalize them. If we desire ``r`` rays and generate ``r`` at
+    random, we are likely to discover that some are redundant and that
+    we need to append more. On the other hand, if generate more than
+    ``r`` with the expectation that some will be eliminated, we
+    increase the likelihood that :func:`Cone` normalizes them to
+    boring standard basis vectors.
+
+    This bottom-up approach motivates fixing the number of rays ``r``
+    attempted in each iteration. If ``r`` were not fixed -- if we were
+    willing to accept any number of rays between the min/max in any
+    iteration -- then we would almost always stop as soon as we hit
+    ``min_rays``. That would be legal, but perhaps unexpected: it is
+    reasonable to assume that the result will have a number of rays
+    distributed throughout ``[min_rays, max_rays]``. That said, this
+    approach greatly increases the failure rate of the loop.
 
     The default upper bounds on the ambient dimension and number of
-    rays are chosen so that each iteration of this process remains
-    fast. The following should be considered an implementation detail,
-    but at the beginning of each iteration we fix the number of rays
-    to attempt for the duration of that iteration. This is necessary
-    because we begin with a cone that likely has too few rays, and add
-    rays to it in batches: if we did not have a fixed number of rays
-    in mind, we would tend to stop as soon as we reached the minimum
-    allowable number of rays. That would be legal, but not what people
-    expect.
+    rays ensure that failed iterations remain fast. Adding rays to the
+    cone consists of appending vectors to the ray set, and calling
+    :func:`Cone` on the result. This can be quite slow, and we may
+    have to do it many times. As the speed of :func:`Cone` depends
+    mainly on the degree and number of rays given to it, those are the
+    critical factors in the worst-case performance.
 
-    Adding rays to the cone consists of appending vectors to the ray
-    set, and calling :func:`Cone` on the result. This can be quite
-    slow, and we may have to do it many times. As the speed of
-    :func:`Cone` depends mainly on the degree and number of rays given
-    to it, those are the critical factors in the worst-case
-    performance.
+    For the time being, we forego the following adjustments because
+    they remove the cone's :meth:`ConvexRationalPolyhedralCone.lines`,
+    thereby skewing the number of rays towards the lower end of
+    ``[min_rays, max_rays]``:
 
-    Keep in mind however that if you are looking for a cone with
-    hard-to-generate properties (a strictly-convex cone with at least
-    twenty extreme rays, for example), we can make no promises about
-    the overall runtime. The default bounds allow unsatisfactory cones
-    to be contructed/discarded quickly, but we may have to
-    construct/discard them for eternity.
+    * Using :meth:`ConvexRationalPolyhedralCone.strict_quotient` to
+      make a non-pointed cone pointed.
+
+    * Projecting a non-pointed cone onto the orthogonal complement
+      of its :meth:`ConvexRationalPolyhedralCone.lines` to obtain a
+      pointed cone.
 
     EXAMPLES:
 
