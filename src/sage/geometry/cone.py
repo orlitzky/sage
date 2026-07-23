@@ -6612,7 +6612,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
     # going to attempt those combinations at random, so avoiding the
     # ones that are doomed to fail should improve the average runtime.
 
-    if solid:
+    if solid and max_rays < max_ambient_dim:
         # If the user wants a solid cone, we need at least as many
         # rays as the dimension. If max_rays was specified, then
         # above we have already verified that
@@ -6625,8 +6625,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         # max_rays, ensuring that we don't perform any pointless
         # iterations in a space that's too big for max_rays to
         # generate a solid cone.
-        if max_rays < max_ambient_dim:
-            max_ambient_dim = max_rays
+        max_ambient_dim = max_rays
 
     if strictly_convex is False and min_rays < 2:
         # We've already verified that max_rays >= 2. Increase min_rays
