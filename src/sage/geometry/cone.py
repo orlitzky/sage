@@ -6521,6 +6521,18 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         have d rays. Please increase max_ambient_dim, or decrease
         min_rays.
 
+    Ensure that we can produce a cone whose :meth:`lines` are not
+    orthogonal::
+
+        sage: set_random_seed(1)
+        sage: K = random_cone(min_ambient_dim=2, strictly_convex=False)
+        sage: V = K.ambient_vector_space()
+        sage: all( V(x).inner_product(V(y)).is_zero()
+        ....:      for x in K.lines()
+        ....:      for y in K.lines()
+        ....:      if not x == y )
+        False
+
     """
     from sage.misc.prandom import randint, sample
 
