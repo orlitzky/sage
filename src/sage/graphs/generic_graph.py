@@ -7575,7 +7575,10 @@ class GenericGraph(GenericGraph_pyx):
 
         With ``k=None``, a directed graph yields as many arborescences as its
         edge connectivity, and an undirected graph a maximum packing of
-        spanning trees (`K_4` is 3-edge-connected but packs only 2 trees)::
+        spanning trees. By Nash-Williams, a graph with edge connectivity
+        `\lambda` has at least `\lfloor \lambda / 2 \rfloor` edge-disjoint
+        spanning trees and at most `m / (n - 1)`; for instance `K_4` has
+        `\lambda = 3` and packs 2 trees::
 
             sage: len(digraphs.Complete(4).edge_disjoint_spanning_trees(algorithm='Gabow'))
             3
@@ -7628,11 +7631,15 @@ class GenericGraph(GenericGraph_pyx):
             from sage.graphs.spanning_tree import edge_disjoint_spanning_trees
             if k is None:
                 # Return a maximum packing. Feasibility is monotone in k, so
-                # we binary search using the Roskind-Tarjan algorithm, with
-                # the trivial upper bound m // (n - 1).
+                # we binary search with the Roskind-Tarjan algorithm between a
+                # lower and an upper bound. By Nash-Williams a graph with edge
+                # connectivity ``lambda`` has at least ``lambda // 2`` disjoint
+                # spanning trees, and at most ``m // (n - 1)``.
                 n = self.order()
-                lo = 0
-                hi = self.size() // (n - 1) if n > 1 else 0
+                if n <= 1:
+                    return []
+                lo = int(self.edge_connectivity()) // 2
+                hi = self.size() // (n - 1)
                 while lo < hi:
                     mid = (lo + hi + 1) // 2
                     try:
