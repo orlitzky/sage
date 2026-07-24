@@ -6148,9 +6148,12 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
     3` dimensions with more than `2n` rays, they are unusually hard to
     find, and not comparably interesting.
 
-    OUTPUT: a new, randomly generated cone
+    OUTPUT:
 
-    A :exc:`ValueError` will be thrown under the following conditions:
+    In most cases, a new, randomly generated
+    :class:`ConvexRationalPolyhedralCone` will be returned. A
+    :exc:`ValueError` will however be raised under the following
+    conditions:
 
     * Any of ``min_ambient_dim``, ``max_ambient_dim``, ``min_rays``,
       or ``max_rays`` are negative.
