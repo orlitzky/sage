@@ -1,4 +1,5 @@
 import pytest
+from random import randint
 
 from itertools import chain
 from sage.geometry.cone import Cone, random_cone
@@ -327,8 +328,6 @@ def test_random_element_membership(K):
     vector space, and its lattice. The same is true for conic
     combinations of random elements.
     """
-    from random import randint
-
     L = K.lattice()
     V = L.vector_space()
     F = L.base_field()
@@ -842,3 +841,51 @@ def test_discrete_complementarity_set_is_complementary(K):
     """
     dcs = K.discrete_complementarity_set()
     assert sum((s*x).abs() for (x,s) in dcs) == 0
+
+
+def test_random_cone_params_are_respected(K):
+    r"""
+    The dim/ray bounds and pointed/solid constraints should
+    actually be met by the result.
+    """
+    solid = bool(randint(0,1))
+    pointed = bool(randint(0,1))
+    min_ambient_dim = randint(5,10)
+    min_rays = randint(0,8)
+
+    # Start with random maxima, but fudge them a bit so that they
+    # don't contradict the minima.
+    max_rays = randint(min_rays,2*min_rays)
+    max_rays = max(max_rays, min_ambient_dim+3)
+    max_ambient_dim = randint(min_ambient_dim, 2*min_ambient_dim)
+    max_ambient_dim = max(max_ambient_dim, min_ambient_dim+4)
+
+    C = random_cone(min_rays=min_rays,
+                    max_rays=max_rays,
+                    solid=solid,
+                    strictly_convex=pointed,
+                    min_ambient_dim=min_ambient_dim,
+                    max_ambient_dim=max_ambient_dim)
+
+    assert all((
+        min_rays <= C.n_rays() <= max_rays,
+        min_ambient_dim <= C.lattice_dim() <= max_ambient_dim,
+        solid == C.is_solid(),
+        pointed == C.is_strictly_convex()
+    ))
+
+    # Again with a fixed lattice (in which we know a satisfactory cone
+    # exists, because we just found one) rather than dimension bounds.
+    L = C.lattice()
+    C = random_cone(min_rays=min_rays,
+                    max_rays=max_rays,
+                    solid=solid,
+                    strictly_convex=pointed,
+                    lattice=L)
+
+    assert all((
+        min_rays <= C.n_rays() <= max_rays,
+        C.lattice() is L,
+        solid == C.is_solid(),
+        pointed == C.is_strictly_convex()
+    ))
