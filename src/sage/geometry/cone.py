@@ -6742,8 +6742,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
             # uninteresting set of generators.
             if is_valid(K):
                 return K
-            else:
-                continue
+            continue
 
         if solid and not K.is_solid():
             # Just add rays until we get a solid cone? Adding rays is
