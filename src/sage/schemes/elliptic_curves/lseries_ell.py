@@ -745,7 +745,7 @@ class Lseries_ell(SageObject):
         Return whether or not `L(E,1) = 0`. The result is provably
         correct if the Manin constant of the associated optimal
         quotient is <= 2.  This hypothesis on the Manin constant
-        is true for all curves of conductor <= 40000 (by Cremona) and
+        is true for all curves of conductor <= 130000 (by Cremona) and
         all semistable curves (i.e., squarefree conductor).
 
         ALGORITHM: see :meth:`L_ratio`.
