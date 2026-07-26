@@ -2793,7 +2793,8 @@ cdef class MixedIntegerLinearProgram(SageObject):
         The solver parameters are by essence solver-specific, which means their
         meaning heavily depends on the solver used.
 
-        (If you do not know which solver you are using, then you use GLPK).
+        (If you do not know which solver you are using, then you are using the
+        default; see :func:`default_mip_solver`.)
 
         Aliases:
 
