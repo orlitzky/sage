@@ -467,7 +467,9 @@ def treewidth(g, k=None, kmin=None, certificate=False, algorithm=None, nice=Fals
 
     When ``certificate=True``, the tree decomposition is returned.
 
-    When ``nice=True``, the nice tree decomposition is returned.
+    When ``nice=True``, the nice tree decomposition is returned. See
+    :meth:`~sage.graphs.graph_decompositions.tree_decomposition.make_nice_tree_decomposition`
+    for details.
 
     ALGORITHM:
 
@@ -490,9 +492,13 @@ def treewidth(g, k=None, kmin=None, certificate=False, algorithm=None, nice=Fals
 
     .. SEEALSO::
 
-        :meth:`~sage.graphs.graph_decompositions.vertex_separation.path_decomposition`
-        computes the pathwidth of a graph. See also the
-        :mod:`~sage.graphs.graph_decompositions.vertex_separation` module.
+        - The utility functions in the
+          :mod:`~sage.graphs.graph_decompositions.tree_decomposition`
+          module, especially
+          :meth:`~sage.graphs.graph_decompositions.tree_decomposition.label_nice_tree_decomposition`.
+        - :meth:`~sage.graphs.graph_decompositions.vertex_separation.path_decomposition`
+          computes the pathwidth of a graph.
+        - module :mod:`~sage.graphs.graph_decompositions.vertex_separation`.
 
     EXAMPLES:
 
@@ -809,7 +815,7 @@ def make_nice_tree_decomposition(graph, tree_decomp):
 
     A *nice* TD `NT` is a rooted tree with four types of nodes:
 
-    - *Leaf* nodes have no children and bag size 1;
+    - *Leaf* nodes have no children and bag size 0;
     - *Introduce* nodes have one child: If `v \in NT` is an introduce node and
       `w \in NT` its child, then `Bag(v) = Bag(w) \cup \{ x \}`, where `x` is the
       introduced node;
@@ -824,7 +830,8 @@ def make_nice_tree_decomposition(graph, tree_decomp):
 
     - ``tree_decomp`` -- a tree decomposition
 
-    OUTPUT: a nice tree decomposition
+    OUTPUT: a nice tree decomposition whose root vertex is a tuple of the form
+    ``(0, bag)``.
 
     .. WARNING::
 
@@ -1063,7 +1070,7 @@ def make_nice_tree_decomposition(graph, tree_decomp):
     return nice_tree_decomp
 
 
-def label_nice_tree_decomposition(nice_TD, root, directed=False):
+def label_nice_tree_decomposition(nice_TD, root=None, directed=False):
     r"""
     Return a nice tree decomposition with nodes labelled accordingly.
 
@@ -1071,11 +1078,13 @@ def label_nice_tree_decomposition(nice_TD, root, directed=False):
 
     - ``nice_TD`` -- a nice tree decomposition
 
-    - ``root`` -- the root of the nice tree decomposition
+    - ``root`` -- the root of the nice tree decomposition (default:
+      ``min(nice_TD)``). The default value is suitable for the output of
+      :meth:`make_nice_tree_decomposition`.
 
     - ``directed`` -- boolean (default: ``False``); whether to return the nice
-      tree decomposition as a directed graph rooted at vertex ``root`` or as an
-      undirected graph
+      tree decomposition as a directed graph rooted at vertex ``root`` (with
+      edges oriented away from the root) or as an undirected graph
 
     OUTPUT: a nice tree decomposition with nodes labelled
 
@@ -1085,8 +1094,7 @@ def label_nice_tree_decomposition(nice_TD, root, directed=False):
         sage: claw = graphs.CompleteBipartiteGraph(1, 3)
         sage: claw_TD = claw.treewidth(certificate=True)
         sage: nice_TD = make_nice_tree_decomposition(claw, claw_TD)
-        sage: root = sorted(nice_TD.vertices())[0]
-        sage: label_TD = label_nice_tree_decomposition(nice_TD, root, directed=True)
+        sage: label_TD = label_nice_tree_decomposition(nice_TD, directed=True)
         sage: label_TD.name()
         'Labelled Nice tree decomposition of Tree decomposition'
         sage: for node in sorted(label_TD):  # random
@@ -1103,6 +1111,9 @@ def label_nice_tree_decomposition(nice_TD, root, directed=False):
     """
     from sage.graphs.digraph import DiGraph
     from sage.graphs.graph import Graph
+
+    if root is None:
+        root = min(nice_TD)
 
     directed_TD = DiGraph(nice_TD.breadth_first_search(start=root, edges=True),
                           format='list_of_edges',
