@@ -2868,8 +2868,8 @@ cdef class Matrix_integer_dense(Matrix_dense):
         - ``precision`` -- (default: ``0`` for automatic choice) bit
           precision to use if ``fp='rr'`` is set
 
-        - ``**kwds`` -- keywords to be passed to :mod:`fpylll`; see
-          :class:`fpylll.BKZ.Param` for details
+        - ``**kwds`` -- keywords to be passed to ``fpylll``; see
+          ``fpylll.BKZ.Param`` for details
 
         Also, if the verbose level is at least `2`, some output
         is printed during the computation.
@@ -3079,8 +3079,9 @@ cdef class Matrix_integer_dense(Matrix_dense):
         - ``transformation`` -- boolean (default: ``False``); also return transformation
           matrix
 
-        - ``**kwds`` -- keywords to be passed to :mod:`fpylll`; see
-          :meth:`fpylll.LLL.reduction` for details
+        - ``**kwds`` -- keywords to be passed to ``fpylll``; see
+          :meth:`fpylll.LLL.reduction <fpylll.fplll.lll.LLL.reduction>`
+          for details
 
         Also, if the verbose level is at least `2`, some output
         is printed during the computation.
@@ -3229,7 +3230,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
 
         .. NOTE::
 
-            See :mod:`sage.libs.ntl.ntl_mat_ZZ.ntl_mat_ZZ.LLL` and
+            See ``sage.libs.ntl.ntl_mat_ZZ.ntl_mat_ZZ.LLL`` and
             :mod:`fpylll.fplll.lll` for details on the algorithms used.
 
             Although LLL is a deterministic algorithm, the output for

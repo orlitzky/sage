@@ -131,7 +131,7 @@ class NumberField_relative(NumberField_generic):
 
     - ``embedding`` -- currently not supported, must be ``None``
 
-    - ``structure`` -- an instance of :class:`structure.NumberFieldStructure`
+    - ``structure`` -- an instance of :class:`~sage.rings.number_field.structure.NumberFieldStructure`
       or ``None`` (default: ``None``), provides additional information about
       this number field, e.g., the absolute number field from which it was
       created

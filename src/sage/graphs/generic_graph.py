@@ -296,8 +296,8 @@ can be applied on both. Here is what it can do:
     :meth:`~GenericGraph.layout_tree` | Return an ordered tree layout for this graph
     :meth:`~GenericGraph.layout_forest` | Return an ordered forest layout for this graph
     :meth:`~GenericGraph.layout_graphviz` | Call ``graphviz`` to compute a layout of the vertices of this graph.
-    :meth:`~GenericGraph._circle_embedding` | Set some vertices on a circle in the embedding of this graph.
-    :meth:`~GenericGraph._line_embedding` | Set some vertices on a line in the embedding of this graph.
+    :meth:`GenericGraph._circle_embedding <sage.graphs.generic_graph.GenericGraph._circle_embedding>` | Set some vertices on a circle in the embedding of this graph.
+    :meth:`GenericGraph._line_embedding <sage.graphs.generic_graph.GenericGraph._line_embedding>` | Set some vertices on a line in the embedding of this graph.
     :meth:`~GenericGraph.graphplot` | Return a :class:`~sage.graphs.graph_plot.GraphPlot` object.
     :meth:`~GenericGraph.plot` | Return a :class:`~sage.plot.graphics.Graphics` object representing the (di)graph.
     :meth:`~GenericGraph.show` | Show the (di)graph.
@@ -305,7 +305,7 @@ can be applied on both. Here is what it can do:
     :meth:`~GenericGraph.show3d` | Plot the graph using :class:`~sage.plot.plot3d.tachyon.Tachyon`, and shows the resulting plot.
     :meth:`~GenericGraph.graphviz_string` | Return a representation in the ``dot`` language.
     :meth:`~GenericGraph.graphviz_to_file_named` | Write a representation in the ``dot`` language in a file.
-    :meth:`~GenericGraph.tikz` | Return a :class:`~sage.misc.latex_standalone.TikzPicture` object representing the (di)graph.
+    :meth:`~sage.graphs.generic_graph.GenericGraph.tikz` | Return a :class:`~sage.misc.latex_standalone.TikzPicture` object representing the (di)graph.
 
 **Algorithmically hard stuff:**
 
@@ -475,6 +475,9 @@ class GenericGraph(GenericGraph_pyx):
     Base class for graphs and digraphs.
 
     .. automethod:: __eq__
+    .. automethod:: _circle_embedding
+    .. automethod:: _get_weight_function
+    .. automethod:: _line_embedding
     """
 
     # Nice defaults for plotting arrays of graphs (see sage.misc.functional.show)
@@ -979,7 +982,7 @@ class GenericGraph(GenericGraph_pyx):
              usetikzlibrary=None, macros=None,
              use_sage_preamble=None, **kwds):
         r"""
-        Return a TikzPicture of the graph.
+        Return a :class:`~sage.misc.latex_standalone.TikzPicture` of the graph.
 
         If graphviz and dot2tex are available, it uses these packages for
         placements of vertices and edges.
@@ -1029,7 +1032,7 @@ class GenericGraph(GenericGraph_pyx):
 
         OUTPUT:
 
-        An instance of :mod:`sage.misc.latex_standalone.TikzPicture`.
+        An instance of :class:`~sage.misc.latex_standalone.TikzPicture`.
 
         .. NOTE::
 
@@ -1631,7 +1634,7 @@ class GenericGraph(GenericGraph_pyx):
         .. NOTE::
 
             This functions uses the ``write_*`` functions defined in NetworkX
-            (see :mod:`networkx.readwrite`).
+            (see ``networkx.readwrite``).
 
         EXAMPLES::
 
@@ -6230,7 +6233,7 @@ class GenericGraph(GenericGraph_pyx):
         combinatorial embedding is used for the layout. Otherwise: if a
         combinatorial embedding is set to the instance field variable of the
         graph (e.g. using
-        :meth:`~sage/graphs/generic_graph.GenericGraph.set_embedding`), then
+        :meth:`~sage.graphs.generic_graph.GenericGraph.set_embedding`), then
         that one is used, and if no combinatorial embedding is set, then one is
         computed.
 
@@ -6241,7 +6244,7 @@ class GenericGraph(GenericGraph_pyx):
         - ``set_embedding`` -- boolean (default: ``False``); whether to set the
           instance field variable that contains a combinatorial embedding to the
           combinatorial embedding used for the planar layout (see
-          :meth:`~sage/graphs/generic_graph.GenericGraph.get_embedding`)
+          :meth:`~sage.graphs.generic_graph.GenericGraph.get_embedding`)
 
         - ``on_embedding`` -- dictionary (default: ``None``); provide a
           combinatorial embedding
@@ -26322,7 +26325,8 @@ class GenericGraph(GenericGraph_pyx):
         INPUT:
 
         - ``backend`` -- string or ``None`` (default); the backend to use;
-          see :meth:`sage.geometry.polyhedron.constructor.Polyhedron`
+          see the :func:`Polyhedron constructor
+          <sage.geometry.polyhedron.constructor.Polyhedron>`
 
         EXAMPLES:
 
@@ -26408,7 +26412,8 @@ class GenericGraph(GenericGraph_pyx):
         INPUT:
 
         - ``backend`` -- string or ``None`` (default); the backend to use;
-          see :meth:`sage.geometry.polyhedron.constructor.Polyhedron`
+          see the :func:`Polyhedron constructor
+          <sage.geometry.polyhedron.constructor.Polyhedron>`
 
         EXAMPLES:
 

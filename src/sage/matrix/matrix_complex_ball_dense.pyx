@@ -766,7 +766,7 @@ cdef class Matrix_complex_ball_dense(Matrix_dense):
 
         OUTPUT:
 
-        A :class:`~sage.structure.sequence.Sequence` of complex balls of
+        A :func:`~sage.structure.sequence.Sequence` of complex balls of
         length equal to the size of the matrix.
 
         Each element represents one eigenvalue with the correct multiplicities

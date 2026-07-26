@@ -49,7 +49,9 @@ class HtmlFragment(str, SageObject):
         """
         Rich Output Magic Method.
 
-        See :mod:`sage.repl.rich_output` for details.
+        See the `display manager documentation
+        <../../../repl/sage/repl/rich_output/display_manager.html>`_ for
+        details.
 
         EXAMPLES::
 

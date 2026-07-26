@@ -2080,7 +2080,7 @@ cdef class Matrix_modn_dense_template(Matrix_dense):
         self.cache('rank', E._cache['rank'])
         self.cache('pivots', v)
         self.cache('pivot_rows', rrp)
-        return v 
+        return v
 
     def pivot_rows(self):
         """
@@ -2158,7 +2158,7 @@ cdef class Matrix_modn_dense_template(Matrix_dense):
 
         If the base ring is the ring of integers modulo a composite,
         the keyword arguments are ignored and the computation is
-        delegated to :meth:`Matrix_dense.right_kernel_matrix`.
+        delegated to :meth:`~sage.matrix.matrix2.Matrix.right_kernel_matrix`.
 
         INPUT:
 

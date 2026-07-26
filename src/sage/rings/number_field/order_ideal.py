@@ -654,7 +654,7 @@ class NumberFieldOrderIdeal_quadratic(NumberFieldOrderIdeal_generic):
 
         .. SEEALSO::
 
-            :meth:`sage.rings.number_field.number_field_ideal.NumberFieldFractionalIdeal.quadratic_form`
+            :meth:`~sage.rings.number_field.order_ideal.NumberFieldOrderIdeal_quadratic.quadratic_form`
 
         EXAMPLES::
 

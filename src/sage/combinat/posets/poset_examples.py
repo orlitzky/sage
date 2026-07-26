@@ -296,9 +296,24 @@ class Posets(metaclass=ClasscallMetaclass):
 
     ShufflePoset = staticmethod(bubble_shuffle.ShufflePoset)
 
-    HochschildLattice = staticmethod(hochschild_lattice.hochschild_lattice)
+    @staticmethod
+    def HochschildLattice(n):
+        r"""
+        Return the Hochschild lattice `H_n`.
 
-    Sashes = staticmethod(sashes.lattice_of_sashes)
+        See :func:`~sage.combinat.posets.hochschild_lattice.hochschild_lattice`
+        for details.
+        """
+        return hochschild_lattice.hochschild_lattice(n)
+
+    @staticmethod
+    def Sashes(n):
+        r"""
+        Return the lattice of sashes of length ``n``.
+
+        See :func:`~sage.combinat.posets.sashes.lattice_of_sashes` for details.
+        """
+        return sashes.lattice_of_sashes(n)
 
     @staticmethod
     def ChainPoset(n, facade=None):
@@ -1329,7 +1344,14 @@ class Posets(metaclass=ClasscallMetaclass):
 
     # shard intersection order
     import sage.combinat.shard_order
-    ShardPoset = staticmethod(sage.combinat.shard_order.shard_poset)
+    @staticmethod
+    def ShardPoset(n):
+        r"""
+        Return the shard intersection order on permutations of size `n`.
+
+        See :func:`~sage.combinat.shard_order.shard_poset` for details.
+        """
+        return sage.combinat.shard_order.shard_poset(n)
 
     # Tamari lattices
     import sage.combinat.nu_tamari_lattice

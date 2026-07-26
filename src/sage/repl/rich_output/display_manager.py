@@ -14,7 +14,9 @@ arbitrates between
 * User preferences: typeset vs. plain text vs. ascii art, etc.
 
 The display manager is a singleton class, Sage always has exactly one
-instance of it. Use :func:`get_display_manager` to obtain it.
+instance of it. Use
+:meth:`get_display_manager <sage.repl.rich_output.display_manager.DisplayManager.get_instance>`
+to obtain it.
 
 EXAMPLES::
 
@@ -212,7 +214,7 @@ class DisplayManager(SageObject):
         Get the singleton instance.
 
         This class method is equivalent to
-        :func:`get_display_manager`.
+        :meth:`get_display_manager <sage.repl.rich_output.display_manager.DisplayManager.get_instance>`.
 
         OUTPUT: the display manager singleton
 

@@ -750,7 +750,7 @@ def roots_interval(f, x0) -> dict:
 
 def roots_interval_cached(f, x0) -> dict:
     r"""
-    Cached version of :func:`roots_interval`.
+    Cached version of ``roots_interval``.
 
     TESTS::
 
@@ -779,8 +779,8 @@ def roots_interval_cached(f, x0) -> dict:
 
 def populate_roots_interval_cache(inputs) -> None:
     r"""
-    Call :func:`roots_interval` to the inputs that have not been
-    computed previously, and cache them.
+    Call ``roots_interval`` to the inputs that have not been computed
+    previously, and cache them.
 
     INPUT:
 

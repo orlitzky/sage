@@ -149,6 +149,8 @@ atexit.register(m4ri_destroy_all_codes)
 cdef class Matrix_mod2_dense(matrix_dense.Matrix_dense):   # dense or sparse
     """
     Dense matrix over GF(2).
+
+    .. automethod:: _right_kernel_matrix
     """
     def __cinit__(self):
         """
@@ -553,7 +555,8 @@ cdef class Matrix_mod2_dense(matrix_dense.Matrix_dense):   # dense or sparse
 
         - ``from_list`` -- boolean (default: ``False``); if ``True``,
           returns the ``i``-th element of ``self.rows()`` (see
-          :func:`rows`), which may be faster, but requires building a
+          :meth:`~sage.matrix.matrix1.Matrix.rows`), which may be faster,
+          but requires building a
           list of all rows the first time it is called after an entry
           of the matrix is changed.
 
@@ -2236,7 +2239,7 @@ cdef class Matrix_mod2_dense(matrix_dense.Matrix_dense):   # dense or sparse
         OUTPUT:
 
         A pair ``(row_ordering, col_ordering)`` of
-        :class:`~sage.groups.perm_gps.constructor.PermutationGroupElement`
+        :class:`~sage.groups.perm_gps.permgroup_element.PermutationGroupElement`
         that represents a doubly lexical ordering of the rows or columns.
 
         .. SEEALSO::

@@ -2889,7 +2889,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
            The columns correspond to facets/facet normals
            in the order of :meth:`facet_normals`, the rows
            correspond to the rays in the order of
-           :meth:`rays`.
+           :meth:`~sage.geometry.cone.IntegralRayCollection.rays`.
 
         EXAMPLES::
 
@@ -5661,7 +5661,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         - If ``exact`` is ``True`` and if both ``self`` and ``other``
           are strictly convex, then the algorithm will fall back to
           inexact arithmetic. In that case, the returned angle and
-          vectors will be over :class:`sage.rings.real_double.RDF`.
+          vectors will be over ``RDF``.
 
         - If ``exact`` is ``False`` or if either cone is not strictly
           convex, then a :exc:`ValueError` is raised to indicate
