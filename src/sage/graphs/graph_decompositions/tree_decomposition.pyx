@@ -698,10 +698,9 @@ def treewidth(g, k=None, kmin=None, certificate=False, algorithm=None, nice=Fals
                 for a in atoms:
                     kmin = max(kmin, g.subgraph(a).treewidth(algorithm=algorithm, kmin=kmin))
                 return kmin
-            elif max(len(c) for c in cliques) - 1 > k:
+            if max(len(c) for c in cliques) - 1 > k:
                 return False
-            else:
-                return all(g.subgraph(a).treewidth(algorithm=algorithm, k=k) for a in atoms)
+            return all(g.subgraph(a).treewidth(algorithm=algorithm, k=k) for a in atoms)
 
         # Otherwise, compute the tree decomposition of each atom
         T = []
@@ -1902,10 +1901,9 @@ def treelength(G, k=None, certificate=False):
     if not G.is_connected():
         if certificate:
             raise ValueError("the tree decomposition of a disconnected graph is not defined")
-        elif k is None:
+        if k is None:
             return +Infinity
-        else:
-            return k is Infinity
+        return k is Infinity
     if k == 0:
         return (False, None) if certificate else False
     if not certificate and G.is_chordal():
@@ -1921,10 +1919,9 @@ def treelength(G, k=None, certificate=False):
         if certificate:
             if k is None:
                 return TC.get_length(), TC.get_tree_decomposition()
-            elif TC.is_less_than_k():
+            if TC.is_less_than_k():
                 return True, TC.get_tree_decomposition()
-            else:
-                return False, None
+            return False, None
         if k is None:
             return TC.get_length()
         return TC.is_less_than_k()

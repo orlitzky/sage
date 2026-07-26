@@ -1800,8 +1800,7 @@ cdef class MixedIntegerLinearProgram(SageObject):
 
         if len(lists) == 1:
             return val[0]
-        else:
-            return val
+        return val
 
     def set_objective(self, obj):
         r"""
@@ -3140,8 +3139,7 @@ cdef class MixedIntegerLinearProgram(SageObject):
         def format(name, prefix, index):
             if name:
                 return name.replace('[', '_').strip(']')
-            else:
-                return prefix + '_' + str(index)
+            return prefix + '_' + str(index)
 
         # Construct 'x'
         var_names = [format(back_end.col_name(i), 'x', i) for i in range(back_end.ncols())]
