@@ -87,7 +87,7 @@ jobs:
 
       - name: Download old doc
         if: github.event_name == 'pull_request'
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: doc-develop
           github-token: ${{ secrets.GITHUB_TOKEN }}

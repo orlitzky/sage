@@ -119,11 +119,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v8
         with:
           name: release_dist
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
@@ -202,7 +202,7 @@ jobs:
         with:
           platforms: all
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
@@ -259,7 +259,7 @@ jobs:
       CAN_DEPLOY: ${{ github.event_name != 'pull_request' }}
     steps:
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v8
         with:
           pattern: "*-*-*-wheels"
           path: wheelhouse
