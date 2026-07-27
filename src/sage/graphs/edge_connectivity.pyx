@@ -1348,6 +1348,13 @@ cdef class GabowEdgeConnectivity:
         for j in range(sz):
             self.tree_edges[j].clear()
 
+        # Clear the scratch state of the matroid-intersection augmentation.
+        # The edge connectivity computation stops as soon as construct_trees
+        # fails, which leaves the joining edges of that unfinished round in
+        # the queue. As we just reset every label above, tracing them back
+        # here would follow dangling labels.
+        self.clear_augmentation_aux_state()
+
         self.root_vertex = root_idx
         self.next_f_tree = 0
 
