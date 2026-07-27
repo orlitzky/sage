@@ -596,7 +596,7 @@ class AffinePlaneCurveArrangementElement(PlaneCurveArrangementElement):
         .. NOTE::
 
            This function requires the ``sirocco`` package to be installed and
-           :func:`ProjectivePlaneCurveArrangements.fundamental_group`
+           :meth:`~sage.schemes.curves.plane_curve_arrangement.AffinePlaneCurveArrangementElement.fundamental_group`
            with the same options, where some examples are shown.
 
         EXAMPLES::

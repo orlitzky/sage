@@ -6272,7 +6272,8 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
     critical factors in the worst-case performance.
 
     For the time being, we forego the following adjustments because
-    they remove the cone's :meth:`ConvexRationalPolyhedralCone.lines`,
+    they remove the cone's
+    :meth:`~sage.geometry.cone.ConvexRationalPolyhedralCone.lines`,
     thereby skewing the number of rays towards the lower end of
     ``[min_rays, max_rays]``:
 
@@ -6280,7 +6281,8 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
       make a non-pointed cone pointed.
 
     * Projecting a non-pointed cone onto the orthogonal complement
-      of its :meth:`ConvexRationalPolyhedralCone.lines` to obtain a
+      of its :meth:`~sage.geometry.cone.ConvexRationalPolyhedralCone.lines`
+      to obtain a
       pointed cone.
 
     EXAMPLES:
@@ -6524,7 +6526,8 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=8,
         have d rays. Please increase max_ambient_dim, or decrease
         min_rays.
 
-    Ensure that we can produce a cone whose :meth:`lines` are not
+    Ensure that we can produce a cone whose
+    :meth:`~sage.geometry.cone.ConvexRationalPolyhedralCone.lines` are not
     orthogonal::
 
         sage: set_random_seed(1)
