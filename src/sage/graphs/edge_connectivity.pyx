@@ -420,12 +420,17 @@ cdef class GabowEdgeConnectivity:
         # Search successively trees in g_in and g_out
         self.ec = 0
         for i in range(self.max_ec):
-            if self.construct_trees(False, i) and self.construct_trees(True, i):
-                # We found both an in-arborescence and an out-arborescence.
-                # So we can increase the edge connectivity
-                self.ec += 1
-                # and save the current k-intersection
-                self.save_current_k_intersection()
+            if not (self.construct_trees(False, i) and self.construct_trees(True, i)):
+                # We cannot build one more tree, so the edge connectivity is
+                # reached. We must stop here: the tree of this round is left
+                # incomplete, and the next rounds assume that all previous
+                # trees are spanning.
+                break
+            # We found both an in-arborescence and an out-arborescence.
+            # So we can increase the edge connectivity
+            self.ec += 1
+            # and save the current k-intersection
+            self.save_current_k_intersection()
             sig_check()
         self.ec_checked = True
         return True
