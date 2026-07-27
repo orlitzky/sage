@@ -38,6 +38,8 @@ def intervals_to_polyomino(intervals) -> list[tuple[int, int]]:
     r"""
     Create a polyomino from a list of intervals.
 
+    The intervals correspond to the rows of the polyomino.
+
     INPUT:
 
     - list of pairs of integers `(i, j)` with `i \leq j`
@@ -166,9 +168,9 @@ class PolyominoFilling(SageObject):
 
         xs = [i for i, _ in self._P]
         ys = [j for _, j in self._P]
-        min_i, max_i = min(xs), max(xs)
-        min_j, max_j = min(ys), max(ys)
-
+        min_i = min(xs)
+        max_i = max(xs)
+        min_j = min(ys)
         height = max_i - min_i + 1
 
         cell_size = 0.5
