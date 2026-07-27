@@ -6,6 +6,7 @@ parsing behavior belongs in pytest tests rather than inert docstring examples.
 
 import errno
 import os
+import stat
 import sys
 from importlib.util import find_spec
 
@@ -17,12 +18,19 @@ if find_spec('sage_docbuild') is None or find_spec('sphinx') is None:
         allow_module_level=True,
     )
 
+from sage_docbuild import builders
 from sage_docbuild.__main__ import (
     _options_generation_lock,
     command_line_args,
     format_columns,
     setup_parser,
     source_dir_for_help,
+)
+from sage_docbuild.build_options import BuildOptions
+from sage_docbuild.builders import (
+    SingleFileBuilder,
+    _single_file_output_owned,
+    get_builder,
 )
 
 
@@ -119,6 +127,41 @@ def test_source_dir_for_help_treats_negative_value_as_path(
     source.mkdir()
     monkeypatch.chdir(tmp_path)
     assert source_dir_for_help(['-D', '--source', '-3']) == source.absolute()
+
+
+def test_single_file_builder_creates_default_output_root(monkeypatch, tmp_path):
+    import sage.env
+
+    source = tmp_path / 'issue_42481.py'
+    source.write_text('"""A module documented on its own."""\n')
+    dot_sage = tmp_path / 'new-sage-home'
+    monkeypatch.setattr(sage.env, 'DOT_SAGE', str(dot_sage))
+    monkeypatch.setattr(builders, 'DOT_SAGE', str(dot_sage), raising=False)
+    from sage.env import DOT_SAGE as resolved
+    assert resolved == str(dot_sage)
+    options = BuildOptions(
+        source_dir=tmp_path,
+        output_dir=tmp_path / 'unused-documentation-output',
+        output_dir_given=False,
+    )
+
+    previous_umask = None
+    if os.name != 'nt':
+        previous_umask = os.umask(0o022)
+    try:
+        builder = get_builder(f'file={source}', options)
+    finally:
+        if previous_umask is not None:
+            os.umask(previous_umask)
+    expected = dot_sage / 'docbuild' / source.stem
+
+    assert isinstance(builder, SingleFileBuilder)
+    assert builder._options is options
+    assert builder._single_file_base_dir == expected
+    if os.name != 'nt':
+        assert stat.S_IMODE(dot_sage.stat().st_mode) == 0o700
+    assert _single_file_output_owned(expected)
+    assert (expected / 'source' / 'index.rst').is_file()
 
 
 def test_ambiguous_source_abbreviation_matches_argparse(monkeypatch, tmp_path):

@@ -2090,7 +2090,8 @@ def _single_file_output_owned(directory: Path) -> bool:
 
 def _prepare_single_file_output(directory: Path, *, explicit: bool) -> None:
     r"""
-    Create a fresh owned output directory without following a symlink.
+    Create a fresh owned output directory without following a symlink at the
+    output leaf. Parent components use ordinary filesystem path resolution.
 
     An explicit directory that has no ownership marker is left untouched::
 
@@ -2125,7 +2126,28 @@ def _prepare_single_file_output(directory: Path, *, explicit: bool) -> None:
         ....:                  == stat.S_IMODE(ordinary.stat().st_mode))
         sage: owned, same_mode
         (True, True)
+
+    The output root is created when it does not exist yet::
+
+        sage: with tempfile.TemporaryDirectory() as root:
+        ....:     directory = Path(root) / 'new-root' / 'module'
+        ....:     _prepare_single_file_output(directory, explicit=False)
+        ....:     answer = (directory.is_dir(),
+        ....:               _single_file_output_owned(directory))
+        sage: answer
+        (True, True)
+
+    The same holds for an explicitly requested output root::
+
+        sage: with tempfile.TemporaryDirectory() as root:
+        ....:     directory = Path(root) / 'explicit-root' / 'module'
+        ....:     _prepare_single_file_output(directory, explicit=True)
+        ....:     answer = (directory.is_dir(),
+        ....:               _single_file_output_owned(directory))
+        sage: answer
+        (True, True)
     """
+    directory.parent.mkdir(parents=True, exist_ok=True)
     try:
         status = directory.lstat()
     except FileNotFoundError:
@@ -2191,7 +2213,11 @@ class SingleFileBuilder(DocBuilder):
         if explicit_output:
             base_dir = Path(options.output_dir) / base_name
         else:
-            base_dir = Path(DOT_SAGE) / 'docbuild' / base_name
+            dot_sage = Path(DOT_SAGE)
+            # Match sage.misc.misc's protection for history and configuration;
+            # as there, do not change the permissions of an existing DOT_SAGE.
+            dot_sage.mkdir(mode=0o700, parents=True, exist_ok=True)
+            base_dir = dot_sage / 'docbuild' / base_name
         self._single_file_base_dir = base_dir
 
         # Create docbuild and relevant subdirectories, e.g.,
