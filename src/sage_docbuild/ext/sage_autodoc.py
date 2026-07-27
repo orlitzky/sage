@@ -140,7 +140,7 @@ def getdoc(obj, *args, **kwargs):
     """Read a docstring the way Sage does, in place of Sphinx's own reader.
 
     This accepts the calling convention of
-    :func:`sphinx.util.inspect.getdoc` rather than repeating its signature,
+    ``sphinx.util.inspect.getdoc`` rather than repeating its signature,
     so that the documenters below can call it either way round.  Everything
     past the object is discarded: Sage resolves inheritance and Cython
     docstrings itself, so the ``attrgetter``, ``allow_inherited``, ``cls``
