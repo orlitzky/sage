@@ -429,6 +429,22 @@ def find_sage_dangling_links(app, env, node, contnode):
         ....:     result = crossrefs.find_sage_dangling_links(None, env, node, None)
         sage: result is None
         True
+
+    A builtin that Python documents as a function is retried under the function
+    role, and the role the document asked for is restored afterwards.  Sphinx
+    resolves nothing here and warns about nothing either, so without the retry
+    the reference would silently render as plain text::
+
+        sage: node = {'refdoc': 'index', 'refdomain': 'py', 'reftype': 'class',
+        ....:         'reftarget': 'staticmethod'}
+        sage: def as_func(app, env, node, contnode):
+        ....:     if node['reftype'] == 'func':
+        ....:         return {'refuri': 'library/functions.html#staticmethod'}
+        sage: with patch.object(crossrefs, 'call_intersphinx', as_func):
+        ....:     crossrefs.find_sage_dangling_links(None, env, node, None)
+        {'refuri': 'library/functions.html#staticmethod'}
+        sage: node['reftype']
+        'class'
     """
     debug_inf(app, "==================== find_sage_dangling_links ")
 
@@ -557,14 +573,21 @@ def find_sage_dangling_links(app, env, node, contnode):
     return newnode
 
 
-# Basic Python classes documented as functions in some old inventories.
+# Basic Python classes documented as functions in some old inventories, and
+# builtins which are classes that Python documents as functions to this day.
+# The latter need this list to be linked at all: Sphinx's own
+# ``builtin_resolver()`` renders a ``:class:`` reference to any builtin class as
+# plain text and suppresses the warning that nitpicky mode would otherwise
+# raise, so a reference that no inventory resolves is invisible in the output.
 base_class_as_func = [
-    'bool', 'complex', 'dict', 'float', 'frozenset',
-    'int', 'list', 'object', 'set', 'slice', 'str',
-    'tuple', 'type']
+    'bool', 'classmethod', 'complex', 'dict', 'enumerate', 'filter',
+    'float', 'frozenset', 'int', 'list', 'map', 'object', 'reversed',
+    'set', 'slice', 'staticmethod', 'str', 'tuple', 'type', 'zip']
 
 # Basic Python functions documented as classes in modern inventories.
-base_func_as_class = base_class_as_func + ['range']
+base_func_as_class = [
+    'bool', 'complex', 'dict', 'float', 'frozenset', 'int', 'list',
+    'object', 'range', 'set', 'slice', 'str', 'tuple', 'type']
 
 
 def setup(app):
