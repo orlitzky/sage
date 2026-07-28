@@ -6223,7 +6223,7 @@ class NumberField_generic(WithEqualityById, number_field_base.NumberField):
 
         - ``algorithm`` -- ``'pari'``, ``'gap'``, or ``'magma'`` (default:
           ``'pari'``; for degrees greater than 11, ``'gap'`` is attempted
-          instead); the deprecated value ``'kash'`` is treated as ``'gap'``
+          instead)
 
         - ``names`` -- string giving a name for the generator of the Galois
           closure of ``self``, when this field is not Galois
@@ -6266,13 +6266,6 @@ class NumberField_generic(WithEqualityById, number_field_base.NumberField):
             Galois group Transitive group number 2 of degree 3
              of the Number Field in a with defining polynomial x^3 + 2*x + 1
 
-        The former KASH algorithm is a deprecated alias for GAP::
-
-            sage: _ = NumberField(x^3 + 2*x + 1, 'a').galois_group(algorithm='kash')
-            doctest:warning...
-            DeprecationWarning: algorithm='kash' for Galois group computations is deprecated; use algorithm='gap' instead
-            See https://github.com/sagemath/sage/issues/42523 for details.
-
         EXPLICIT GALOIS GROUP: We compute the Galois group as an explicit
         group of automorphisms of the Galois closure of a field.
 
@@ -6311,13 +6304,6 @@ class NumberField_generic(WithEqualityById, number_field_base.NumberField):
             See https://github.com/sagemath/sage/issues/28782 for details.
             Galois group 10T22 (S(5)[x]2) with order 240 of t^5 - t + a
         """
-        if algorithm == 'kash':
-            from sage.misc.superseded import deprecation
-            deprecation(
-                42523,
-                "algorithm='kash' for Galois group computations is "
-                "deprecated; use algorithm='gap' instead")
-            algorithm = 'gap'
         from .galois_group import GaloisGroup_v2
         return GaloisGroup_v2(self, algorithm=algorithm, names=names, gc_numbering=gc_numbering)
 

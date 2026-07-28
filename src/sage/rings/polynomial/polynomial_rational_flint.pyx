@@ -2099,7 +2099,7 @@ cdef class Polynomial_rational_flint(Polynomial):
 
         - ``algorithm`` -- ``'pari'``, ``'gap'``, or ``'magma'`` (default:
           ``'pari'``; for degrees greater than 11, ``'gap'`` is attempted
-          instead); the deprecated value ``'kash'`` is treated as ``'gap'``
+          instead)
 
         OUTPUT: Galois group
 
@@ -2229,14 +2229,6 @@ cdef class Polynomial_rational_flint(Polynomial):
             ...
             ValueError: pari_group=True requires algorithm='pari'
 
-        The deprecated KASH selection now uses GAP::
-
-            sage: (t^4 - t - 1).galois_group(algorithm='kash')
-            doctest:warning...
-            DeprecationWarning: algorithm='kash' for Galois group computations is deprecated; use algorithm='gap' instead
-            See https://github.com/sagemath/sage/issues/42523 for details.
-            Transitive group number 5 of degree 4
-
         Variable names that are reserved in PARI, such as ``zeta``,
         are supported (see :issue:`20631`)::
 
@@ -2250,14 +2242,6 @@ cdef class Polynomial_rational_flint(Polynomial):
 
         if not self.is_irreducible():
             raise ValueError("The polynomial must be irreducible")
-
-        if algorithm == 'kash':
-            from sage.misc.superseded import deprecation_cython
-            deprecation_cython(
-                42523,
-                "algorithm='kash' for Galois group computations is "
-                "deprecated; use algorithm='gap' instead")
-            algorithm = 'gap'
 
         if pari_group and algorithm != 'pari':
             raise ValueError("pari_group=True requires algorithm='pari'")
