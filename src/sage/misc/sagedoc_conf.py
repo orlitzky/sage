@@ -62,7 +62,9 @@ def process_docstring_aliases(app, what, name, obj, options, docstringlines):
         module = getattr(obj, '__module__', None)
         qualname = getattr(obj, '__qualname__', None)
         target = f'{module}.{qualname}' if module and qualname else original_name
-        docstringlines[:] = [f'alias of :meth:`{target}`.']
+        # The target is fully qualified so that it resolves from any page;
+        # the tilde keeps the rendered text short ("alias of foo()").
+        docstringlines[:] = [f'alias of :meth:`~{target}`.']
         return
 
     # We now have `what == 'function'`
