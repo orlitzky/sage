@@ -16,6 +16,7 @@ one that the reference names, or because it has no target to link to.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
+import builtins
 import functools
 import os
 import sys
@@ -140,6 +141,87 @@ def set_intersphinx_mappings(app, config):
             app.config.intersphinx_mapping[directory] = (src, dst)
 
     intersphinx.validate_intersphinx_mapping(app, config)
+
+
+def prefer_python_inventory(app):
+    r"""
+    Give the Python inventory the last word on the builtins it shares.
+
+    Intersphinx merges every inventory into a single one, project by
+    project in the order of the project names, so that the project whose
+    name sorts last silently claims each name that two projects define.
+    Sphinx documents ``enumerate`` as a function of its own in the
+    quickstart guide, for one, which is enough to divert every reference to
+    the builtin away from the Python manual.
+
+    Only the builtins are taken back, and only in the Python domain: a
+    name that a project legitimately owns keeps its target, be it a
+    glossary term, a document, a label or a function of the C API that
+    the Python manual happens to name too.
+
+    TESTS:
+
+    Sphinx sorts after Python, hence wins every name the two share::
+
+        sage: from types import SimpleNamespace
+        sage: from sphinx.ext.intersphinx import InventoryAdapter
+        sage: from sage_docbuild.ext.crossrefs import prefer_python_inventory
+        sage: python = {'py:function': {'enumerate': 'python/enumerate'},
+        ....:           'py:class': {'os.PathLike': 'python/pathlike'},
+        ....:           'std:term': {'object': 'python/object'},
+        ....:           'std:doc': {'tutorial/index': 'python/tutorial'},
+        ....:           'std:label': {'glossary': 'python/glossary'},
+        ....:           'c:function': {'PyType_GenericAlloc': 'python/alloc'}}
+        sage: sphinx = {'py:function': {'enumerate': 'sphinx/enumerate'},
+        ....:           'py:class': {'os.PathLike': 'sphinx/pathlike',
+        ....:                        'sphinx.application.Sphinx': 'sphinx/app'},
+        ....:           'std:term': {'object': 'sphinx/object'},
+        ....:           'std:doc': {'tutorial/index': 'sphinx/tutorial'},
+        ....:           'std:label': {'glossary': 'sphinx/glossary'},
+        ....:           'c:function': {'PyType_GenericAlloc': 'sphinx/alloc'}}
+        sage: app = SimpleNamespace(env=SimpleNamespace())
+        sage: inventories = InventoryAdapter(app.env)
+        sage: inventories.named_inventory.update(python=python, sphinx=sphinx)
+        sage: for inventory in (python, sphinx):
+        ....:     for objtype, objects in inventory.items():
+        ....:         inventories.main_inventory.setdefault(objtype, {}).update(objects)
+        sage: main = inventories.main_inventory
+        sage: main['py:function']['enumerate']
+        'sphinx/enumerate'
+        sage: main['py:class']['os.PathLike']
+        'sphinx/pathlike'
+
+    A builtin of the Python domain goes back to the Python manual::
+
+        sage: prefer_python_inventory(app)
+        sage: main['py:function']['enumerate']
+        'python/enumerate'
+
+    Nothing else moves, neither the entries of the other domains, nor a
+    Python object that is not a builtin, nor a name of Sphinx's own::
+
+        sage: main['std:term']['object']
+        'sphinx/object'
+        sage: main['std:doc']['tutorial/index']
+        'sphinx/tutorial'
+        sage: main['std:label']['glossary']
+        'sphinx/glossary'
+        sage: main['c:function']['PyType_GenericAlloc']
+        'sphinx/alloc'
+        sage: main['py:class']['os.PathLike']
+        'sphinx/pathlike'
+        sage: main['py:class']['sphinx.application.Sphinx']
+        'sphinx/app'
+    """
+    inventories = intersphinx.InventoryAdapter(app.env)
+    for objtype, objects in inventories.named_inventory.get('python', {}).items():
+        if not objtype.startswith('py:'):
+            continue
+        builtin_objects = {name: entry for name, entry in objects.items()
+                           if hasattr(builtins, name)}
+        if builtin_objects:
+            inventories.main_inventory.setdefault(objtype, {}).update(builtin_objects)
+
 
 dangling_debug = False
 
@@ -606,6 +688,7 @@ def setup(app):
     app.add_config_value('intersphinx_timeout', None, False)
     app.connect('config-inited', set_intersphinx_mappings)
     app.connect('builder-inited', intersphinx.load_mappings)
+    app.connect('builder-inited', prefer_python_inventory, priority=600)
     # We do *not* fully initialize intersphinx since we call it by hand
     # in find_sage_dangling_links.
     #   app.connect('missing-reference', missing_reference)
