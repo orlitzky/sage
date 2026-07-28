@@ -1102,8 +1102,8 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
             and on, the main diagonal are employed in the computation.
 
             Methods such as
-            :meth:`~sage.matrix.matrix0.Matrix.is_symmetric` and
-            :meth:`~sage.matrix.matrix0.Matrix.is_hermitian`
+            :meth:`~sage.matrix.matrix_numpy_dense.Matrix_numpy_dense.is_symmetric` and
+            :meth:`~sage.matrix.matrix_double_dense.Matrix_double_dense.is_hermitian`
             could be used to verify this beforehand.
 
         OUTPUT:
@@ -2508,7 +2508,7 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
 
         Note that if conjugation has no effect on elements of the base
         ring (such as for integers), then the
-        :meth:`~sage.matrix.matrix0.Matrix.is_symmetric`
+        :meth:`~sage.matrix.matrix_numpy_dense.Matrix_numpy_dense.is_symmetric`
         method is equivalent and faster.
 
         The tolerance parameter is used to allow for numerical values

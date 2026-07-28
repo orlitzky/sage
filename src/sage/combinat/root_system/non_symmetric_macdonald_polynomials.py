@@ -1568,7 +1568,7 @@ class NonSymmetricMacdonaldPolynomials(CherednikOperatorsEigenvectors):
         .. SEEALSO::
 
             - :meth:`~sage.combinat.root_system.hecke_algebra_representation.CherednikOperatorsEigenvectors.affine_lift`
-            - :meth:`~sage.combinat.root_system.hecke_algebra_representation.CherednikOperatorsEigenvectors.affine_retract`
+            - :meth:`~sage.combinat.root_system.non_symmetric_macdonald_polynomials.NonSymmetricMacdonaldPolynomials.affine_retract`
             - :meth:`L_prime`
 
         EXAMPLES:

@@ -447,7 +447,7 @@ class SymmetricFunctionsNonCommutingVariables(UniqueRepresentation, Parent):
 
             .. SEEALSO::
 
-                :meth:`~sage.combinat.ncsym.bases.NCSymBases.ElementMethods.to_symmetric_function`
+                :meth:`~sage.combinat.ncsym.ncsym.SymmetricFunctionsNonCommutingVariables.monomial.Element.to_symmetric_function`
 
             INPUT:
 
