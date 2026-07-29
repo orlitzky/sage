@@ -11,7 +11,8 @@ matroid approach of [Gabow1995]_.
 .. TODO::
 
     - Implement the tree-packing strengthening proposed in [BHKP2008]_
-    - Extend to digraphs with multiple edges
+    - Fix the DFS-based speed-up initialization of [GKLP2021]_ for digraphs
+      with multiple edges, for which it is currently disabled
     - Extend to weighted digraphs
 """
 # ****************************************************************************
@@ -101,6 +102,20 @@ cdef class GabowEdgeConnectivity:
         sage: all_edges = sum((T.edges(labels=False, sort=False) for T in trees), [])
         sage: len(all_edges) == len(set(all_edges))  # the trees are edge disjoint
         True
+
+    The round-robin loop must stop as soon as one more tree cannot be built:
+    the round that failed leaves a tree incomplete, while the next rounds
+    assume that all previous trees are spanning. On this digraph the edge
+    connectivity is 1, and continuing used to corrupt the state
+    (:issue:`42570`)::
+
+        sage: D = DiGraph([(0, 2), (0, 2), (0, 2), (1, 3), (1, 3), (1, 3),
+        ....:              (2, 0), (2, 0), (2, 1), (3, 0), (3, 1), (3, 1)],
+        ....:             multiedges=True)
+        sage: GabowEdgeConnectivity(D).edge_connectivity()
+        1
+        sage: len(GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(root=0))
+        1
 
     Corner cases::
 
@@ -244,7 +259,9 @@ cdef class GabowEdgeConnectivity:
         - ``G`` -- a :class:`~sage.graphs.digraph.DiGraph`
 
         - ``dfs_preprocessing`` -- boolean (default: ``True``); whether to use
-          the DFS-based speed-up initialization proposed in [GKLP2021]_
+          the DFS-based speed-up initialization proposed in [GKLP2021]_. It is
+          automatically turned off for digraphs with multiple edges, on which
+          it miscounts the edge connectivity.
 
         - ``use_rec`` -- boolean (default: ``False``); whether to use a
           recursive or non-recursive DFS for ``dfs_preprocessing``. The
