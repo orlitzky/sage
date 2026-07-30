@@ -334,7 +334,7 @@ class HyperellipticCurve_generic(WeightedProjectiveCurve):
         """
         f, h = self._hyperelliptic_polynomials
         F = 4 * f + h**2
-        disc = F.discriminant() / 16 ** (self.genus() + 1)
+        disc = F.discriminant() / 16**(self.genus() + 1)
 
         if f.degree() % 2 == 1:
             disc *= F.leading_coefficient()**2
