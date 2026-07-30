@@ -437,17 +437,18 @@ cdef class GabowEdgeConnectivity:
         # Search successively trees in g_in and g_out
         self.ec = 0
         for i in range(self.max_ec):
-            if not (self.construct_trees(False, i) and self.construct_trees(True, i)):
+            if self.construct_trees(False, i) and self.construct_trees(True, i):
+                # We found both an in-arborescence and an out-arborescence.
+                # So we can increase the edge connectivity
+                self.ec += 1
+                # and save the current k-intersection
+                self.save_current_k_intersection()
+            else:
                 # We cannot build one more tree, so the edge connectivity is
                 # reached. We must stop here: the tree of this round is left
                 # incomplete, and the next rounds assume that all previous
                 # trees are spanning.
                 break
-            # We found both an in-arborescence and an out-arborescence.
-            # So we can increase the edge connectivity
-            self.ec += 1
-            # and save the current k-intersection
-            self.save_current_k_intersection()
             sig_check()
         self.ec_checked = True
         return True
@@ -2501,18 +2502,14 @@ cdef class GabowEdgeConnectivity:
             ....:         return False
             ....:     edges = [e for T in trees for e in T.edge_iterator(labels=False)]
             ....:     return len(edges) == len(set(edges))
-            sage: for _ in range(20):
-            ....:     n = randint(3, 7)
-            ....:     D = digraphs.RandomDirectedGNP(n, 0.5)
-            ....:     if not D.is_strongly_connected():
-            ....:         continue
-            ....:     ec = GabowEdgeConnectivity(D).edge_connectivity()
-            ....:     if ec == 0:
-            ....:         continue
-            ....:     for r in D:
-            ....:         trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=ec, root=r)
-            ....:         assert len(trees) == ec
-            ....:         assert is_valid_packing(D, r, trees)
+            sage: D = digraphs.RandomDirectedGNP(randint(3, 10), 0.5)
+            sage: while not D.is_strongly_connected():
+            ....:     D = digraphs.RandomDirectedGNP(randint(3, 10), 0.5)
+            sage: ec = GabowEdgeConnectivity(D).edge_connectivity()
+            sage: for r in D:
+            ....:     trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=ec, root=r)
+            ....:     assert len(trees) == ec
+            ....:     assert is_valid_packing(D, r, trees)
 
         The same validation on digraphs with multiple edges, where
         edge-disjointness is counted with multiplicity: every arc ``(u, v)``
@@ -2530,21 +2527,18 @@ cdef class GabowEdgeConnectivity:
             ....:     used = Counter(e for T in trees for e in T.edge_iterator(labels=False))
             ....:     mult = Counter(D.edge_iterator(labels=False))
             ....:     return all(used[e] <= mult[e] for e in used)
-            sage: for _ in range(10):
-            ....:     base = digraphs.RandomDirectedGNP(randint(3, 6), 0.6)
-            ....:     if not base.is_strongly_connected():
-            ....:         continue
-            ....:     D = DiGraph(base, multiedges=True)
-            ....:     for e in base.edges(labels=False, sort=False):
-            ....:         if randint(0, 1):
-            ....:             D.add_edge(e)
-            ....:     ec = GabowEdgeConnectivity(D).edge_connectivity()
-            ....:     if not ec:
-            ....:         continue
-            ....:     for r in D:
-            ....:         trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=ec, root=r)
-            ....:         assert len(trees) == ec
-            ....:         assert is_valid_multigraph_packing(D, r, trees)
+            sage: base = digraphs.RandomDirectedGNP(randint(3, 10), 0.6)
+            sage: while not base.is_strongly_connected():
+            ....:     base = digraphs.RandomDirectedGNP(randint(3, 10), 0.6)
+            sage: D = DiGraph(base, multiedges=True)
+            sage: for e in base.edges(labels=False, sort=False):
+            ....:     for _ in range(randint(0, 2)):
+            ....:         D.add_edge(e)
+            sage: ec = GabowEdgeConnectivity(D).edge_connectivity()
+            sage: for r in D:
+            ....:     trees = GabowEdgeConnectivity(D).edge_disjoint_spanning_trees(k=ec, root=r)
+            ....:     assert len(trees) == ec
+            ....:     assert is_valid_multigraph_packing(D, r, trees)
         """
         from sage.graphs.digraph import DiGraph
         from sage.categories.sets_cat import EmptySetError
