@@ -743,7 +743,7 @@ class Lseries_ell(SageObject):
     def L1_vanishes(self) -> bool:
         r"""
         Return whether or not `L(E,1) = 0`.
-        
+
         The result is provably correct if the Manin constant of the associated
         optimal quotient is <= 2. This hypothesis on the Manin constant
         is true for all optimal curves of conductor <= 500000 (by Cremona) and
