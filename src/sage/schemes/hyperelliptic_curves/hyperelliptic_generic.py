@@ -337,7 +337,7 @@ class HyperellipticCurve_generic(WeightedProjectiveCurve):
         disc = F.discriminant() / 16 ** (self.genus() + 1)
 
         if f.degree() % 2 == 1:
-            disc *= F.leading_coefficient() ** 2
+            disc *= F.leading_coefficient()**2
 
         return disc
     def polynomial_ring(self):
