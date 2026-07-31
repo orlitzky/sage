@@ -292,7 +292,7 @@ class MathJax:
             sage: MathJax().eval(type(3), mode='inline')
             <html>\(\verb|&lt;class|\verb| |\verb|'sage.rings.integer.Integer'>|\)</html>
 
-        TESTS:
+        TESTS::
 
             sage: from sage.misc.html import MathJax
             sage: MathJax().eval(IntegerModRing(6))
