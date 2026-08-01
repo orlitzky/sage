@@ -113,24 +113,17 @@ class PolyominoFilling(SageObject):
         """
         return f"shape={self._P}, filling={self._B}"
 
-    def _unicode_art_(self):
+    def _array(self):
         r"""
-        Return a pretty representation.
+        Return the filling as an array.
 
         EXAMPLES::
 
             sage: from sage.combinat.posets.chute_move import PolyominoFilling
             sage: P = PolyominoFilling([(1,1),(1,2),(2,1)], [(1,2)])
-            sage: unicode_art(P)
-            ┌───┬───┐
-            │   │ o │
-            ├───┼───┘
-            │   │
-            └───┘
+            sage: P._array()
+            [['', 'o'], ['', None]]
         """
-        from sage.combinat.output import ascii_art_table
-        from sage.typeset.unicode_art import UnicodeArt
-
         xs = [i for i, _ in self._P]
         ys = [j for _, j in self._P]
         min_i, max_i = min(xs), max(xs)
@@ -148,7 +141,45 @@ class PolyominoFilling(SageObject):
                     row.append("")
             array.append(row)
 
-        return UnicodeArt(ascii_art_table(array, use_unicode=True).splitlines())
+        return array
+
+    def _ascii_art_(self):
+        r"""
+        Return a pretty representation.
+
+        EXAMPLES::
+
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)], [(1,2)])
+            sage: ascii_art(P)
+            +---+---+
+            |   | o |
+            +---+---+
+            |   |
+            +---+
+        """
+        from sage.combinat.output import ascii_art_table
+        from sage.typeset.ascii_art import AsciiArt
+        return AsciiArt(ascii_art_table(self._array(), use_unicode=False).splitlines())
+
+    def _unicode_art_(self):
+        r"""
+        Return a pretty representation.
+
+        EXAMPLES::
+
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)], [(1,2)])
+            sage: unicode_art(P)
+            ┌───┬───┐
+            │   │ o │
+            ├───┼───┘
+            │   │
+            └───┘
+        """
+        from sage.combinat.output import ascii_art_table
+        from sage.typeset.unicode_art import UnicodeArt
+        return UnicodeArt(ascii_art_table(self._array(), use_unicode=True).splitlines())
 
     def _latex_(self):
         r"""
