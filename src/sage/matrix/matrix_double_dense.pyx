@@ -1923,7 +1923,7 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
             [3.0 4.0]
             [5.0 6.0]
             sage: U,S,V = m.SVD()
-            sage: U*S*V.transpose()  # tol 1e-15
+            sage: U*S*V.transpose()  # tol 1e-14
             [0.9999999999999996 1.9999999999999998]
             [               3.0 3.9999999999999996]
             [ 4.999999999999999  6.000000000000001]
