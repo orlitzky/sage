@@ -115,10 +115,9 @@ confidence.
 You can report issues to the Sage Code of Conduct Committee at
 sage-conduct@googlegroups.com. Currently, the committee consists of:
 
-- Nils Bruin
-- J-P Labbé
-- John Palmieri
-- Viviane Pons
+- Vincent Delecroix
+- Antoine Leudière
+- Vincent Macri
 - David Roe
 - Julian Rüth
 
