@@ -104,7 +104,7 @@ def coefficient_matrix(polys):
     .. NOTE::
 
         This function may be merged with
-        :func:`~sage.rings.polynomial.toy_variety.coefficient_matrix`
+        :meth:`~sage.rings.polynomial.multi_polynomial_sequence.PolynomialSequence_generic.coefficients_monomials`
         in the future.
     """
     from sage.matrix.constructor import matrix

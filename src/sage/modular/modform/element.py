@@ -1403,7 +1403,7 @@ class ModularForm_abstract(ModuleElement):
         .. SEEALSO::
 
             - :meth:`cm_discriminant` (to return the CM field)
-            - :meth:`~sage.modular.modform.element.ModularForm_abstract.has_cm`
+            - :meth:`~sage.schemes.elliptic_curves.ell_rational_field.EllipticCurve_rational_field.has_cm`
 
         EXAMPLES::
 

@@ -2643,8 +2643,7 @@ class ClusterAlgebra(Parent, UniqueRepresentation):
         .. WARNING::
 
             Elements of the theta basis do not satisfy a separation of additions formula.
-            See the implementation of :meth:`sage.algebras.cluster_algebra.ClusterAlgebra.theta_basis_F_polynomial`
-            for further details.
+            See the algorithm below for implementation details.
 
         ALGORITHM:
 

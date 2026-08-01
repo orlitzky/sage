@@ -411,8 +411,7 @@ class InstanceTester(unittest.TestCase):
 
     def runTest(self):
         """
-        Trivial implementation of the default
-        :meth:`runTest <sage.misc.sage_unittest.InstanceTester.runTest>`
+        Trivial implementation of the default ``unittest.TestCase.runTest()``
         method expected by :class:`TestCase <unittest.TestCase>`. That's the
         price to pay for abusively inheriting from it.
 

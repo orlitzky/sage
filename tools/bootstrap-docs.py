@@ -123,31 +123,49 @@ def _generation_lock(target_dir: Path, *, exclusive: bool):
     lock exists; a false stale result during that narrow race merely makes the
     caller wait for the writer and regenerate unchanged files atomically.
 
-    Where the platform has no :mod:`fcntl` the lock is absent rather than
-    emulated.  Sage builds only where it exists, so a run that could race with
-    another one always holds it.
+    Where the platform has no :mod:`fcntl`, or where the filesystem refuses
+    opening or locking the lock file, the lock is absent rather than emulated.
+    Generated files are still published atomically and obsolete-file ownership
+    is rechecked immediately before removal, so an unavailable advisory lock
+    must not make an otherwise usable documentation tree fail to build.
     """
 
     if fcntl is None:
         yield
         return
     lock_path = manifest_path(target_dir).with_suffix(".lock")
-    if exclusive:
-        lock_path.parent.mkdir(parents=True, exist_ok=True)
-        descriptor = os.open(lock_path, os.O_RDONLY | os.O_CREAT, 0o666)
-    else:
-        try:
+    try:
+        if exclusive:
+            lock_path.parent.mkdir(parents=True, exist_ok=True)
+            descriptor = os.open(lock_path, os.O_RDONLY | os.O_CREAT, 0o666)
+        else:
             descriptor = os.open(lock_path, os.O_RDONLY)
-        except (FileNotFoundError, PermissionError):
-            yield
-            return
+    except OSError:
+        # The lock is an optimization, not a reason to reject an otherwise
+        # usable tree.  In particular, network and read-only filesystems can
+        # refuse either creating or opening the persistent lock file.
+        yield
+        return
     with os.fdopen(descriptor, "rb") as lock:
         operation = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
-        fcntl.flock(lock, operation)
+        try:
+            fcntl.flock(lock, operation)
+        except OSError:
+            # Some network filesystems provide fcntl but not advisory locks.
+            # The writes themselves are atomic, so retain the pre-lock behavior
+            # instead of making documentation builds on those filesystems fail.
+            yield
+            return
         try:
             yield
         finally:
-            fcntl.flock(lock, fcntl.LOCK_UN)
+            # Closing the descriptor releases the lock in any case.  Do not
+            # let a refused explicit unlock hide an exception from the body or
+            # turn a completed generation into a failure.
+            try:
+                fcntl.flock(lock, fcntl.LOCK_UN)
+            except OSError:
+                pass
 
 
 @functools.cache
@@ -1180,7 +1198,6 @@ def complaints_about(target_dir: Path,
             complaints.append("stale: generator inputs changed")
 
     recorded = manifest["outputs"] if manifest is not None else None
-    required_read = _file_mode() & 0o444
     for path in targets:
         try:
             info = path.lstat()
@@ -1189,8 +1206,6 @@ def complaints_about(target_dir: Path,
             continue
         if not stat.S_ISREG(info.st_mode):
             complaints.append(f"not a regular file: {path}")
-        elif (stat.S_IMODE(info.st_mode) & required_read) != required_read:
-            complaints.append(f"not readable according to the process umask: {path}")
         elif not info.st_size:
             complaints.append(f"empty: {path}")
         elif recorded is not None:
@@ -1200,10 +1215,11 @@ def complaints_about(target_dir: Path,
                 complaints.append(f"unrecorded: {path}")
             else:
                 try:
-                    actual = _hash_file(path)
+                    content, _ = _read_regular_file_stably(path)
                 except OSError as error:
                     complaints.append(f"unreadable: {path}: {error}")
                 else:
+                    actual = hashlib.sha256(content).hexdigest()
                     if actual != expected:
                         complaints.append(f"changed or truncated: {path}")
 

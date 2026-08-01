@@ -445,7 +445,7 @@ class AbelianGroup_gap(UniqueRepresentation, GroupMixinLibGAP, ParentLibGAP, Abe
         Return the elementary divisors of this group.
 
         See
-        :meth:`~sage.groups.abelian_gps.abelian_group_gap.AbelianGroup_gap.elementary_divisors`.
+        :meth:`~sage.groups.abelian_gps.abelian_group.AbelianGroup_class.elementary_divisors`.
 
         EXAMPLES::
 

@@ -1306,7 +1306,7 @@ class EllipticCurve_field(ell_generic.EllipticCurve_generic, ProjectivePlaneCurv
         factors of `n`.
 
         If ``algorithm`` is ``"structure"``, this method calls
-        :meth:`~sage.schemes.elliptic_curves.ell_field.EllipticCurve_field.torsion_subgroup`
+        :meth:`~sage.schemes.elliptic_curves.ell_number_field.EllipticCurve_number_field.torsion_subgroup`
         and
         :meth:`sage.groups.additive_abelian.additive_abelian_wrapper.AdditiveAbelianGroupWrapper.torsion_subgroup`.
         """

@@ -463,7 +463,8 @@ def source_dir_for_help(argv=None) -> Path:
                 raise SystemExit(
                     'error: argument -s/--source: expected one argument')
             source = Path(argv[i + 1])
-        elif separator and is_source_option(long_option):
+        elif separator and (long_option == '-s'
+                            or is_source_option(long_option)):
             source = Path(attached)
         elif arg.startswith('-s') and len(arg) > 2:
             source = Path(arg[2:])
@@ -746,10 +747,8 @@ def _needs_options_page(options: Path, root: Path,
         recorded = manifest_path.lstat()
     except OSError:
         return True
-    required_read = _file_mode() & 0o444
     if (not stat.S_ISREG(written.st_mode)
             or not stat.S_ISREG(recorded.st_mode)
-            or (stat.S_IMODE(written.st_mode) & required_read) != required_read
             or not written.st_size):
         return True
     try:

@@ -5,6 +5,8 @@ parsing behavior belongs in pytest tests rather than inert docstring examples.
 """
 
 import errno
+import hashlib
+import json
 import os
 import stat
 import sys
@@ -18,6 +20,7 @@ if find_spec('sage_docbuild') is None or find_spec('sphinx') is None:
         allow_module_level=True,
     )
 
+from sage_docbuild import __main__ as docbuild_main
 from sage_docbuild import builders
 from sage_docbuild.__main__ import (
     _options_generation_lock,
@@ -84,6 +87,19 @@ def test_source_dir_for_help(monkeypatch, tmp_path):
     assert source_dir_for_help(['-D', '--source', str(source)]) == expected
     assert source_dir_for_help(['-D', f'--source={source}']) == expected
     assert source_dir_for_help(['-D', f'--sour={source}']) == expected
+
+
+def test_source_dir_for_help_accepts_short_attached_value(monkeypatch, tmp_path):
+    source = tmp_path / 'documentation source'
+    source.mkdir()
+    argument = f'-s={source}'
+
+    # argparse accepts an equals sign between a short option and its attached
+    # value.  The help actions exit while parsing, so their pre-parser must
+    # recognize the same spelling itself.
+    parsed = setup_parser().parse_args([argument, 'reference', 'html'])
+    assert parsed.source_dir == source
+    assert source_dir_for_help(['-D', argument]) == source.absolute()
 
 
 @pytest.mark.parametrize(
@@ -173,6 +189,46 @@ def test_ambiguous_source_abbreviation_matches_argparse(monkeypatch, tmp_path):
     assert source_dir_for_help(['-D', f'--s={tmp_path}']) == source.absolute()
     with pytest.raises(SystemExit):
         setup_parser().parse_args(['-D', f'--s={tmp_path}'])
+
+
+def test_needs_options_page_reads_files_instead_of_consulting_umask(
+    monkeypatch, tmp_path
+):
+    options = tmp_path / 'en' / 'reference' / 'repl' / 'options.txt'
+    options.parent.mkdir(parents=True)
+    content = 'usage: sage [options]\n'
+    options.write_text(content, encoding='utf-8')
+
+    input_digest = 'cli-input-digest'
+    manifest = tmp_path / 'options-manifest.json'
+    manifest.write_text(
+        json.dumps(
+            {
+                'version': docbuild_main._OPTIONS_MANIFEST_VERSION,
+                'inputs': input_digest,
+                'output': hashlib.sha256(content.encode('utf-8')).hexdigest(),
+            }
+        ),
+        encoding='utf-8',
+    )
+
+    # Both files are readable by this process.  Their mode need not match the
+    # current umask: ACLs and the process identity, not creation defaults,
+    # determine whether a read succeeds.
+    options.chmod(0o600)
+    manifest.chmod(0o600)
+    monkeypatch.setattr(
+        docbuild_main, '_options_input_digest', lambda root: input_digest
+    )
+    monkeypatch.setattr(
+        docbuild_main,
+        '_file_mode',
+        lambda: pytest.fail('_needs_options_page consulted the current umask'),
+    )
+
+    assert not docbuild_main._needs_options_page(
+        options, tmp_path / 'source root', manifest
+    )
 
 
 # The lock around the generated options page only keeps parallel builds from

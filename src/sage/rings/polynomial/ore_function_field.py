@@ -413,7 +413,7 @@ class OreFunctionField(Parent, UniqueRepresentation):
 
         .. SEEALSO::
 
-            :meth:`~sage.rings.polynomial.ore_function_field.OreFunctionField.twisting_morphism`,
+            :meth:`~sage.rings.polynomial.ore_polynomial_ring.OrePolynomialRing.twisting_morphism`,
             :meth:`twisting_derivation`
         """
         return self._ring.twisting_morphism(n)
@@ -441,7 +441,7 @@ class OreFunctionField(Parent, UniqueRepresentation):
 
         .. SEEALSO::
 
-            :meth:`~sage.rings.polynomial.ore_function_field.OreFunctionField.twisting_derivation`,
+            :meth:`~sage.rings.polynomial.ore_polynomial_ring.OrePolynomialRing.twisting_derivation`,
             :meth:`twisting_morphism`
         """
         return self._ring.twisting_derivation()

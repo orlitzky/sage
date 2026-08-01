@@ -240,7 +240,10 @@ class CartesianProduct(UniqueRepresentation, Parent):
         """
         Return the Cartesian product of the given ``elements``.
 
-        This implements :meth:`~sage.sets.cartesian_product.CartesianProduct._cartesian_product_of_elements`.
+        This implements
+        ``Sets.CartesianProducts.ParentMethods._cartesian_product_of_elements()``
+        from :class:`~sage.categories.sets_cat.Sets.CartesianProducts`.
+
         INPUT:
 
         - ``elements`` -- an iterable (e.g. tuple, list) with one element of

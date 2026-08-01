@@ -1901,7 +1901,7 @@ cdef class FiniteField(Field):
 
         .. SEEALSO::
 
-            :meth:`sage.rings.finite_rings.finite_field_base.FiniteField.an_embedding`
+            :meth:`~sage.categories.fields.Fields.ParentMethods.an_embedding`
 
         EXAMPLES::
 

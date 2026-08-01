@@ -213,8 +213,7 @@ class DisplayManager(SageObject):
         """
         Get the singleton instance.
 
-        This class method is equivalent to
-        :meth:`get_display_manager <sage.repl.rich_output.display_manager.DisplayManager.get_instance>`.
+        This class method is also exported as ``get_display_manager``.
 
         OUTPUT: the display manager singleton
 

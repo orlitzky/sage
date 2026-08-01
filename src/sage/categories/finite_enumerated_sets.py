@@ -223,7 +223,7 @@ class FiniteEnumeratedSets(CategoryWithAxiom):
 
         def tuple(self):
             r"""
-            Return a :class:`tuple` of the elements of ``self``.
+            Return a ``tuple`` of the elements of ``self``.
 
             EXAMPLES::
 

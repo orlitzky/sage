@@ -4979,7 +4979,7 @@ class StandardTableau(SemistandardTableau):
         [Sag2011]_ (p. 23) and in [Stan2009]_, and is the inverse of the map
         called "promotion" in [Hai1992]_ (p. 90).
 
-        See the :meth:`~sage.combinat.tableau.StandardTableau.promotion_inverse`
+        See the :meth:`~sage.combinat.tableau.Tableau.promotion_inverse`
         method for a
         more general operator.
 
@@ -5023,7 +5023,7 @@ class StandardTableau(SemistandardTableau):
         (p. 90). It is the inverse of the maps called "promotion" in [Sag2011]_
         (p. 23) and in [Stan2009]_.
 
-        See the :meth:`~sage.combinat.tableau.StandardTableau.promotion`
+        See the :meth:`~sage.combinat.tableau.Tableau.promotion`
         method for a
         more general operator.
 
