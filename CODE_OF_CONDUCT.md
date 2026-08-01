@@ -116,11 +116,10 @@ You can report issues to the Sage Code of Conduct Committee at
 sage-conduct@googlegroups.com. Currently, the committee consists of:
 
 - Vincent Delecroix
-- Antoine Leudière
 - Vincent Macri
 - David Roe
 - Julian Rüth
-
+- Gonzalo Tornaría
 If your report involves any members of the committee, or if they feel
 they have a conflict of interest in handling it, then they will recuse
 themselves from considering your report. Alternatively, if, for any
