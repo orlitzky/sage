@@ -253,6 +253,21 @@ class PolyominoFilling(SageObject):
                 and self._P == other._P
                 and self._B == other._B)
 
+    def __ne__(self, other):
+        r"""
+        Check whether ``self`` is not equal to ``other``.
+
+        EXAMPLES::
+
+            sage: from sage.combinat.posets.chute_move import PolyominoFilling
+            sage: P = PolyominoFilling([(1,1),(1,2),(2,1)], [(1,2)])
+            sage: Q = PolyominoFilling([(1,1),(1,2),(2,1)], [(2,1)])
+            sage: P != P
+            False
+            sage: P != Q
+            True
+        """
+        return not (self == other)
 
 def ChuteMoveLattice(M, n=None):
     r"""
