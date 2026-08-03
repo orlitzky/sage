@@ -323,10 +323,23 @@ class HyperellipticCurve_generic(WeightedProjectiveCurve):
             sage: for p in prime_range(3, 50):
             ....:     Hp = H_patch.change_ring(GF(p))
             ....:     assert Hp.is_smooth() == (H.discriminant() % p != 0)
+
+        The discriminant is invariant under this change of model::
+
+            sage: R.<x> = QQ[]
+            sage: C = HyperellipticCurve(2*x^5 + 1)
+            sage: C2 = HyperellipticCurve(x^6 + 2*x)
+            sage: C.discriminant() == C2.discriminant()
+            True
         """
         f, h = self._hyperelliptic_polynomials
-        return (4 * f + h**2).discriminant() / 16 ** (self.genus() + 1)
+        F = 4 * f + h**2
+        disc = F.discriminant() / 16**(self.genus() + 1)
 
+        if f.degree() % 2 == 1:
+            disc *= F.leading_coefficient()**2
+
+        return disc
     def polynomial_ring(self):
         r"""
         Return the parent ring of the defining polynomials `f, h`, of this hyperelliptic curve.
