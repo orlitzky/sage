@@ -33,7 +33,7 @@ The molecular decomposition begins with::
     + (E_5+E_2*E_3+X*E_4+X*E_2^2+X^2*E_3+2*X*E_2(E_2)+P_5+5*X*E_2(X^2)+3*X^3*E_2)
 
 Note that [GL2011]_ write `D_5` instead of `P_5`, and there is
-apparently a misprint: `X*E_2(E_2) + 4 X^3 E_2` should be `2 X
+apparently a misprint: `X E_2(E_2) + 4 X^3 E_2` should be `2 X
 E_2(E_2) + 3 X^3 E_2`.
 
 To compute the molecular decomposition of the species of
