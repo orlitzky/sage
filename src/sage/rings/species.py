@@ -1670,6 +1670,19 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                 sage: A.cycle_index()
                 1/4*p[1, 1] # p[1, 1, 1, 1] + 1/4*p[1, 1] # p[2, 2] + 1/4*p[2] # p[1, 1, 1, 1] + 1/4*p[2] # p[2, 2]
 
+            For multisort species, the result is a tensor product of
+            symmetric functions::
+
+                sage: h = SymmetricFunctions(QQ).h()
+                sage: tensor([h, h])(A.cycle_index())
+                h[2] # h[1, 1, 1, 1] - 2*h[2] # h[2, 1, 1] + 2*h[2] # h[2, 2]
+
+            For unisort species, the result is a symmetric function:
+
+                sage: M = MolecularSpecies("X")
+                sage: h(M(SymmetricGroup(3)).cycle_index())
+                h[3]
+
             Find two molecular species with the same cycle index::
 
                 sage: M = MolecularSpecies("X")
