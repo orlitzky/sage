@@ -61,6 +61,11 @@ from sage.matrix.matrix_rational_dense cimport Matrix_rational_dense
 
 
 cdef class Matrix_rational_sparse(Matrix_sparse):
+    """
+    .. automethod:: _right_kernel_matrix
+    .. automethod:: _right_kernel_matrix_linbox
+    """
+
     def __cinit__(self):
         self._matrix = <mpq_vector*>check_calloc(self._nrows, sizeof(mpq_vector))
         # initialize the rows

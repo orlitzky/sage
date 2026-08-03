@@ -1139,7 +1139,8 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
             Uses the :func:`~scipy:scipy.linalg.eigvals` function from SciPy.
 
           - ``'symmetric'`` -- converts the matrix into a real matrix
-            (i.e. with entries from :class:`~sage.rings.real_double.RDF`),
+            (i.e. with entries from
+            :func:`RDF <sage.rings.real_double.RealDoubleField>`),
             then applies the algorithm for Hermitian matrices.  This
             algorithm can be significantly faster than the
             ``'default'`` algorithm.
@@ -1168,17 +1169,19 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
             no check is made on the input matrix, and only the entries below,
             and on, the main diagonal are employed in the computation.
 
-            Methods such as :meth:`is_symmetric` and :meth:`is_hermitian`
+            Methods such as
+            :meth:`~sage.matrix.matrix_numpy_dense.Matrix_numpy_dense.is_symmetric` and
+            :meth:`~sage.matrix.matrix_double_dense.Matrix_double_dense.is_hermitian`
             could be used to verify this beforehand.
 
         OUTPUT:
 
         Default output for a square matrix of size `n` is a list of `n`
         eigenvalues from the complex double field,
-        :class:`~sage.rings.complex_double.CDF`.  If the ``'symmetric'``
+        :func:`CDF <sage.rings.complex_double.ComplexDoubleField>`.  If the ``'symmetric'``
         or ``'hermitian'`` algorithms are chosen, the returned eigenvalues
         are from the real double field,
-        :class:`~sage.rings.real_double.RDF`.
+        :func:`RDF <sage.rings.real_double.RealDoubleField>`.
 
         If a tolerance is specified, an attempt is made to group eigenvalues
         that are numerically similar.  The return is then a list of pairs,
@@ -2572,7 +2575,8 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
         every entry conjugated, and ``False`` otherwise.
 
         Note that if conjugation has no effect on elements of the base
-        ring (such as for integers), then the :meth:`is_symmetric`
+        ring (such as for integers), then the
+        :meth:`~sage.matrix.matrix_numpy_dense.Matrix_numpy_dense.is_symmetric`
         method is equivalent and faster.
 
         The tolerance parameter is used to allow for numerical values
@@ -2698,7 +2702,8 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
         its conjugate transpose, and ``False`` otherwise.
 
         Note that if conjugation has no effect on elements of the base
-        ring (such as for integers), then the :meth:`is_skew_symmetric`
+        ring (such as for integers), then the
+        :meth:`~sage.matrix.matrix0.Matrix.is_skew_symmetric`
         method is equivalent and faster.
 
         The tolerance parameter is used to allow for numerical values

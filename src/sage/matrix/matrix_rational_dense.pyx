@@ -130,6 +130,10 @@ from cypari2.paridecl cimport *
 # ########################################################
 
 cdef class Matrix_rational_dense(Matrix_dense):
+    """
+    .. automethod:: _right_kernel_matrix
+    """
+
     def __cinit__(self):
         """
         Create and allocate memory for the matrix.

@@ -1286,7 +1286,7 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
         Return the columns containing a leading 1 in the echelon form of this matrix.
 
         When the base ring is not a field, there may be other rows with leading entries
-        a zero divisor.  These columns are available using the :meth:`_pivots` method.
+        a zero divisor.  These columns are available using the ``_pivots()`` method.
 
         EXAMPLES::
 
@@ -1313,7 +1313,7 @@ cdef class Matrix_modn_dense_flint(Matrix_dense):
 
         - :meth:`pivots`
 
-        - :meth:`_pivots`
+        - ``_pivots()``
 
         EXAMPlES::
 

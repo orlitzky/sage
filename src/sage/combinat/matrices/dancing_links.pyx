@@ -987,7 +987,7 @@ cdef class dancing_linksWrapper:
         Return the mixed integer linear program (MILP) representing an
         equivalent problem.
 
-        See also :mod:`sage.numerical.mip.MixedIntegerLinearProgram`.
+        See also :class:`sage.numerical.mip.MixedIntegerLinearProgram`.
 
         INPUT:
 

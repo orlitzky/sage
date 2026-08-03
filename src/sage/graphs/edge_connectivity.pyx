@@ -2318,10 +2318,10 @@ cdef class GabowEdgeConnectivity:
         phases. Phase 1 builds a ``k``-intersection whose union is a
         ``k``-in-regular subgraph rooted at ``root`` (every non-root vertex
         has in-degree ``k``). Phase 2 decomposes that union into ``k``
-        spanning out-arborescences one at a time (:meth:`find_tree`): it grows
+        spanning out-arborescences one at a time (``find_tree``): it grows
         the set of vertices reachable from ``root``, and whenever the next edge
         it needs is already used by another tree, an augmenting-path *swap*
-        (:meth:`search_step`) frees a usable edge while keeping the other trees
+        (``search_step``) frees a usable edge while keeping the other trees
         valid.
 
         The extraction scheme follows the practical implementation studied in

@@ -1887,6 +1887,8 @@ def unpickle_MPolynomialRing_libsingular(base_ring, names, term_order):
 cdef class MPolynomial_libsingular(MPolynomial_libsingular_base):
     """
     A multivariate polynomial implemented using libSINGULAR.
+
+    .. automethod:: _derivative
     """
     def __init__(self, MPolynomialRing_libsingular parent):
         """
@@ -5684,7 +5686,9 @@ cdef class MPolynomial_libsingular(MPolynomial_libsingular_base):
 
         - ``variable`` -- the derivative is taken with respect to variable
 
-        .. NOTE:: See also :meth:`derivative`
+        .. NOTE::
+
+            See also :meth:`~sage.rings.polynomial.multi_polynomial.MPolynomial.derivative`.
 
         EXAMPLES::
 
@@ -5995,7 +5999,7 @@ cdef class MPolynomial_libsingular(MPolynomial_libsingular_base):
         INPUT:
 
         - ``prec`` -- desired floating point precision (default:
-          default :class:`RealField` precision)
+          default :func:`~sage.rings.real_mpfr.RealField` precision)
 
         OUTPUT: a real number
 
@@ -6073,7 +6077,7 @@ cdef class MPolynomial_libsingular(MPolynomial_libsingular_base):
         - ``v`` -- a prime or prime ideal of the base ring
 
         - ``prec`` -- desired floating point precision (default:
-          default :class:`RealField` precision)
+          default :func:`~sage.rings.real_mpfr.RealField` precision)
 
         OUTPUT: a real number
 
@@ -6120,7 +6124,7 @@ cdef class MPolynomial_libsingular(MPolynomial_libsingular_base):
         - ``i`` -- integer
 
         - ``prec`` -- desired floating point precision (default:
-          default :class:`RealField` precision)
+          default :func:`~sage.rings.real_mpfr.RealField` precision)
 
         OUTPUT: a real number
 

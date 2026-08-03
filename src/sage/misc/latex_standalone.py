@@ -259,8 +259,8 @@ class Standalone(SageObject):
     - ``macros`` -- list of strings (default: ``[]``); stuff you need for the picture
     - ``use_sage_preamble`` -- boolean (default: ``False``); whether to include sage
       latex preamble and sage latex macros, that is, the content of
-      :func:`sage.misc.latex.extra_preamble()`,
-      :func:`sage.misc.latex.extra_macros()` and
+      :meth:`sage.misc.latex.Latex.extra_preamble`,
+      :meth:`sage.misc.latex.Latex.extra_macros` and
       :func:`sage.misc.latex_macros.sage_latex_macros()`
 
     EXAMPLES::
@@ -1237,7 +1237,7 @@ class Standalone(SageObject):
         .. NOTE::
 
             This method follows the signature of the method
-            :meth:`sage.plot.Graphics.save` in order to be compatible with
+            :meth:`sage.plot.graphics.Graphics.save` in order to be compatible with
             with sagetex. In particular so that ``\sageplot{t}`` written
             in a ``tex`` file works when ``t`` is an instance of
             :class:`Standalone` or :class:`TikzPicture`.
@@ -1287,8 +1287,8 @@ class TikzPicture(Standalone):
     - ``macros`` -- list of strings (default: ``[]``); stuff you need for the picture
     - ``use_sage_preamble`` -- boolean (default: ``False``); whether to include sage
       latex preamble and sage latex macros, that is, the content of
-      :func:`sage.misc.latex.extra_preamble()`,
-      :func:`sage.misc.latex.extra_macros()` and
+      :meth:`sage.misc.latex.Latex.extra_preamble`,
+      :meth:`sage.misc.latex.Latex.extra_macros` and
       :func:`sage.misc.latex_macros.sage_latex_macros()`
 
     EXAMPLES:

@@ -474,7 +474,7 @@ class HyperellipticCurve_generic(WeightedProjectiveCurve):
 
         .. SEEALSO::
 
-            :func:`~sage.schemes.hyperelliptic_curves.jacobian_homset_split.cantor_compose_at_infinity`
+            :meth:`~sage.schemes.hyperelliptic_curves.jacobian_homset_split.HyperellipticJacobianHomsetSplit.cantor_compose_at_infinity`
 
 
         EXAMPLES::
@@ -995,7 +995,7 @@ class HyperellipticCurve_generic(WeightedProjectiveCurve):
 
         .. SEEALSO::
 
-            :func:`~sage.schemes.hyperelliptic_curves.hyperelliptic_generic.set_distinguished_point`
+            :meth:`~sage.schemes.hyperelliptic_curves.hyperelliptic_generic.HyperellipticCurve_generic.set_distinguished_point`
 
         EXAMPLE::
 
@@ -1244,12 +1244,14 @@ class HyperellipticCurve_generic(WeightedProjectiveCurve):
     def rational_points(self, **kwds) -> list:
         r"""
         Find rational points on the hyperelliptic curve. Arguments are passed
-        on to :meth:`sage.schemes.generic.algebraic_scheme.rational_points`.
+        on to
+        :meth:`sage.schemes.generic.algebraic_scheme.AlgebraicScheme_subscheme.rational_points`.
 
         ALGORITHM:
 
         We use :meth:`points_at_infinity` to compute the points at infinity, and
-        :meth:`sage.schemes.generic.algebraic_scheme.rational_points` on this curve's
+        :meth:`sage.schemes.generic.algebraic_scheme.AlgebraicScheme_subscheme.rational_points`
+        on this curve's
         :meth:`projective_curve` for the affine points.
 
         EXAMPLES:
