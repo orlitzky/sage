@@ -6223,9 +6223,9 @@ class NumberField_generic(WithEqualityById, number_field_base.NumberField):
 
         INPUT:
 
-        - ``algorithm`` -- ``'pari'``, ``'gap'``, ``'kash'``, or ``'magma'``
-          (default: ``'pari'``); for degrees between 12 and 15 default is
-          ``'gap'``, and when the degree is >= 16 it is ``'kash'``)
+        - ``algorithm`` -- ``'pari'``, ``'gap'``, or ``'magma'`` (default:
+          ``'pari'``; for degrees greater than 11, ``'gap'`` is attempted
+          instead)
 
         - ``names`` -- string giving a name for the generator of the Galois
           closure of ``self``, when this field is not Galois
@@ -6307,7 +6307,7 @@ class NumberField_generic(WithEqualityById, number_field_base.NumberField):
             Galois group 10T22 (S(5)[x]2) with order 240 of t^5 - t + a
         """
         from .galois_group import GaloisGroup_v2
-        return GaloisGroup_v2(self, algorithm=algorithm, names=names, gc_numbering=gc_numbering, _type=type)
+        return GaloisGroup_v2(self, algorithm=algorithm, names=names, gc_numbering=gc_numbering)
 
     def _normalize_prime_list(self, v):
         """
