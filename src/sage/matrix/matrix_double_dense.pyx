@@ -70,6 +70,7 @@ import sage.rings.complex_double
 
 from sage.structure.element cimport Vector
 from sage.matrix.constructor import matrix
+from sage.matrix.matrix0 cimport Matrix as Matrix0
 from sage.matrix.matrix_utils cimport check_matrix_multiplication_sizes
 cimport sage.structure.element
 
@@ -251,22 +252,89 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
         """
         check_matrix_multiplication_sizes(self, right)
 
-        cdef Matrix_double_dense M, _right, _left
+        cdef Matrix_double_dense M = self._new(self._nrows, right._ncols)
+        M._set_to_product(self, <Matrix0>right)
+        return M
 
-        if self._nrows == 0 or self._ncols == 0 or right._nrows == 0 or right._ncols == 0:
-            M = self._new(self._nrows, right._ncols)
-            M._matrix_numpy.fill(0)
-            return M
+    cdef void _set_to_product(self, Matrix0 left, Matrix0 right) except *:
+        r"""
+        Set ``self`` to ``left * right`` using NumPy.
 
-        M = self._new(self._nrows, right._ncols)
-        _right = right
-        _left = self
+        The product is computed by :func:`numpy.dot`, writing straight into the
+        destination's array with its ``out`` argument.  That requires a
+        C-contiguous destination; a destination built from a Fortran-contiguous
+        array (which :func:`numpy.asfortranarray` produces) is instead filled
+        by copying the result of :func:`numpy.dot` into it.
+
+        INPUT:
+
+        - ``left`` -- a matrix of the same type and base ring as ``self``
+        - ``right`` -- a matrix of the same type and base ring as ``self``
+
+        OUTPUT: none; ``self`` is modified in place
+
+        EXAMPLES::
+
+            sage: A = matrix(RDF, 3, range(1, 10))
+            sage: B = matrix(RDF, 3, range(1, 13))
+            sage: C = matrix(RDF, 3, 4)
+            sage: C.set_to_product(A, B)
+            sage: C
+            [ 38.0  44.0  50.0  56.0]
+            [ 83.0  98.0 113.0 128.0]
+            [128.0 152.0 176.0 200.0]
+            sage: C == A * B
+            True
+
+        TESTS:
+
+        A destination constructed from a Fortran-contiguous NumPy array takes
+        the copying path, and must give the same answer::
+
+            sage: import numpy
+            sage: A = matrix(RDF, [[1, 2], [3, 4]])
+            sage: B = matrix(RDF, [[5, 6], [7, 8]])
+            sage: C = matrix(RDF, numpy.asfortranarray([[1., 1.], [1., 1.]]))
+            sage: C.set_to_product(A, B)
+            sage: C == A * B
+            True
+            sage: C.set_to_product(B, A)
+            sage: C == B * A
+            True
+
+        The same holds over the complex double field::
+
+            sage: A = A.change_ring(CDF)
+            sage: B = B.change_ring(CDF)
+            sage: C = matrix(CDF, numpy.asfortranarray([[1., 1.], [1., 1.]], dtype='complex128'))
+            sage: C.set_to_product(A, B)
+            sage: C == A * B
+            True
+
+        A zero inner dimension zeroes the destination; compare
+        :issue:`27366`::
+
+            sage: C = matrix(RDF, 3, 3, 1)
+            sage: C.set_to_product(matrix(RDF, 3, 0), matrix(RDF, 0, 3))
+            sage: C.is_zero()
+            True
+        """
+        cdef Matrix_double_dense _left = <Matrix_double_dense>left
+        cdef Matrix_double_dense _right = <Matrix_double_dense>right
+
         global numpy
         if numpy is None:
             import numpy
 
-        M._matrix_numpy = numpy.dot(_left._matrix_numpy, _right._matrix_numpy)
-        return M
+        # ``numpy.dot`` already zeroes the destination when the inner
+        # dimension is zero, so degenerate shapes need no special case.
+        if cnumpy.PyArray_IS_C_CONTIGUOUS(self._matrix_numpy):
+            numpy.dot(_left._matrix_numpy, _right._matrix_numpy,
+                      out=self._matrix_numpy)
+        else:
+            numpy.copyto(self._matrix_numpy,
+                         numpy.dot(_left._matrix_numpy,
+                                   _right._matrix_numpy))
 
     def __invert__(self):
         """
