@@ -21321,7 +21321,7 @@ class GenericGraph(GenericGraph_pyx):
 
         - ``layout`` -- string (default: ``None``); specifies a layout algorithm
           among ``'acyclic'``, ``'acyclic_dummy'``, ``'circular'``,
-          ``'ranked'``, ``'graphviz'``, ``'planar'``, ``'spring'``,
+          ``'ranked'``, ``'graphviz'``, ``'planar'``, ``'tutte'``, ``'spring'``,
           ``'forest'`` or ``'tree'``
 
         - ``pos`` -- dictionary (default: ``None``); a dictionary of positions
@@ -21389,15 +21389,15 @@ class GenericGraph(GenericGraph_pyx):
             ....:     print("option {} : {}".format(key, value))
             option by_component : Whether to do the spring layout by connected component -- boolean.
             option dim : The dimension of the layout -- 2 or 3.
-            option external_face : A list of the vertices of the external face of the graph, used for Tutte embedding layout.
-            option external_face_pos : A dictionary specifying the positions of the external face of the graph, used for Tutte embedding layout. If none specified, theexternal face is a regular polygon.
+            option external_face : A list of the vertices of the external face of the graph if used for Tutte embedding layout; or an edge on the external face if used for the 'planar' layout.
+            option external_face_pos : A dictionary specifying the positions of the external face of the graph, used for Tutte embedding layout. If none specified, the external face is a regular polygon.
             option forest_roots : An iterable specifying which vertices to use as roots for the ``layout='forest'`` option. If no root is specified for a tree, then one is chosen close to the center of the tree. Ignored unless ``layout='forest'``.
             option heights : A dictionary mapping heights to the list of vertices at this height.
             option iterations : The number of times to execute the spring layout algorithm.
-            option layout : A layout algorithm -- one of : "acyclic", "circular" (plots the graph with vertices evenly distributed on a circle), "ranked", "graphviz", "planar", "spring" (traditional spring layout, using the graph's current positions as initial positions), or "tree" (the tree will be plotted in levels, depending on minimum distance for the root).
+            option layout : A layout algorithm -- one of: ...
             option prog : Which graphviz layout program to use -- one of "circo", "dot", "fdp", "neato", or "twopi".
             option save_pos : Whether or not to save the computed position for the graph.
-            option spring : Use spring layout to finalize the current layout.
+            option spring : Use spring layout to finalize the current 'ranked' layout.
             option tree_orientation : The direction of tree branches -- 'up', 'down', 'left' or 'right'.
             option tree_root : A vertex designation for drawing trees. A vertex of the tree to be used as the root for the ``layout='tree'`` option. If no root is specified, then one is chosen close to the center of the tree. Ignored unless ``layout='tree'``.
 
@@ -22411,109 +22411,11 @@ class GenericGraph(GenericGraph_pyx):
 
         INPUT:
 
-        - ``pos`` -- an optional positioning dictionary
-
-        - ``layout`` -- string (default: ``None``); specifies a kind of layout
-          to use, takes precedence over pos
-
-          - ``'circular'`` -- plots the graph with vertices evenly distributed
-            on a circle
-
-          - ``'spring'`` -- uses the traditional spring layout, using the
-            graph's current positions as initial positions
-
-          - ``'tree'`` -- the (di)graph must be a tree. One can specify the root
-            of the tree using the keyword tree_root, otherwise a root will be
-            selected at random. Then the tree will be plotted in levels,
-            depending on minimum distance for the root.
-
-          - ``'tutte'`` -- uses the Tutte embedding algorithm. The graph must be
-            a 3-connected, planar graph.
-
-        - ``vertex_labels`` -- boolean (default: ``True``); whether to print
-          vertex labels
-
-        - ``edge_labels`` -- boolean (default: ``False``); whether to print edge
-          labels. If ``True``, the result of ``str(l)`` is printed on the edge
-          for each label `l`. Labels equal to ``None`` are not printed (to set
-          edge labels, see :meth:`set_edge_label`).
-
-        - ``edge_labels_background`` -- the color of the edge labels
-          background. The default is "white". To achieve a transparent
-          background use "transparent".
-
-        - ``vertex_size`` -- size of vertices displayed
-
-        - ``vertex_shape`` -- the shape to draw the vertices, for example
-          ``'o'`` for circle or ``'s'`` for square. Whole list is available at
-          https://matplotlib.org/api/markers_api.html.
-          (Not available for multiedge digraphs.)
-
-        - ``graph_border`` -- boolean (default: ``False``); whether to include a
-          box around the graph
-
-        - ``vertex_colors`` -- dictionary (default: ``None``); optional
-          dictionary to specify vertex colors: each key is a color recognizable
-          by matplotlib, and each corresponding entry is a list of vertices. If
-          a vertex is not listed, it looks invisible on the resulting plot (it
-          doesn't get drawn).
-
-        - ``edge_colors`` -- dictionary (default: ``None``); a dictionary
-          specifying edge colors: each key is a color recognized by matplotlib,
-          and each entry is a list of edges.
-
-        - ``partition`` -- a partition of the vertex set (default: ``None``); if
-          specified, plot will show each cell in a different color.
-          ``vertex_colors`` takes precedence.
-
-        - ``talk`` -- boolean (default: ``False``); if ``True``, prints large
-          vertices with white backgrounds so that labels are legible on slides
-
-        - ``iterations`` -- integer; how many iterations of the spring layout
-          algorithm to go through, if applicable
-
-        - ``color_by_label`` -- boolean or dictionary or function (default:
-          ``False``); whether to color each edge with a different color
-          according to its label; the colors are chosen along a rainbow, unless
-          they are specified by a function or dictionary mapping labels to
-          colors; this option is incompatible with ``edge_color`` and
-          ``edge_colors``.
-
-        - ``heights`` -- dictionary (default: ``None``); if specified, this is a
-          dictionary from a set of floating point heights to a set of vertices
-
-        - ``edge_style`` -- keyword arguments passed into the edge-drawing
-          routine.  This currently only works for directed graphs, since we pass
-          off the undirected graph to networkx
-
-        - ``tree_root`` -- a vertex (default: ``None``); if specified, this
-          vertex is used as the root for the ``layout="tree"`` option.
-          Otherwise, then one is chosen at random. Ignored unless
-          ``layout='tree'``.
-
-        - ``tree_orientation`` -- string (default: ``'down'``); one of "up" or
-          "down".  If "up" (resp., "down"), then the root of the tree will
-          appear on the bottom (resp., top) and the tree will grow upwards
-          (resp. downwards). Ignored unless ``layout='tree'``.
-
-        - ``external_face`` -- list of vertices (default: ``None``); the external face to be made a
-          in the Tutte layout. Ignored unless ``layout='tutte''``.
-
-        - ``external_face_pos`` -- dictionary (default: ``None``). If specified,
-          used as the positions for the external face in the Tutte layout.
-          Ignored unless ``layout='tutte'``.
-
-        - ``save_pos`` -- boolean (default: ``False``); save position computed
-          during plotting
+        See the documentation of the :mod:`sage.graphs.graph_plot` module
+        for supported parameters. In addition, this method supports all
+        parameters of :meth:`sage.plot.graphics.Graphics.show`.
 
         .. NOTE::
-
-            - This method supports any parameter accepted by
-              :meth:`sage.plot.graphics.Graphics.show`.
-
-            - See the documentation of the :mod:`sage.graphs.graph_plot` module
-              for information and examples of how to define parameters that will
-              be applied to **all** graph plots.
 
             - Default parameters for this method *and a specific graph* can also
               be set through the :class:`~sage.misc.decorators.options`
