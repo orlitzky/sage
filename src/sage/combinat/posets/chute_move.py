@@ -269,6 +269,7 @@ class PolyominoFilling(SageObject):
         """
         return not (self == other)
 
+
 def ChuteMoveLattice(M, n=None):
     r"""
     Return the chute move lattice.
