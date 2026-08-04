@@ -697,7 +697,7 @@ class LazyCombinatorialSpeciesElement(LazyCompletionGradedAlgebraElement):
 
             sage: from sage.rings.species import PolynomialSpecies
             sage: P = PolynomialSpecies(QQ, "X")
-            sage: Gc = L(lambda n: sum(P(G.automorphism_group()) for G in graphs(n) if G.is_connected()) if n else 0)
+            sage: Gc = L.Graphs(connected=True)
             sage: E = L.Sets()
             sage: G = L.Graphs()
             sage: E(Gc) - G
@@ -2177,9 +2177,13 @@ class LazyCombinatorialSpeciesUnivariate(LazyCombinatorialSpecies):
         """
         return ChainSpecies(self)
 
-    def Graphs(self):
+    def Graphs(self, connected=False):
         r"""
         Return the species of vertex labelled simple graphs.
+
+        INPUT:
+
+        - ``connected`` -- boolean; whether the graphs should be connected
 
         EXAMPLES::
 
@@ -2191,7 +2195,7 @@ class LazyCombinatorialSpeciesUnivariate(LazyCombinatorialSpecies):
             sage: G.isotype_generating_series()[20]
             645490122795799841856164638490742749440
         """
-        return GraphSpecies(self)
+        return GraphSpecies(self, connected=bool(connected))
 
     def SetPartitions(self):
         r"""
@@ -2613,9 +2617,13 @@ class ChainSpecies(LazyCombinatorialSpeciesElement, UniqueRepresentation,
 class GraphSpecies(LazyCombinatorialSpeciesElementGeneratingSeriesMixin,
                    LazyCombinatorialSpeciesElement, UniqueRepresentation,
                    metaclass=InheritComparisonClasscallMetaclass):
-    def __init__(self, parent):
+    def __init__(self, parent, connected=False):
         r"""
         Initialize the species of simple graphs.
+
+        INPUT:
+
+        - ``connected`` -- boolean; whether the graphs should be connected
 
         TESTS::
 
@@ -2625,9 +2633,22 @@ class GraphSpecies(LazyCombinatorialSpeciesElementGeneratingSeriesMixin,
 
             sage: G is L.Graphs()
             True
+
+            sage: Gc = L.Graphs(connected=True)
+            sage: TestSuite(Gc).run(skip=['_test_category', '_test_pickling'])
+
+            sage: G == Gc
+            False
+
+            sage: L.Graphs(True) is L.Graphs(connected=1)
+            True
         """
         P = parent._laurent_poly_ring
-        S = parent(lambda n: sum(P(G.automorphism_group()) for G in graphs(n)))
+        self._connected = bool(connected)
+        if self._connected:
+            S = parent(lambda n: 0 if not n else sum(P(G.automorphism_group()) for G in graphs.nauty_geng("%s -c" % n)))
+        else:
+            S = parent(lambda n: sum(P(G.automorphism_group()) for G in graphs(n)))
         super().__init__(parent, S._coeff_stream)
 
     def _repr_(self):
@@ -2636,9 +2657,15 @@ class GraphSpecies(LazyCombinatorialSpeciesElementGeneratingSeriesMixin,
 
         EXAMPLES::
 
-           sage: LazyCombinatorialSpecies(QQ, "X").Graphs()  # indirect doctest
+           sage: L = LazyCombinatorialSpecies(QQ, "X")
+           sage: L.Graphs()  # indirect doctest
            Graph species
+
+           sage: L.Graphs(connected=True)
+           Connected Graph species
         """
+        if self._connected:
+            return "Connected Graph species"
         return "Graph species"
 
     def isotypes(self, labels):
@@ -2651,9 +2678,19 @@ class GraphSpecies(LazyCombinatorialSpeciesElementGeneratingSeriesMixin,
             sage: G = L.Graphs()
             sage: list(G.isotypes(2))
             [Graph on 2 vertices, Graph on 2 vertices]
+
+            sage: G = L.Graphs(connected=True)
+            sage: list(G.isotypes(2))
+            [Graph on 2 vertices]
         """
         if labels in ZZ:
-            yield from (G.canonical_label().copy(immutable=True) for G in graphs(labels))
+            if self._connected:
+                if labels:
+                    yield from (G.canonical_label().copy(immutable=True)
+                                for G in graphs.nauty_geng("%s -c" % labels))
+            else:
+                yield from (G.canonical_label().copy(immutable=True)
+                            for G in graphs(labels))
         else:
             raise NotImplementedError("isotypes with given labels are currently not supported")
 
@@ -2667,11 +2704,22 @@ class GraphSpecies(LazyCombinatorialSpeciesElementGeneratingSeriesMixin,
             sage: L = LazyCombinatorialSpecies(QQ, "X")
             sage: L.Graphs().generating_series().truncate(7)
             1 + X + X^2 + 4/3*X^3 + 8/3*X^4 + 128/15*X^5 + 2048/45*X^6
+
+            sage: L.Graphs(connected=True).generating_series().truncate(7)
+            X + 1/2*X^2 + 2/3*X^3 + 19/12*X^4 + 91/15*X^5 + 1669/45*X^6
+
+        TESTS::
+
+            sage: L.Graphs(connected=True).generating_series().exp()
+            1 + X + X^2 + 4/3*X^3 + 8/3*X^4 + 128/15*X^5 + 2048/45*X^6 + O(X^7)
         """
         P = self.parent()
         L = LazyPowerSeriesRing(P.base_ring().fraction_field(),
                                 P._laurent_poly_ring._indices._indices.variable_names())
-        return L(lambda n: 2**binomial(n, 2) / factorial(n))
+        s = L(lambda n: 2**binomial(n, 2) / factorial(n))
+        if self._connected:
+            return s.log()
+        return s
 
     def cycle_index_series(self):
         r"""
@@ -2690,6 +2738,14 @@ class GraphSpecies(LazyCombinatorialSpeciesElementGeneratingSeriesMixin,
 
             sage: L.Graphs().isotype_generating_series()[20]
             645490122795799841856164638490742749440
+
+        We can also compute the series for connected graphs::
+
+            sage: L.Graphs(connected=True).cycle_index_series().truncate(4)
+            p[1] + (1/2*p[1,1]+1/2*p[2]) + (2/3*p[1,1,1]+p[2,1]+1/3*p[3])
+
+            sage: L.Graphs(True).isotype_generating_series()[12]
+            164059830476
         """
         P = self.parent()
         p = SymmetricFunctions(P.base_ring().fraction_field()).p()
@@ -2708,7 +2764,10 @@ class GraphSpecies(LazyCombinatorialSpeciesElementGeneratingSeriesMixin,
         def coefficient(n):
             return p._from_dict({sigma: a(sigma) for sigma in Partitions(n)})
 
-        return L(coefficient)
+        s = L(coefficient)
+        if self._connected:
+            return L.combinatorial_logarithm()(s - 1)
+        return s
 
 
 class SetPartitionSpecies(CompositionSpeciesElement, UniqueRepresentation,

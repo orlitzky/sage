@@ -3880,6 +3880,63 @@ class LazySymmetricFunctions(LazyCompletionGradedAlgebra):
     """
     Element = LazySymmetricFunction
 
+    @cached_method
+    def combinatorial_logarithm(self):
+        r"""Return the plethystic inverse of the complete homogeneous
+        symmetric function series `h_1 + h_2 + \dots`.
+
+        Let `H_+ = \sum_{n \ge 1} h_n`. This method computes the unique
+        symmetric function `G` such that `H_+ \circ G = p_1`, where
+        `\circ` denotes plethystic substitution.
+
+        Because `H_+` is the symmetric function analogue of `\exp(x) - 1`,
+        this series acts as the analogue of the logarithm `\ln(1 + x)`
+        under plethysm.
+
+        EXAMPLES::
+
+            sage: p = SymmetricFunctions(QQ).power()
+            sage: L = LazySymmetricFunctions(p)
+            sage: Omega = L.combinatorial_logarithm()
+            sage: Omega[1]
+            p[1]
+            sage: Omega[2]
+            -1/2*p[1, 1] - 1/2*p[2]
+            sage: Omega[3]
+            1/3*p[1, 1, 1] - 1/3*p[3]
+            sage: Omega[4]
+            -1/4*p[1, 1, 1, 1] - 1/4*p[2, 2] + 1/3*p[3, 1] - 1/4*p[4]
+
+        We can verify its defining property `\Omega\circ H_+ = H_+
+        \circ\Omega = p_1`::
+
+            sage: h = SymmetricFunctions(QQ).h()
+            sage: Lh = LazySymmetricFunctions(h)
+            sage: H_plus = Lh(lambda n: h[n] if n > 0 else 0)
+            sage: Lh.commbinatorial_logarithm()(H_plus)
+            h[1] + O^8
+        """
+        from sage.combinat.sf.sf import SymmetricFunctions
+        from sage.misc.cachefunc import cached_function
+        from sage.arith.all import divisors
+
+        p = SymmetricFunctions(self.base_ring()).power()
+
+        @cached_function
+        def coefficient(n):
+            if n == 0:
+                return p.zero()
+            if n == 1:
+                return p([1])
+
+            res = p.zero()
+            for d in divisors(n)[:-1]:
+                res -= d * p([n // d]).plethysm(coefficient(d))
+            res += (-1)**(n-1) * p([1])**n
+
+            return res / n
+
+        return self(coefficient)
 
 ######################################################################
 
