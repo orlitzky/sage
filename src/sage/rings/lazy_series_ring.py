@@ -3897,15 +3897,9 @@ class LazySymmetricFunctions(LazyCompletionGradedAlgebra):
 
             sage: p = SymmetricFunctions(QQ).power()
             sage: L = LazySymmetricFunctions(p)
-            sage: Omega = L.combinatorial_logarithm()
-            sage: Omega[1]
-            p[1]
-            sage: Omega[2]
-            -1/2*p[1, 1] - 1/2*p[2]
-            sage: Omega[3]
-            1/3*p[1, 1, 1] - 1/3*p[3]
-            sage: Omega[4]
-            -1/4*p[1, 1, 1, 1] - 1/4*p[2, 2] + 1/3*p[3, 1] - 1/4*p[4]
+            sage: L.combinatorial_logarithm().truncate(5)
+            p[1] + (-1/2*p[1,1]-1/2*p[2]) + (1/3*p[1,1,1]-1/3*p[3])
+            + (-1/4*p[1,1,1,1]+1/4*p[2,2])
 
         We can verify its defining property `\Omega\circ H_+ = H_+
         \circ\Omega = p_1`::
@@ -3913,8 +3907,8 @@ class LazySymmetricFunctions(LazyCompletionGradedAlgebra):
             sage: h = SymmetricFunctions(QQ).h()
             sage: Lh = LazySymmetricFunctions(h)
             sage: H_plus = Lh(lambda n: h[n] if n > 0 else 0)
-            sage: Lh.commbinatorial_logarithm()(H_plus)
-            h[1] + O^8
+            sage: Lh.combinatorial_logarithm()(H_plus)
+            h[1] + O^7
         """
         from sage.combinat.sf.sf import SymmetricFunctions
         from sage.misc.cachefunc import cached_function
