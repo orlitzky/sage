@@ -7394,6 +7394,8 @@ class GenericGraph(GenericGraph_pyx):
 
           * ``'MILP'`` -- use a mixed integer linear programming
             formulation. This is the default method for directed graphs.
+            Graphs with loops and multiple edges are supported: loops are
+            ignored and each parallel copy counts as a distinct edge.
 
           * ``'Gabow'`` -- use the combinatorial algorithm of Gabow
             [Gabow1995]_ for packing edge-disjoint spanning arborescences.
@@ -7594,9 +7596,9 @@ class GenericGraph(GenericGraph_pyx):
             sage: DiGraph().edge_disjoint_spanning_trees(algorithm='Gabow')
             []
 
-        The ``'Gabow'`` algorithm supports digraphs with multiple edges; with
-        ``labels=True``, parallel copies remain distinguishable in the
-        output::
+        The ``'Gabow'`` and ``'MILP'`` algorithms support multiple edges, each
+        parallel copy counting as a distinct edge. With ``labels=True``, the
+        ``'Gabow'`` algorithm keeps the copies distinguishable in the output::
 
             sage: D = DiGraph([(0, 1, 'a'), (0, 1, 'b'), (1, 0, 'c'), (1, 0, 'd')],
             ....:             multiedges=True)
