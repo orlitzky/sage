@@ -7680,12 +7680,16 @@ class GenericGraph(GenericGraph_pyx):
         if root is None:
             root = next(G.vertex_iterator())
 
-        if k == 1:
+        if k == 1 and not G.is_directed():
+            # A single spanning tree is a minimum spanning tree. This shortcut
+            # is only valid in the undirected case: min_spanning_tree ignores
+            # the orientation of the edges, so on a digraph it may return a
+            # tree that is not an arborescence rooted at ``root``.
             E = G.min_spanning_tree(starting_vertex=root)
             if not E:
                 raise EmptySetError("this graph does not contain the required "
                                     "number of trees/arborescences")
-            return [DiGraph(E) if G.is_directed() else Graph(E)]
+            return [Graph(E)]
 
         D = G if G.is_directed() else DiGraph(G)
 
