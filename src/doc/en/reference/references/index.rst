@@ -4674,6 +4674,10 @@ REFERENCES:
 .. [Labelle2008] \G. Labelle. *New combinatorial computational methods
                  arising from pseudo-singletons.* DMTCS Proceedings 1, 2008.
 
+.. [Labelle2013] Labelle, Gilbert. *The explicit molecular expansion
+             of the combinatorial logarithm*, in FPSAC 2013, Paris,
+             DMTCS Proceedings 2013, 361-372 (2013).
+
 .. [Lad2021] S. Ladkani. *Refined Coxeter polynomials*, Proceedings ICRA 2020,
              EMS Publishing House. :arxiv:`2110.15329`
 

@@ -3883,7 +3883,8 @@ class LazySymmetricFunctions(LazyCompletionGradedAlgebra):
 
     @cached_method
     def combinatorial_logarithm(self):
-        r"""Return the plethystic inverse of the complete homogeneous
+        r"""
+        Return the plethystic inverse of the complete homogeneous
         symmetric function series `h_1 + h_2 + \dots`.
 
         Let `H_+ = \sum_{n \ge 1} h_n`. This method computes the unique
@@ -3893,6 +3894,9 @@ class LazySymmetricFunctions(LazyCompletionGradedAlgebra):
         Because `H_+` is the symmetric function analogue of `\exp(x) - 1`,
         this series acts as the analogue of the logarithm `\ln(1 + x)`
         under plethysm.
+
+        We use Equation (2.42) in [Labelle2013]_ for the
+        implementation.
 
         EXAMPLES::
 
@@ -3910,26 +3914,25 @@ class LazySymmetricFunctions(LazyCompletionGradedAlgebra):
             sage: H_plus = Lh(lambda n: h[n] if n > 0 else 0)
             sage: Lh.combinatorial_logarithm()(H_plus)
             h[1] + O^7
+
+        We could also revert `H_+`, but this special case can be
+        computed much faster::
+
+            sage: pi = Partition([13, 3, 2, 1, 1, 1, 1, 1])
+            sage: Lh.combinatorial_logarithm()[sum(pi)].coefficient(pi)
+            42
         """
         from sage.combinat.sf.sf import SymmetricFunctions
-        from sage.misc.cachefunc import cached_function
         from sage.arith.all import divisors
+        from sage.arith.misc import moebius
 
         p = SymmetricFunctions(self.base_ring()).power()
 
-        @cached_function
         def coefficient(n):
             if n == 0:
                 return p.zero()
-            if n == 1:
-                return p([1])
-
-            res = p.zero()
-            for d in divisors(n)[:-1]:
-                res -= d * p([n // d]).plethysm(coefficient(d))
-            res += (-1)**(n-1) * p([1])**n
-
-            return res / n
+            return sum(moebius(d) * (-1) ** (k - 1) * p([d] * k)
+                       for d in divisors(n) if (k := n // d)) // n
 
         return self(coefficient)
 
