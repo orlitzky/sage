@@ -7614,11 +7614,9 @@ class GenericGraph(GenericGraph_pyx):
             ValueError: labels is only supported for directed graphs with algorithm "Gabow"
         """
         if algorithm == "Roskind-Tarjan" or (algorithm is None and not self.is_directed()):
-            # the Roskind-Tarjan implementation requires a simple graph
-            self._scream_if_not_simple()
-        else:
+            # the Roskind-Tarjan implementation requires a simple graph, while
             # the Gabow and MILP backends support loops and multiple edges
-            self._scream_if_not_simple(allow_loops=True, allow_multiple_edges=True)
+            self._scream_if_not_simple()
         from sage.categories.sets_cat import EmptySetError
         from sage.graphs.digraph import DiGraph
         from sage.graphs.graph import Graph
@@ -7682,18 +7680,21 @@ class GenericGraph(GenericGraph_pyx):
         if root is None:
             root = next(G.vertex_iterator())
 
-        if k == 1 and not G.is_directed():
-            # A single spanning tree is a minimum spanning tree. This shortcut
-            # is only valid in the undirected case: min_spanning_tree ignores
-            # the orientation of the edges, so on a digraph it may return a
-            # tree that is not an arborescence rooted at ``root``.
+        if k == 1:
+            if G.is_directed():
+                # min_spanning_tree ignores the orientation of the edges, so we
+                # ask for an out-branching rooted at ``root`` instead. It spans
+                # the digraph if and only if it has n-1 edges.
+                T = next(G.out_branchings(root, spanning=False))
+                if T.num_edges() != n - 1:
+                    raise EmptySetError("this graph does not contain the "
+                                        "required number of trees/arborescences")
+                return [T]
             E = G.min_spanning_tree(starting_vertex=root)
             if not E:
                 raise EmptySetError("this graph does not contain the required "
                                     "number of trees/arborescences")
             return [Graph(E)]
-
-        D = G if G.is_directed() else DiGraph(G)
 
         # The colors we can use (one color per tree)
         colors = list(range(k))
@@ -7736,7 +7737,7 @@ class GenericGraph(GenericGraph_pyx):
                 p.add_constraint(p.sum(edge[(u, v, i), c] + edge[(v, u, i), c]
                                        for c in colors) <= 1)
 
-        # Constraints defining a spanning tree in D for each color c
+        # Constraints defining a spanning tree in G for each color c
         for c in colors:
             # A tree has n-1 edges
             p.add_constraint(p.sum(edge[a, c] for a in arcs) == n - 1)
@@ -7771,8 +7772,8 @@ class GenericGraph(GenericGraph_pyx):
 
             # and extra strengthening constraints on the minimum distance
             # between the root of the spanning tree and any vertex
-            BFS = dict(D.breadth_first_search(root, report_distance=True))
-            for u in D:
+            BFS = dict(G.breadth_first_search(root, report_distance=True))
+            for u in G:
                 p.add_constraint(pos[root, c] + BFS[u] <= pos[u, c])
 
         # We now solve this program and extract the solution
