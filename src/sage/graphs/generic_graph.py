@@ -7393,17 +7393,18 @@ class GenericGraph(GenericGraph_pyx):
             undirected simple graphs in time `O(m\log{m} + k^2n^2)`.
 
           * ``'MILP'`` -- use a mixed integer linear programming
-            formulation. This is the default method for directed graphs.
-            Graphs with loops and multiple edges are supported: loops are
-            ignored and each parallel copy counts as a distinct edge.
+            formulation. Graphs with loops and multiple edges are supported:
+            loops are ignored and each parallel copy counts as a distinct
+            edge.
 
           * ``'Gabow'`` -- use the combinatorial algorithm of Gabow
             [Gabow1995]_ for packing edge-disjoint spanning arborescences.
-            Only available for directed graphs; digraphs with loops and
-            multiple edges are supported.
+            This is the default method for directed graphs. Only available
+            for directed graphs; digraphs with loops and multiple edges are
+            supported.
 
           * ``None`` -- use ``'Roskind-Tarjan'`` for undirected graphs and
-            ``'MILP'`` for directed graphs.
+            ``'Gabow'`` for directed graphs.
 
         - ``root`` -- vertex (default: ``None``); root of the disjoint
           arborescences when the graph is directed.  If set to ``None``, the
@@ -7613,7 +7614,10 @@ class GenericGraph(GenericGraph_pyx):
             ...
             ValueError: labels is only supported for directed graphs with algorithm "Gabow"
         """
-        if algorithm == "Roskind-Tarjan" or (algorithm is None and not self.is_directed()):
+        if self.is_directed() and algorithm is None:
+            algorithm = "Gabow"
+
+        if algorithm == "Roskind-Tarjan" or algorithm is None:
             # the Roskind-Tarjan implementation requires a simple graph, while
             # the Gabow and MILP backends support loops and multiple edges
             self._scream_if_not_simple()
