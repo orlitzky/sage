@@ -112,6 +112,8 @@ To Do
 
 This implementation is made at Python level, and some parts of the algorithm
 could be rewritten in Cython to save time. Especially when enumerating all pairs
+of edges and computing their distances. This can easily be done in C with the
+functions from the :mod:`sage.graphs.distances_all_pairs` module.
 
 Methods
 -------
