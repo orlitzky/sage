@@ -256,7 +256,6 @@ def is_cartesian_product(g, certificate=False, relabeling=False, immutable=None)
     cdef dict vertex_to_int = {vert: i for i, vert in enumerate(int_to_vertex)}
     g_int = g.relabel(perm=vertex_to_int, inplace=False)
  
-
     # Reorder the vertices of an edge
     def r(x, y):
         return (x, y) if x < y else (y, x)
@@ -292,22 +291,12 @@ def is_cartesian_product(g, certificate=False, relabeling=False, immutable=None)
                 else:
                     break
 
-            # If uv is an edge
-            if g_int.has_edge(u, v):
-                for x in intersect:
-                    ds.union(r(u, x), r(v, x))
-
-            # Only one common neighbor
-            elif len(intersect) == 1:
-                x = intersect.pop()
-                ds.union(r(u, x), r(v, x))
-
-            # Exactly 2 neighbors
-            elif len(intersect) == 2:
+            # Special case: uv is not an edge and exactly 2 common neighbors
+            if len(intersect) == 2 and not g_int.has_edge(u, v):
                 x, y = intersect
                 ds.union(r(u, x), r(v, y))
                 ds.union(r(v, x), r(u, y))
-            # More
+            # All other cases: union with all common neighbors
             else:
                 for x in intersect:
                     ds.union(r(u, x), r(v, x))
@@ -327,13 +316,13 @@ def is_cartesian_product(g, certificate=False, relabeling=False, immutable=None)
             if du[uu] + dv[vv] != du[vv] + dv[uu]:
                 ds.union(r(u, v), r(uu, vv))
 
+    # Only one connected component ? Check before building edges
+    if ds.number_of_subsets() == 1:
+        return (False, None) if relabeling else False
+
     # Gathering the connected components, relabeling the vertices on-the-fly
     edges = [[(int_to_vertex[u], int_to_vertex[v]) for u, v in cc]
              for cc in ds]
-
-    # Only one connected component ?
-    if len(edges) == 1:
-        return (False, None) if relabeling else False
 
     if immutable is None:
         immutable = g.is_immutable()
@@ -342,7 +331,10 @@ def is_cartesian_product(g, certificate=False, relabeling=False, immutable=None)
     cdef list factors = []
     for cc in edges:
         tmp = Graph(cc, format='list_of_edges', immutable=immutable)
-        factors.append(tmp.subgraph(vertices=tmp.connected_components(sort=False)[0]))
+        if tmp.is_connected():
+            factors.append(tmp)
+        else:
+            factors.append(tmp.subgraph(vertices=tmp.connected_components(sort=False)[0]))
 
     # Computing the product of these graphs
     answer = factors[0]
