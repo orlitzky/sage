@@ -79,7 +79,9 @@ from sage.rings.species import (_label_sets,
 from sage.data_structures.stream import (Stream_zero,
                                          Stream_exact,
                                          Stream_truncated,
-                                         Stream_function)
+                                         Stream_function,
+                                         Stream_map_coefficients,
+                                         Stream_shift)
 from sage.categories.tensor import tensor
 from sage.combinat.integer_vector import IntegerVectors
 from sage.combinat.subset import subsets
@@ -1953,19 +1955,29 @@ class DerivativeSpeciesElement(LazyCombinatorialSpeciesElement):
             sage: D[3] == (2*X*E2 + X^3)[3]
             True
             sage: TestSuite(D).run(skip=['_test_category', '_test_pickling'])
+
+        A derivative of an undefined species retains the dependency on its
+        coefficient stream::
+
+            sage: A = L.undefined()
+            sage: dA = A.derivative()
+            sage: M = dA._coeff_stream.input_streams()[0]
+            sage: M.input_streams()[0] is A._coeff_stream
+            True
         """
         if F.parent()._arity != 1:
             raise NotImplementedError("derivative is not yet implemented for multisort species")
 
         self._F = F
 
-        coeff_stream = Stream_function(
-            lambda n: F[n + 1].derivative(),
-            F.parent()._sparse,
-            max(F._coeff_stream._approximate_order - 1, 0),
+        P = F.parent()
+        coeff_stream = Stream_map_coefficients(
+            F._coeff_stream,
+            lambda c: c.derivative(),
+            P._sparse,
         )
-        super().__init__(F.parent(), coeff_stream)
-
+        coeff_stream = Stream_shift(coeff_stream, -1)
+        super().__init__(P, coeff_stream)
     def generating_series(self):
         r"""
         Return the exponential generating series of ``self``.
