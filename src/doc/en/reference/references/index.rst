@@ -4674,7 +4674,7 @@ REFERENCES:
 .. [Labelle2008] \G. Labelle. *New combinatorial computational methods
                  arising from pseudo-singletons.* DMTCS Proceedings 1, 2008.
 
-.. [Labelle2013] Labelle, Gilbert. *The explicit molecular expansion
+.. [Labelle2013] Gilbert Labelle. *The explicit molecular expansion
              of the combinatorial logarithm*, in FPSAC 2013, Paris,
              DMTCS Proceedings 2013, 361-372 (2013).
 

@@ -3931,7 +3931,7 @@ class LazySymmetricFunctions(LazyCompletionGradedAlgebra):
         def coefficient(n):
             if n == 0:
                 return p.zero()
-            return sum(moebius(d) * (-1) ** (k - 1) * p([d] * k)
+            return sum(moebius(d) * (-1)**(k - 1) * p([d] * k)
                        for d in divisors(n) if (k := n // d)) // n
 
         return self(coefficient)
