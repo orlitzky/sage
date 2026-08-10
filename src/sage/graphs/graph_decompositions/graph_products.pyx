@@ -331,10 +331,11 @@ def is_cartesian_product(g, certificate=False, relabeling=False, immutable=None)
     cdef list factors = []
     for cc in edges:
         tmp = Graph(cc, format='list_of_edges', immutable=immutable)
-        if tmp.is_connected():
+        comps = tmp.connected_components(sort=False)
+        if len(comps) == 1:
             factors.append(tmp)
         else:
-            factors.append(tmp.subgraph(vertices=tmp.connected_components(sort=False)[0]))
+            factors.append(tmp.subgraph(vertices=comps[0]))
 
     # Computing the product of these graphs
     answer = factors[0]
