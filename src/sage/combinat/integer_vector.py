@@ -1655,11 +1655,6 @@ class IntegerVectorsConstraints(IntegerVectors):
         if self.n is not None and sum(x) != self.n:
             return False
 
-        # Check for conflicting min_length when length=0
-        if self.constraints.get('length') == 0:
-            if self.constraints.get('min_length', 0) > 0:
-                return False
-
         from sage.combinat.misc import check_integer_list_constraints
         return check_integer_list_constraints(
             x, singleton=True, **self.constraints
@@ -1710,11 +1705,11 @@ class IntegerVectorsConstraints(IntegerVectors):
             []
             sage: R = IntegerVectors(0, length=0, min_length=1)
             sage: [] in R
-            False
+            True
             sage: R.cardinality()
-            0
+            1
             sage: list(R)
-            []
+            [[]]
         """
         # Handle zero-length cases
         zero_length = (
@@ -1724,9 +1719,6 @@ class IntegerVectorsConstraints(IntegerVectors):
         if zero_length:
             if self.constraints.get('length') == 0:
                 if self.n is not None and self.n != 0:
-                    return Integer(0)
-                # Check for conflicting min_length
-                if self.constraints.get('min_length', 0) > 0:
                     return Integer(0)
                 return Integer(1)
             if self.constraints.get('max_length') == 0:
@@ -1826,7 +1818,7 @@ class IntegerVectorsConstraints(IntegerVectors):
             [[]]
             sage: R = IntegerVectors(0, length=0, min_length=1)
             sage: list(R)
-            []
+            [[]]
         """
         # Handle zero-length cases
         zero_length = (
@@ -1836,9 +1828,6 @@ class IntegerVectorsConstraints(IntegerVectors):
         if zero_length:
             if self.constraints.get('length') == 0:
                 if self.n is not None and self.n != 0:
-                    return
-                # Check for conflicting min_length
-                if self.constraints.get('min_length', 0) > 0:
                     return
                 yield self.element_class(self, [], check=False)
                 return
