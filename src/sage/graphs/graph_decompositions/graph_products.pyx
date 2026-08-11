@@ -255,7 +255,7 @@ def is_cartesian_product(g, certificate=False, relabeling=False, immutable=None)
     cdef list int_to_vertex = list(g)
     cdef dict vertex_to_int = {vert: i for i, vert in enumerate(int_to_vertex)}
     g_int = g.relabel(perm=vertex_to_int, inplace=False)
- 
+
     # Reorder the vertices of an edge
     def r(x, y):
         return (x, y) if x < y else (y, x)
