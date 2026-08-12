@@ -783,12 +783,22 @@ def mrrw2_bound_asymp(delta, q):
         sage: codes.bounds.mrrw2_bound_asymp(1/10, 2)  # abs tol 1e-12                  # needs scipy
         0.692740743078879
 
+    At ``delta=0.3``, the right endpoint supplies the minimum::
+
+        sage: codes.bounds.mrrw2_bound_asymp(RDF('0.3'), 2)  # abs tol 1e-12             # needs scipy
+        0.2502249116110706
+
     At the endpoints the asymptotic bound is one and zero, respectively::
 
         sage: codes.bounds.mrrw2_bound_asymp(0, 2)
         1.0
         sage: codes.bounds.mrrw2_bound_asymp(1/2, 2)
         0.0
+
+    Values below the upper endpoint remain positive::
+
+        sage: codes.bounds.mrrw2_bound_asymp(RDF('0.499999994'), 2) > 0                 # needs scipy
+        True
 
     The second bound is only known for binary codes::
 
@@ -821,10 +831,14 @@ def mrrw2_bound_asymp(delta, q):
         return RDF(0)
 
     def g(x):
-        return RDF(entropy((1 - sqrt(1 - x)) / 2, 2))
+        x = RDF(x)
+        s = sqrt(1 - x)
+        return RDF(entropy(x / (2 * (1 + s)), 2))
 
     def objective(u):
-        return 1 + g(u**2) - g(u**2 + 2*delta*u + 2*delta)
+        a = u**2
+        b = a + 2*delta*u + 2*delta
+        return g(a) + (1 - g(b))
 
     from scipy.optimize import minimize_scalar
     upper = 1 - 2*delta
@@ -832,6 +846,5 @@ def mrrw2_bound_asymp(delta, q):
                              options={'xatol': 1e-12})
     if not result.success:
         raise RuntimeError("unable to minimize the second MRRW bound")
-    # At the upper endpoint the expression is the first MRRW bound.
-    upper_value = mrrw1_bound_asymp(delta, 2)
+    upper_value = g(upper**2)
     return RDF(min(objective(0), result.fun, upper_value))
