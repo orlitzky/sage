@@ -1720,7 +1720,7 @@ def minimal_separators(G, forbidden_vertices=None):
                         to_explore.append(frozenset(nh))
 
 
-@rename_keyword(deprecation=99999, implementation='algorithm')
+@rename_keyword(deprecation=42652, implementation='algorithm')
 def edge_connectivity(G,
                       value_only=True,
                       algorithm=None,
@@ -1919,7 +1919,7 @@ def edge_connectivity(G,
         sage: edge_connectivity(graphs.PetersenGraph(), implementation='sage')
         doctest:warning...
         DeprecationWarning: use the option 'algorithm' instead of 'implementation'
-        See https://github.com/sagemath/sage/issues/99999 for details.
+        See https://github.com/sagemath/sage/issues/42652 for details.
         3
 
     TESTS:
