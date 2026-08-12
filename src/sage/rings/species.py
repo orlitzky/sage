@@ -1826,7 +1826,7 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                         atoms[B] += e * f
             return M(atoms, check=False)
 
-        def derivative(self):
+        def derivative(self, variable=None):
             r"""
             Return the derivative of ``self``.
 
@@ -1834,7 +1834,9 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
             Section 2.6 in [BLL1998]_.
 
             Note that the result is a polynomial species rather than
-            a molecular species.
+            a molecular species. When the parent is unisort, ``variable`` may
+            be omitted. For a multisort parent, ``variable`` must be a sort
+            generator of the parent.
 
             EXAMPLES::
 
@@ -1849,20 +1851,74 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                 sage: (X*E2).derivative().is_molecular()
                 False
 
+            Partial derivatives of multisort species are obtained by specifying
+            a sort generator::
+
+                sage: M = MolecularSpecies("X, Y")
+                sage: X = M(SymmetricGroup(1), {0: [1]})
+                sage: Y = M(SymmetricGroup(1), {1: [1]})
+                sage: G = PermutationGroup([[(1,2), (3,4)]])
+                sage: F = M(G, {0: [1,2], 1: [3,4]})
+                sage: F
+                E_2(X*Y)
+                sage: F.derivative(X)
+                X*Y^2
+                sage: F.derivative(Y)
+                X^2*Y
+                sage: X.derivative(Y)
+                0
+
             TESTS::
 
+                sage: F.derivative()
+                Traceback (most recent call last):
+                ...
+                ValueError: the derivative variable must be specified for multisort species
+                sage: F.derivative(X*Y)
+                Traceback (most recent call last):
+                ...
+                ValueError: the derivative variable must be a sort generator of the parent
                 sage: M = MolecularSpecies("X")
                 sage: [sum(1 for m in M.subset(n) if m.derivative().is_molecular()) for n in range(1, 7)]
                 [1, 1, 2, 5, 5, 16]
                 sage: oeis(_) # optional - internet
                 0: A002106: Number of transitive permutation groups of degree n.
             """
+            M = self.parent()
+            if variable is None:
+                if M._arity != 1:
+                    raise ValueError("the derivative variable must be specified for multisort species")
+                sort = 0
+            else:
+                variables = tuple( M(SymmetricGroup(1), {i: [1]}) for i in range(M._arity))
+                if parent(variable) is not M or variable not in variables:
+                    raise ValueError("the derivative variable must be a sort generator of the parent")
+                sort = variables.index(variable)
+            return self._derivative_with_respect_to_sort(sort)
+
+        def _derivative_with_respect_to_sort(self, sort):
+            r"""
+            Return the derivative with respect to the sort indexed by ``sort``.
+
+            This method assumes that ``sort`` is a valid zero-based sort index.
+
+            TESTS::
+
+                sage: from sage.rings.species import MolecularSpecies
+                sage: M = MolecularSpecies("X, Y")
+                sage: G = PermutationGroup([[(1,2), (3,4)]])
+                sage: F = M(G, {0: [1,2], 1: [3,4]})
+                sage: F._derivative_with_respect_to_sort(0)
+                X*Y^2
+                sage: F._derivative_with_respect_to_sort(1)
+                X^2*Y
+            """
             def delete_point_from_permutation(g, r, m):
                 r"""
-                Delete the fixed point `r` from a permutation of `\{1,\dots, m\}`.
+                Delete the fixed point `r` from a permutation of `\{1,\dots,m\}`.
 
-                The permutation `g` is assumed to fix `r`. The remaining points are
-                relabelled increasingly in `{1,\dots, m - 1}`.
+                The permutation `g` is assumed to fix `r`. The remaining points are 
+                relabelled increasingly in `\{1,\dots,m-1\}`.
                 """
                 relabel = {i: i if i < r else i - 1 for i in range(1, m + 1) if i != r}
                 cycles = []
@@ -1875,18 +1931,19 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                 return tuple(cycles)
 
             M = self.parent()
-            if M._arity != 1:
-                raise NotImplementedError("derivative is not yet implemented for multisort species")
             P = PolynomialSpecies(ZZ, M._indices._names)
             m = sum(self.grade())
-            if m == 0:
+            if self.grade()[sort] == 0:
                 return P.zero()
             if m == 1:
                 return P.one()
-            H, _ = self.permutation_group()
+
+            H, dompart = self.permutation_group()
             ans = P.zero()
             for orbit in H.orbits():
                 r = min(orbit)
+                if r not in dompart[sort]:
+                    continue
                 H_r = libgap.Stabilizer(H.gap(), r)
                 gens = []
                 for g in H_r.GeneratorsOfGroup().sage():
@@ -1894,7 +1951,11 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                     if cycles:
                         gens.append(cycles)
                 H_r_star = PermutationGroup(gens, domain=range(1, m))
-                ans += P(M(H_r_star))
+
+                new_dompart = { i: [ point if point < r else point - 1 for point in block if point != r ]
+                    for i, block in enumerate(dompart)
+                }
+                ans += P(M(H_r_star, new_dompart, check=False))
             return ans
 
         def structures(self, *labels):
