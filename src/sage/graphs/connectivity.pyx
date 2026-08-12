@@ -1951,7 +1951,6 @@ def edge_connectivity(G,
     if not isinstance(G, GenericGraph):
         raise TypeError("the input must be a Sage graph")
 
-    G._scream_if_not_simple(allow_loops=True, allow_multiple_edges=True)
     g = G
 
     if vertices:
