@@ -1759,7 +1759,9 @@ def edge_connectivity(G,
 
       - ``'boost'`` -- use the Boost graph library (which is much more
         efficient). It is not available when ``edge_labels=True``, and it is
-        unreliable for directed graphs (see :issue:`18753`).
+        rejected for directed graphs: the Boost implementation is for
+        undirected graphs only and returns wrong values on digraphs (see
+        :issue:`18753`).
 
       - ``'Sage'`` -- use Sage's implementation based on integer linear
         programming
@@ -1861,25 +1863,19 @@ def edge_connectivity(G,
         ....:    == edge_connectivity(g, implementation='sage'))
         True
 
-    Boost interface also works with directed graphs::
-
-        sage: edge_connectivity(digraphs.Circuit(10), implementation='boost',
-        ....:                   vertices=True)
-        [1, [(0, 1)], [{0}, {1, 2, 3, 4, 5, 6, 7, 8, 9}]]
-
-    However, the Boost algorithm is not reliable if the input is directed
-    (see :issue:`18753`)::
+    The Boost implementation is for undirected graphs only. It considers a
+    digraph as undirected and therefore returns wrong values, so it is
+    rejected (see :issue:`18753`)::
 
         sage: g = digraphs.Path(3)
         sage: edge_connectivity(g)
         0.0
         sage: edge_connectivity(g, implementation='boost')
-        1
-        sage: g.add_edge(1, 0)
-        sage: edge_connectivity(g)
-        0.0
-        sage: edge_connectivity(g, implementation='boost')
-        0
+        Traceback (most recent call last):
+        ...
+        ValueError: the Boost implementation of the edge connectivity is for
+        undirected graphs only and returns wrong values on digraphs, see
+        https://github.com/sagemath/sage/issues/18753
 
     TESTS:
 
@@ -1927,6 +1923,10 @@ def edge_connectivity(G,
         raise ValueError("'implementation' must be set to 'boost', 'sage' or None.")
     elif implementation == "boost" and use_edge_labels:
         raise ValueError("the Boost implementation is currently not able to handle edge labels")
+    elif implementation == "boost" and g.is_directed():
+        raise ValueError("the Boost implementation of the edge connectivity is for "
+                         "undirected graphs only and returns wrong values on digraphs, "
+                         "see https://github.com/sagemath/sage/issues/18753")
 
     # Otherwise, an error is created
     if not g.n_edges() or not g.n_vertices():
