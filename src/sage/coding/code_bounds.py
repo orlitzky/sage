@@ -163,16 +163,21 @@ PROBLEM: In this module we shall typically either (a) seek bounds on `k`, given
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.arith.misc import binomial, is_prime_power
-from sage.features.gap import GapPackage
-from sage.misc.functional import sqrt, log
+from math import log1p
+
 from sage.misc.lazy_import import lazy_import
-from sage.rings.integer_ring import ZZ
-from sage.rings.rational_field import QQ
 from sage.rings.real_double import RDF
 
-from .delsarte_bounds import (delsarte_bound_hamming_space,
-                              delsarte_bound_additive_hamming_space)
+from sage.arith.misc import binomial, is_prime_power
+from sage.features.gap import GapPackage
+from sage.misc.functional import log, sqrt
+from sage.rings.integer_ring import ZZ
+from sage.rings.rational_field import QQ
+
+from .delsarte_bounds import (
+    delsarte_bound_additive_hamming_space,
+    delsarte_bound_hamming_space,
+)
 
 lazy_import('sage.libs.gap.libgap', 'libgap')
 
@@ -795,10 +800,12 @@ def mrrw2_bound_asymp(delta, q):
         sage: codes.bounds.mrrw2_bound_asymp(1/2, 2)
         0.0
 
-    Values below the upper endpoint remain positive::
+    Values below the upper endpoint retain their numerical accuracy::
 
-        sage: codes.bounds.mrrw2_bound_asymp(RDF('0.499999994'), 2) > 0                 # needs scipy
-        True
+        sage: codes.bounds.mrrw2_bound_asymp(RDF('0.499999994'), 2)  # abs tol 1e-27    # needs scipy
+        2.018429124836941e-15
+        sage: codes.bounds.mrrw2_bound_asymp(1/2 - 2^-100, 2)  # abs tol 1e-70          # needs scipy
+        1.2535809688529749e-58
 
     The second bound is only known for binary codes::
 
@@ -817,31 +824,54 @@ def mrrw2_bound_asymp(delta, q):
         Traceback (most recent call last):
         ...
         ValueError: the relative minimum distance must be between 0 and 1/2
+        sage: codes.bounds.mrrw2_bound_asymp(1/2 + 2^-100, 2)
+        Traceback (most recent call last):
+        ...
+        ValueError: the relative minimum distance must be between 0 and 1/2
     """
     if q != 2:
         raise NotImplementedError("the second MRRW bound is only implemented "
                                   "for binary codes")
-    delta = RDF(delta)
-    if delta < 0 or delta > 0.5:
+    twice_delta = 2*delta
+    if twice_delta < 0 or twice_delta > 1:
         raise ValueError("the relative minimum distance must be between 0 "
                          "and 1/2")
-    if delta == 0:
+    if twice_delta == 0:
         return RDF(1)
-    if delta == 0.5:
+    if twice_delta == 1:
         return RDF(0)
+    upper = RDF(1 - twice_delta)
+    log_two = RDF.log2()
+
+    def binary_entropy(p):
+        if p == 0:
+            return RDF(0)
+        return RDF((-p*log(p) + (p - 1)*log1p(-p)) / log_two)
 
     def g(x):
         x = RDF(x)
         s = sqrt(1 - x)
-        return RDF(entropy(x / (2 * (1 + s)), 2))
+        return binary_entropy(x / (2 * (1 + s)))
+
+    def one_minus_g(y):
+        y = RDF(y)
+        if y == 0:
+            return RDF(0)
+        if y == 1:
+            return RDF(1)
+        t = sqrt(y)
+        if y < 0.5:
+            value = log1p(-y) + t*(log1p(t) - log1p(-t))
+        else:
+            value = (1 - t)*log1p(-t) + (1 + t)*log1p(t)
+        return RDF(value / (2*log_two))
 
     def objective(u):
         a = u**2
-        b = a + 2*delta*u + 2*delta
-        return g(a) + (1 - g(b))
+        y = (1 + u) * (upper - u)
+        return g(a) + one_minus_g(y)
 
     from scipy.optimize import minimize_scalar
-    upper = 1 - 2*delta
     result = minimize_scalar(objective, bounds=(0, upper), method='bounded',
                              options={'xatol': 1e-12})
     if not result.success:
