@@ -1917,7 +1917,7 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                 r"""
                 Delete the fixed point `r` from a permutation of `\{1,\dots,m\}`.
 
-                The permutation `g` is assumed to fix `r`. The remaining points are 
+                The permutation `g` is assumed to fix `r`. The remaining points are
                 relabelled increasingly in `\{1,\dots,m-1\}`.
                 """
                 relabel = {i: i if i < r else i - 1 for i in range(1, m + 1) if i != r}
