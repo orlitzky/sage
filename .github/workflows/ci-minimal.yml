@@ -91,9 +91,13 @@ jobs:
       # code are bypassing the feature framework and e.g. attempting
       # to detect an optional package with an import statement. We want
       # those to fail as well.
+      #
+      # TODO: remove the --force after the pinned version of linbox has
+      # been updated so that it no longer erroneously depends on m4rie.
+      #
       - name: Remove optional packages from Conda environment
         shell: bash -l {0}
-        run: conda remove bliss libbraiding libhomfly m4rie rw sirocco
+        run: conda remove --force bliss libbraiding libhomfly m4rie rw sirocco
 
       - name: Print Conda environment
         shell: bash -l {0}
