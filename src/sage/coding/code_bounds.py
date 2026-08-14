@@ -163,7 +163,7 @@ PROBLEM: In this module we shall typically either (a) seek bounds on `k`, given
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from math import log1p
+from math import exp, log1p
 
 from sage.misc.lazy_import import lazy_import
 from sage.rings.real_double import RDF
@@ -797,15 +797,23 @@ def mrrw2_bound_asymp(delta, q):
 
         sage: codes.bounds.mrrw2_bound_asymp(0, 2)
         1.0
+        sage: codes.bounds.mrrw2_bound_asymp(2^-60, 2)
+        1.0
         sage: codes.bounds.mrrw2_bound_asymp(1/2, 2)
         0.0
 
     Values below the upper endpoint retain their numerical accuracy::
 
-        sage: codes.bounds.mrrw2_bound_asymp(RDF('0.499999994'), 2)  # abs tol 1e-27    # needs scipy
+        sage: # needs scipy
+        sage: codes.bounds.mrrw2_bound_asymp(RDF('0.499999994'), 2)  # abs tol 1e-27
         2.018429124836941e-15
-        sage: codes.bounds.mrrw2_bound_asymp(1/2 - 2^-100, 2)  # abs tol 1e-70          # needs scipy
+        sage: codes.bounds.mrrw2_bound_asymp(1/2 - 2^-100, 2)  # abs tol 1e-70
         1.2535809688529749e-58
+        sage: codes.bounds.mrrw2_bound_asymp(1/2 - 2^-538, 2) > 0
+        True
+        sage: all(codes.bounds.mrrw2_bound_asymp(1/2 - 2^-n, 2) > 0
+        ....:     for n in range(539, 543))
+        True
 
     The second bound is only known for binary codes::
 
@@ -841,17 +849,31 @@ def mrrw2_bound_asymp(delta, q):
     if twice_delta == 1:
         return RDF(0)
     upper = RDF(1 - twice_delta)
+    if upper == 1:
+        return RDF(1)
     log_two = RDF.log2()
+    smallest_normal = RDF(2)**-1022
 
     def binary_entropy(p):
         if p == 0:
             return RDF(0)
         return RDF((-p*log(p) + (p - 1)*log1p(-p)) / log_two)
 
-    def g(x):
+    def binary_entropy_from_log_p(log_p):
+        # H_2(p) = p*(1 - log(p))/log(2) + O(p^2), and the error is below
+        # the range of RDF here.
+        log_entropy = log_p + log(1 - log_p) - log(log_two)
+        return RDF(exp(log_entropy))
+
+    def g(x, log_x=None):
         x = RDF(x)
         s = sqrt(1 - x)
-        return binary_entropy(x / (2 * (1 + s)))
+        p = x / (2 * (1 + s))
+        if p < smallest_normal and (x != 0 or log_x is not None):
+            if log_x is None:
+                log_x = log(x)
+            return binary_entropy_from_log_p(log_x - 2*log_two)
+        return binary_entropy(p)
 
     def one_minus_g(y):
         y = RDF(y)
@@ -876,5 +898,5 @@ def mrrw2_bound_asymp(delta, q):
                              options={'xatol': 1e-12})
     if not result.success:
         raise RuntimeError("unable to minimize the second MRRW bound")
-    upper_value = g(upper**2)
+    upper_value = g(upper**2, 2*log(upper))
     return RDF(min(objective(0), result.fun, upper_value))
