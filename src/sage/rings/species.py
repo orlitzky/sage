@@ -2159,7 +2159,7 @@ class PolynomialSpeciesElement(CombinatorialFreeModule.Element):
             result += c * result_m
         return result
 
-    def derivative(self):
+    def derivative(self, variable=None):
         r"""
         Return the derivative of ``self``.
 
@@ -2175,11 +2175,24 @@ class PolynomialSpeciesElement(CombinatorialFreeModule.Element):
             1 + 2*X*E_2
             sage: E2(E2).derivative()
             X*E_2
+            sage: P.<X, Y> = PolynomialSpecies(QQ)
+            sage: F = X^2 + 2*Y
+            sage: F.derivative(X)
+            2*X
+            sage: F.derivative(Y)
+            2
         """
         P = self.parent()
-        if P._arity != 1:
-            raise NotImplementedError("derivative is not yet implemented for multisort species")
-        return sum((c * P(M.derivative()) for M, c in self.monomial_coefficients().items()),
+        if variable is None:
+            if P._arity != 1:
+                raise ValueError("the derivative variable must be specified for multisort species")
+            sort = 0
+        else:
+            variables = tuple(P(SymmetricGroup(1), {i: [1]}) for i in range(P._arity))
+            if parent(variable) is not P or variable not in variables:
+                raise ValueError("the derivative variable must be a sort generator of the parent")
+            sort = variables.index(variable)
+        return sum((c * P(M._derivative_with_respect_to_sort(sort)) for M, c in self.monomial_coefficients().items()),
                     P.zero())
 
     def hadamard_product(self, other):
