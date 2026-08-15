@@ -53,6 +53,7 @@ from sage.groups.perm_gps.permgroup import PermutationGroup, PermutationGroup_ge
 from sage.groups.perm_gps.permgroup_named import SymmetricGroup
 from sage.libs.gap.libgap import libgap
 from sage.misc.cachefunc import cached_method, cached_function
+from sage.misc.derivative import derivative_parse, multi_derivative
 from sage.misc.fast_methods import WithEqualityById
 from sage.misc.inherit_comparison import InheritComparisonClasscallMetaclass
 from sage.misc.misc_c import prod
@@ -1826,7 +1827,7 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                         atoms[B] += e * f
             return M(atoms, check=False)
 
-        def derivative(self, variable=None):
+        def derivative(self, *args):
             r"""
             Return the derivative of ``self``.
 
@@ -1834,9 +1835,10 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
             Section 2.6 in [BLL1998]_.
 
             Note that the result is a polynomial species rather than
-            a molecular species. When the parent is unisort, ``variable`` may
-            be omitted. For a multisort parent, ``variable`` must be a sort
-            generator of the parent.
+            a molecular species. The arguments follow Sage's standard derivative
+            syntax (see :func:`sage.misc.derivative.derivative_parse`). The sort
+            generator may be omitted if the parent is unisort. It
+            must be specified if the parent is Multisort.
 
             EXAMPLES::
 
@@ -1867,6 +1869,14 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                 X^2*Y
                 sage: X.derivative(Y)
                 0
+                sage: F.derivative(X, 2)
+                Y^2
+                sage: F.derivative(X, Y)
+                2*X*Y
+                sage: F.derivative([X, Y])
+                2*X*Y
+                sage: F.derivative(0) == F
+                True
 
             TESTS::
 
@@ -1885,14 +1895,57 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                 0: A002106: Number of transitive permutation groups of degree n.
             """
             M = self.parent()
+            variables = tuple(M(SymmetricGroup(1), {i: [1]}) for i in range(M._arity))
+            sorts = []
+            for variable in derivative_parse(args):
+                if variable is None:
+                    if M._arity != 1:
+                        raise ValueError(
+                            "the derivative variable must be specified for multisort species"
+                            )
+                    sort = 0
+                else:
+                    if parent(variable) is not M or variable not in variables:
+                        raise ValueError(
+                            "the derivative variable must be a sort generator of the parent"
+                            )
+                    sort = variables.index(variable)
+                sorts.append(sort)
+
+            result = self
+            for sort in sorts:
+                current_parent = result.parent()
+                current_variable = current_parent(SymmetricGroup(1), {sort: [1]})
+                result = result._derivative(current_variable)
+            return result
+
+        def _derivative(self, variable=None):
+            r"""
+            Return the derivative of ``self`` with respect to one variable.
+
+            TESTS::
+
+                sage: from sage.rings.species import MolecularSpecies
+                sage: M = MolecularSpecies("X")
+                sage: X = M(SymmetricGroup(1))
+                sage: (X^2)._derivative(X)
+                2*X
+            """
+            M = self.parent()
+            variables = tuple(
+                M(SymmetricGroup(1), {i: [1]}) for i in range(M._arity)
+            )
             if variable is None:
                 if M._arity != 1:
-                    raise ValueError("the derivative variable must be specified for multisort species")
+                    raise ValueError(
+                        "the derivative variable must be specified for multisort species"
+                    )
                 sort = 0
             else:
-                variables = tuple( M(SymmetricGroup(1), {i: [1]}) for i in range(M._arity))
                 if parent(variable) is not M or variable not in variables:
-                    raise ValueError("the derivative variable must be a sort generator of the parent")
+                    raise ValueError(
+                        "the derivative variable must be a sort generator of the parent"
+                    )
                 sort = variables.index(variable)
             return self._derivative_with_respect_to_sort(sort)
 
@@ -2159,9 +2212,46 @@ class PolynomialSpeciesElement(CombinatorialFreeModule.Element):
             result += c * result_m
         return result
 
-    def derivative(self, variable=None):
+    def derivative(self, *args):
         r"""
         Return the derivative of ``self``.
+
+        TESTS::
+
+            sage: from sage.rings.species import PolynomialSpecies
+            sage: P = PolynomialSpecies(QQ, ["X"])
+            sage: X = P(SymmetricGroup(1))
+            sage: E2 = P(SymmetricGroup(2))
+            sage: (X^3).derivative()
+            3*X^2
+            sage: (E2^2 + X).derivative()
+            1 + 2*X*E_2
+            sage: E2(E2).derivative()
+            X*E_2
+            sage: (X^3).derivative(2)
+            6*X
+
+            sage: P.<X, Y> = PolynomialSpecies(QQ)
+            sage: F = X^2 + 2*Y
+            sage: F.derivative(X)
+            2*X
+            sage: F.derivative(Y)
+            2
+            sage: G = X^2*Y^2
+            sage: G.derivative(X, 2)
+            2*Y^2
+            sage: G.derivative(X, Y)
+            4*X*Y
+            sage: G.derivative([X, Y])
+            4*X*Y
+            sage: G.derivative(0) == G
+            True
+        """
+        return multi_derivative(self, args)
+
+    def _derivative(self, variable=None):
+        r"""
+        Return the derivative of ``self`` with respect to one variable.
 
         TESTS::
 
