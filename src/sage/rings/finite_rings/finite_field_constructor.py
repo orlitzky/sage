@@ -508,6 +508,21 @@ class FiniteFieldFactory(UniqueFactory):
     # static type checkers can infer the return type of ``GF``.  The
     # behavior is identical to the ``UniqueFactory`` base implementation.
     def __call__(self, *args, **kwds) -> FiniteField:
+        """
+        TESTS:
+
+        The return annotation matches the runtime type for every backend::
+
+            sage: import typing
+            sage: from sage.rings.finite_rings.finite_field_base import FiniteField
+            sage: typing.get_type_hints(type(GF).__call__)['return'] is FiniteField
+            True
+            sage: all(isinstance(GF(2**8, 'a', implementation=impl), FiniteField)
+            ....:     for impl in ('givaro', 'ntl', 'pari_ffelt'))
+            True
+            sage: isinstance(GF(29), FiniteField)
+            True
+        """
         return super().__call__(*args, **kwds)
 
     def __init__(self, *args, **kwds):

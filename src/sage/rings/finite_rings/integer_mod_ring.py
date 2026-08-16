@@ -209,6 +209,22 @@ class IntegerModFactory(UniqueFactory):
     # and its aliases.  The behavior is identical to the ``UniqueFactory``
     # base implementation.
     def __call__(self, *args, **kwds) -> "IntegerModRing_generic | integer_ring.IntegerRing_class":
+        """
+        TESTS:
+
+        The return annotation matches the runtime type::
+
+            sage: import typing
+            sage: from sage.rings.finite_rings.integer_mod_ring import IntegerModRing_generic
+            sage: from sage.rings.integer_ring import IntegerRing_class
+            sage: typing.get_type_hints(type(Zmod).__call__)['return'] == \
+            ....:     (IntegerModRing_generic | IntegerRing_class)
+            True
+            sage: isinstance(Zmod(29), IntegerModRing_generic)
+            True
+            sage: isinstance(Integers(0), IntegerRing_class)
+            True
+        """
         return super().__call__(*args, **kwds)
 
     def get_object(self, version, key, extra_args):
