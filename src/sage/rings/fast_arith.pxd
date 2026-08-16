@@ -3,6 +3,8 @@ cimport cython
 
 cpdef prime_range(start, stop=*, algorithm=*, bint py_ints=*)
 
+# Declaring these helper classes final avoids vtable lookups in generated code;
+# it is a performance optimization, not an object-oriented design decision.
 @cython.final
 cdef class arith_int:
     cdef int abs_int(self, int x) except -1
