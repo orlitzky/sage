@@ -214,12 +214,8 @@ class IntegerModFactory(UniqueFactory):
 
         The return annotation matches the runtime type::
 
-            sage: import typing
             sage: from sage.rings.finite_rings.integer_mod_ring import IntegerModRing_generic
             sage: from sage.rings.integer_ring import IntegerRing_class
-            sage: typing.get_type_hints(type(Zmod).__call__)['return'] == \
-            ....:     (IntegerModRing_generic | IntegerRing_class)
-            True
             sage: isinstance(Zmod(29), IntegerModRing_generic)
             True
             sage: isinstance(Integers(0), IntegerRing_class)

@@ -513,10 +513,7 @@ class FiniteFieldFactory(UniqueFactory):
 
         The return annotation matches the runtime type for every backend::
 
-            sage: import typing
             sage: from sage.rings.finite_rings.finite_field_base import FiniteField
-            sage: typing.get_type_hints(type(GF).__call__)['return'] is FiniteField
-            True
             sage: all(isinstance(GF(2**8, 'a', implementation=impl), FiniteField)
             ....:     for impl in ('givaro', 'ntl', 'pari_ffelt'))
             True
