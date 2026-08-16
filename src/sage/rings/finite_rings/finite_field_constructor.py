@@ -176,6 +176,7 @@ from collections import defaultdict
 from sage.structure.category_object import normalize_names, certify_names
 from sage.rings.polynomial.polynomial_element import Polynomial
 from sage.rings.integer import Integer
+from sage.rings.finite_rings.finite_field_base import FiniteField
 
 try:
     # We don't late import this because this means trouble with the Givaro library
@@ -503,6 +504,9 @@ class FiniteFieldFactory(UniqueFactory):
         sage: GF(5, 2) is GF((5, 2))
         True
     """
+    def __call__(self, *args, **kwds) -> FiniteField:
+        return super().__call__(*args, **kwds)
+
     def __init__(self, *args, **kwds):
         """
         Initialization.

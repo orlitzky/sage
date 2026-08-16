@@ -204,6 +204,9 @@ class IntegerModFactory(UniqueFactory):
 
         sage: IntegerModRing._cache.clear()
     """
+    def __call__(self, *args, **kwds) -> "IntegerModRing_generic | integer_ring.IntegerRing_class":
+        return super().__call__(*args, **kwds)
+
     def get_object(self, version, key, extra_args):
         out = super().get_object(version, key, extra_args)
         category = extra_args.get('category', None)
