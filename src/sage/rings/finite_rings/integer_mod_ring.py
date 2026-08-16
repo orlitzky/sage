@@ -204,6 +204,10 @@ class IntegerModFactory(UniqueFactory):
 
         sage: IntegerModRing._cache.clear()
     """
+    # This override is only there for the typing info: it exists so that
+    # static type checkers can infer the return type of ``IntegerModRing``
+    # and its aliases.  The behavior is identical to the ``UniqueFactory``
+    # base implementation.
     def __call__(self, *args, **kwds) -> "IntegerModRing_generic | integer_ring.IntegerRing_class":
         return super().__call__(*args, **kwds)
 

@@ -504,6 +504,9 @@ class FiniteFieldFactory(UniqueFactory):
         sage: GF(5, 2) is GF((5, 2))
         True
     """
+    # This override is only there for the typing info: it exists so that
+    # static type checkers can infer the return type of ``GF``.  The
+    # behavior is identical to the ``UniqueFactory`` base implementation.
     def __call__(self, *args, **kwds) -> FiniteField:
         return super().__call__(*args, **kwds)
 
