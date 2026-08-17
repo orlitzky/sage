@@ -63,7 +63,12 @@ AUTHORS:
 
 from __future__ import annotations
 
-from collections.abc import Callable
+# This import is deliberately at runtime visibility (not inside a
+# TYPE_CHECKING block): the class-level ``__call__`` annotation below is
+# resolved by typing.get_type_hints - in the TESTS block of this module
+# and by downstream stub generators - which evaluates the annotation
+# string in the module namespace, so the name must exist there.
+from collections.abc import Callable  # noqa: TC003
 
 import sage.misc.prandom as random
 
