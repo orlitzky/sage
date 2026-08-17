@@ -747,9 +747,8 @@ def higher_level_UpGj(p, N, klist, m, modformsring, bound, extra_data=False):
     verbose("done step 4a", t)
     t = cputime()
     for k in klist:
-        k = ZZ(k) # convert to sage integer
-        kdiv = k // (p - 1)
-        Gkdiv = G ** kdiv
+        kdiv = ZZ(k) // (p - 1)
+        Gkdiv = G**kdiv
 
         T = matrix(S, ell, elldash)
         for i in range(ell):
@@ -997,14 +996,9 @@ def level1_UpGj(p, klist, m, extra_data=False):
     verbose("done step 4a", t)
     t = cputime()
     for k in klist:
-        k = ZZ(k) # convert to sage integer
-        kdiv = k // (p - 1)
-        Gkdiv = G ** kdiv
-        u = []
-        for i in range(ell):
-            ei = e[i]
-            ui = Gkdiv * ei
-            u.append(ui)
+        kdiv = ZZ(k) // (p - 1)
+        Gkdiv = G**kdiv
+        u = [Gkdiv * e[i] for i in range(ell)]
 
         verbose("done step 4b", t)
         t = cputime()
@@ -1013,9 +1007,9 @@ def level1_UpGj(p, klist, m, extra_data=False):
         S = e[0][0].parent()
         T = matrix(S, ell, ell)
 
-        for i in range(ell):
+        for i, ui in enumerate(u):
             for j in range(ell):
-                T[i, j] = u[i][p * j]
+                T[i, j] = ui[p * j]
 
         verbose("done step 5", t)
         t = cputime()
