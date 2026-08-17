@@ -62,6 +62,8 @@ AUTHORS:
 # ****************************************************************************
 
 
+from collections.abc import Callable
+
 import sage.misc.prandom as random
 
 from sage.arith.misc import factor
@@ -203,25 +205,37 @@ class IntegerModFactory(UniqueFactory):
     the ring factory::
 
         sage: IntegerModRing._cache.clear()
+
+    TESTS:
+
+    The return type exposed to static type checkers matches the runtime
+    type::
+
+        sage: from sage.rings.finite_rings.integer_mod_ring import IntegerModRing_generic
+        sage: from sage.rings.integer_ring import IntegerRing_class
+        sage: isinstance(Zmod(29), IntegerModRing_generic)
+        True
+        sage: isinstance(Integers(0), IntegerRing_class)
+        True
+
+    The ``__call__`` annotation resolves to the same union::
+
+        sage: import collections.abc
+        sage: import typing
+        sage: from sage.rings.finite_rings.integer_mod_ring import IntegerModFactory
+        sage: ann = IntegerModFactory.__annotations__['__call__']
+        sage: typing.get_origin(ann) == collections.abc.Callable
+        True
+        sage: typing.get_type_hints(IntegerModFactory)['__call__'] == collections.abc.Callable[..., IntegerModRing_generic | IntegerRing_class]
+        True
     """
-    # This override is only there for the typing info: it exists so that
-    # static type checkers can infer the return type of ``IntegerModRing``
-    # and its aliases.  The behavior is identical to the ``UniqueFactory``
-    # base implementation.
-    def __call__(self, *args, **kwds) -> "IntegerModRing_generic | integer_ring.IntegerRing_class":
-        """
-        TESTS:
-
-        The return annotation matches the runtime type::
-
-            sage: from sage.rings.finite_rings.integer_mod_ring import IntegerModRing_generic
-            sage: from sage.rings.integer_ring import IntegerRing_class
-            sage: isinstance(Zmod(29), IntegerModRing_generic)
-            True
-            sage: isinstance(Integers(0), IntegerRing_class)
-            True
-        """
-        return super().__call__(*args, **kwds)
+    # This class-level annotation is only there for the typing info: it
+    # lets static type checkers infer the return type of ``IntegerModRing``
+    # and its aliases without a forwarding ``__call__`` override, which
+    # would add a Python frame and a ``super()`` lookup to every factory
+    # call.  No value is assigned, so instances keep dispatching directly
+    # to the inherited ``UniqueFactory.__call__`` at full speed.
+    __call__: Callable[..., "IntegerModRing_generic | integer_ring.IntegerRing_class"]
 
     def get_object(self, version, key, extra_args):
         out = super().get_object(version, key, extra_args)
