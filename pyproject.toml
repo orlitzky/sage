@@ -718,6 +718,13 @@ select = [
 "src/sage/algebras/lie_conformal_algebras/examples.py" = [
   "F401", # Unused import - reexports for convenience.
 ]
+"src/sage/rings/finite_rings/integer_mod_ring.py" = [
+  # Callable must stay a runtime import (outside TYPE_CHECKING): the
+  # class-level __call__ annotation is resolved by typing.get_type_hints
+  # in the doctests and by downstream stub generators, so the name has
+  # to be present in the module namespace at runtime.
+  "TC003",
+]
 
 [tool.cython-lint]
 ignore = ["E501", "E741"]

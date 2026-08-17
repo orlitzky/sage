@@ -61,6 +61,7 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
+from __future__ import annotations
 
 from collections.abc import Callable
 
@@ -223,10 +224,10 @@ class IntegerModFactory(UniqueFactory):
         sage: import collections.abc
         sage: import typing
         sage: from sage.rings.finite_rings.integer_mod_ring import IntegerModFactory
-        sage: ann = IntegerModFactory.__annotations__['__call__']
+        sage: ann = typing.get_type_hints(IntegerModFactory)['__call__']
         sage: typing.get_origin(ann) == collections.abc.Callable
         True
-        sage: typing.get_type_hints(IntegerModFactory)['__call__'] == collections.abc.Callable[..., IntegerModRing_generic | IntegerRing_class]
+        sage: ann == collections.abc.Callable[..., IntegerModRing_generic | IntegerRing_class]
         True
     """
     # This class-level annotation is only there for the typing info: it
@@ -234,8 +235,10 @@ class IntegerModFactory(UniqueFactory):
     # and its aliases without a forwarding ``__call__`` override, which
     # would add a Python frame and a ``super()`` lookup to every factory
     # call.  No value is assigned, so instances keep dispatching directly
-    # to the inherited ``UniqueFactory.__call__`` at full speed.
-    __call__: Callable[..., "IntegerModRing_generic | integer_ring.IntegerRing_class"]
+    # to the inherited ``UniqueFactory.__call__`` at full speed.  The
+    # unquoted forward reference is safe because this file has
+    # ``from __future__ import annotations``.
+    __call__: Callable[..., IntegerModRing_generic | integer_ring.IntegerRing_class]
 
     def get_object(self, version, key, extra_args):
         out = super().get_object(version, key, extra_args)
