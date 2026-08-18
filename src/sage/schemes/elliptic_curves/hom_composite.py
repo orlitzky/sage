@@ -593,13 +593,14 @@ class EllipticCurveHom_composite(EllipticCurveHom):
         degs = [phi.degree() for phi in self._phis]
         if len(degs) == 1:
             return f'Composite morphism of degree {self._degree}:' \
-                    f'\n  From: {self._domain}' \
-                    f'\n  To:   {self._codomain}'
-        grouped = [(d, sum(1 for _ in g)) for d,g in groupby(degs)]
-        degs_str = '*'.join(str(d) + (f'^{e}' if e > 1 else '') for d,e in grouped)
-        return f'Composite morphism of degree {self._degree} = {degs_str}:' \
                 f'\n  From: {self._domain}' \
                 f'\n  To:   {self._codomain}'
+        grouped = [(d, sum(1 for _ in g)) for d, g in groupby(degs)]
+        degs_str = '*'.join(str(d) + (f'^{e}' if e > 1 else '')
+                            for d, e in grouped)
+        return f'Composite morphism of degree {self._degree} = {degs_str}:' \
+            f'\n  From: {self._domain}' \
+            f'\n  To:   {self._codomain}'
 
     def factors(self):
         r"""

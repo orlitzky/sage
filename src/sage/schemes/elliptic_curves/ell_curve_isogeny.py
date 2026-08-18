@@ -101,7 +101,7 @@ from sage.schemes.elliptic_curves.constructor import EllipticCurve
 from sage.schemes.elliptic_curves.ell_generic import EllipticCurve_generic
 
 from sage.schemes.elliptic_curves.weierstrass_morphism \
-        import WeierstrassIsomorphism, _isomorphisms, baseWI, negation_morphism
+    import WeierstrassIsomorphism, _isomorphisms, baseWI, negation_morphism
 
 #
 # Private function for parsing input to determine the type of
@@ -3224,11 +3224,11 @@ class EllipticCurveIsogeny(EllipticCurveHom):
         d = self._degree
 
         if algorithm == 'pushforward':
-        #TODO:
-            #Extra Features:
-                #Implement inseparable case.
-                #Implement composite degree cyclic case.
-                #Implement non-cyclic case.
+            # TODO:
+            # Extra Features:
+            # Implement inseparable case.
+            # Implement composite degree cyclic case.
+            # Implement non-cyclic case.
             if F(d) == 0:
                 raise NotImplementedError("``pushforward`` method not implemented for inseparable isogenies")
             if not d.is_prime():
@@ -3484,17 +3484,17 @@ def compute_isogeny_bmss(E1, E2, l):
     _, Q = Rx(U).rational_reconstruction(x ** (2 * l), l, l)
     Q = Q.add_bigoh((l + 1) // 2)
     if not Q.is_square():
-        if True:  #XXX stopgap for #42043; to be fixed properly eventually
+        if True:  # XXX stopgap for #42043; to be fixed properly eventually
             return compute_isogeny_stark(E1, E2, l)
         raise ValueError(f"the two curves are not linked by a cyclic normalized isogeny of degree {l}")
     Q = Q.sqrt()
-    ker = Rx(Q).reverse(degree=l//2)
+    ker = Rx(Q).reverse(degree=l // 2)
 
     ker = ker.monic().radical()
 
-    if True:  #XXX stopgap for #42043; to be fixed properly eventually
+    if True:  # XXX stopgap for #42043; to be fixed properly eventually
         if (E1.division_polynomial(l, x=Rx.quotient(ker).gen())
-            or not E1.isogeny_codomain(ker).is_isomorphic(E2)):
+                or not E1.isogeny_codomain(ker).is_isomorphic(E2)):
             return compute_isogeny_stark(E1, E2, l)
 
     return ker
