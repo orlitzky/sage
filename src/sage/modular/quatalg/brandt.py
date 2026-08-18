@@ -961,7 +961,7 @@ class BrandtModule_class(AmbientHeckeModule):
             [0 0 1]
             [0 1 0]
 
-        An example where the Hecke operator isn't symmetric::
+        An example where the Hecke operator is not symmetric::
 
             sage: B = BrandtModule(43)
             sage: B._compute_hecke_matrix_directly(2)
@@ -1149,7 +1149,7 @@ class BrandtModule_class(AmbientHeckeModule):
 
             sage: B = BrandtModule(1009)
             sage: Is = B.right_ideals()
-            sage: from itertools import pairwise
+            sage: n = len(Is)
             sage: all(not Is[i].is_right_equivalent(Is[j]) for i in range(n) for j in range(i))
             True
         """
@@ -1484,7 +1484,7 @@ def benchmark_magma(levels, silent=False):
     from sage.interfaces.magma import magma
     for p, M in levels:
         t = magma.cputime()
-        magma.eval('HeckeOperator(BrandtModule(%s, %s),2)' % (p, M))
+        magma.eval(f'HeckeOperator(BrandtModule({p}, {M}),2)')
         tm = magma.cputime(t)
         v = ('magma', p, M, tm)
         if not silent:

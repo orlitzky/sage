@@ -368,7 +368,7 @@ class Gamma0_class(GammaH_class):
 
             from .congroup import generators_helper
             level = self.level()
-            if level == 1:  # P1List isn't very happy working mod 1
+            if level == 1:  # P1List is not very happy working mod 1
                 return [self([0, -1, 1, 0]), self([1, 1, 0, 1])]
             gen_list = generators_helper(P1List(level), level)
             return [self(g, check=False) for g in gen_list]
@@ -565,7 +565,7 @@ class Gamma0_class(GammaH_class):
             sage: Gamma0(32041).index()
             32220
         """
-        return prod([p**e + p**(e-1) for p, e in self.level().factor()])
+        return prod([p**e + p**(e - 1) for p, e in self.level().factor()])
 
     def dimension_new_cusp_forms(self, k=2, p=0):
         r"""
@@ -619,10 +619,10 @@ class Gamma0_class(GammaH_class):
         def s0(q, a):
             # function s_0^#
             if a == 1:
-                return 1 - 1/q
+                return 1 - 1 / q
             if a == 2:
-                return 1 - 1/q - 1/q**2
-            return (1 - 1/q) * (1 - 1/q**2)
+                return 1 - 1 / q - 1 / q**2
+            return (1 - 1 / q) * (1 - 1 / q**2)
 
         def vinf(q, a):
             # function v_oo^#
@@ -630,7 +630,7 @@ class Gamma0_class(GammaH_class):
                 return 0
             if a == 2:
                 return q - 2
-            return q**(a/2 - 2) * (q - 1)**2
+            return q**(a / 2 - 2) * (q - 1)**2
 
         def v2(q, a):
             # function v_2^#
@@ -670,8 +670,8 @@ class Gamma0_class(GammaH_class):
 
         res = (k - 1) / 12 * N * prod(s0(q, a) for q, a in factors)
         res -= prod(vinf(q, a) for q, a in factors) / ZZ(2)
-        res += ((1 - k)/4 + k//4) * prod(v2(q, a) for q, a in factors)
-        res += ((1 - k)/3 + k//3) * prod(v3(q, a) for q, a in factors)
+        res += ((1 - k) / 4 + k // 4) * prod(v2(q, a) for q, a in factors)
+        res += ((1 - k) / 3 + k // 3) * prod(v3(q, a) for q, a in factors)
         if k == 2:
             res += moebius(N)
         return res
