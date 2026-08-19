@@ -1430,7 +1430,7 @@ class FMatrix(SageObject):
             eqns.extend((mat.T * mat - matrix.identity(mat.nrows())).coefficients())
         if output:
             return eqns
-        self.ideal_basis.extend([poly_to_tup(eq) for eq in eqns])
+        self.ideal_basis.extend(poly_to_tup(eq) for eq in eqns)
 
     def get_defining_equations(self, option, output=True):
         r"""

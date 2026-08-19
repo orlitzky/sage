@@ -537,7 +537,7 @@ class AtomicSpeciesElement(WithEqualityById,
         for start, M in zip(starts, Mlist):
             K, K_dompart = M.permutation_group()
             for i, v in enumerate(K_dompart):
-                pi[i].extend([start + k for k in v])
+                pi[i].extend(start + k for k in v)
             gens.extend([tuple([start + k for k in cyc])
                          for cyc in gen.cycle_tuples()]
                         for gen in K.gens())
