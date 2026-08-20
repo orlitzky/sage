@@ -1894,30 +1894,7 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                 sage: oeis(_) # optional - internet
                 0: A002106: Number of transitive permutation groups of degree n.
             """
-            M = self.parent()
-            variables = tuple(M(SymmetricGroup(1), {i: [1]}) for i in range(M._arity))
-            sorts = []
-            for variable in derivative_parse(args):
-                if variable is None:
-                    if M._arity != 1:
-                        raise ValueError(
-                            "the derivative variable must be specified for multisort species"
-                            )
-                    sort = 0
-                else:
-                    if parent(variable) is not M or variable not in variables:
-                        raise ValueError(
-                            "the derivative variable must be a sort generator of the parent"
-                            )
-                    sort = variables.index(variable)
-                sorts.append(sort)
-
-            result = self
-            for sort in sorts:
-                current_parent = result.parent()
-                current_variable = current_parent(SymmetricGroup(1), {sort: [1]})
-                result = result._derivative(current_variable)
-            return result
+            return multi_derivative(self, args)
 
         def _derivative(self, variable=None):
             r"""
@@ -1932,20 +1909,14 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                 2*X
             """
             M = self.parent()
-            variables = tuple(
-                M(SymmetricGroup(1), {i: [1]}) for i in range(M._arity)
-            )
             if variable is None:
                 if M._arity != 1:
-                    raise ValueError(
-                        "the derivative variable must be specified for multisort species"
-                    )
+                    raise ValueError("the derivative variable must be specified for multisort species")
                 sort = 0
             else:
+                variables = tuple(M(_SymmetricGroup(1), {i: [1]}) for i in range(M._arity))
                 if parent(variable) is not M or variable not in variables:
-                    raise ValueError(
-                        "the derivative variable must be a sort generator of the parent"
-                    )
+                    raise ValueError("the derivative variable must be a sort generator of the parent")
                 sort = variables.index(variable)
             return self._derivative_with_respect_to_sort(sort)
 
@@ -1992,7 +1963,7 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                 return P.one()
 
             H, dompart = self.permutation_group()
-            ans = P.zero()
+            result = P.zero()
             for orbit in H.orbits():
                 r = min(orbit)
                 if r not in dompart[sort]:
@@ -2005,11 +1976,11 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                         gens.append(cycles)
                 H_r_star = PermutationGroup(gens, domain=range(1, m))
 
-                new_dompart = { i: [ point if point < r else point - 1 for point in block if point != r ]
-                    for i, block in enumerate(dompart)
-                }
-                ans += P(M(H_r_star, new_dompart, check=False))
-            return ans
+                new_dompart = {i: [point if point < r else point - 1
+                                   for point in block if point != r]
+                               for i, block in enumerate(dompart)}
+                result += P(M(H_r_star, new_dompart, check=False))
+            return result
 
         def structures(self, *labels):
             r"""
@@ -2278,12 +2249,16 @@ class PolynomialSpeciesElement(CombinatorialFreeModule.Element):
                 raise ValueError("the derivative variable must be specified for multisort species")
             sort = 0
         else:
-            variables = tuple(P(SymmetricGroup(1), {i: [1]}) for i in range(P._arity))
-            if parent(variable) is not P or variable not in variables:
+            if parent(variable) is not P:
+                variable = P(variable, check=True)
+            variables = P._first_ngens(P._arity)
+            try:
+                sort = variables.index(variable)
+            except ValueError:
                 raise ValueError("the derivative variable must be a sort generator of the parent")
-            sort = variables.index(variable)
-        return sum((c * P(M._derivative_with_respect_to_sort(sort)) for M, c in self.monomial_coefficients().items()),
-                    P.zero())
+        return sum((c * P(M._derivative_with_respect_to_sort(sort))
+                    for M, c in self.monomial_coefficients().items()),
+                   P.zero())
 
     def hadamard_product(self, other):
         r"""
@@ -2921,7 +2896,7 @@ class PolynomialSpecies(CombinatorialFreeModule):
 
         Atomic and molecular species are accepted as arguments::
 
-            sage: from sage.rings.species import AtomicSpecies, PolynomialSpecies
+            sage: from sage.rings.species import AtomicSpecies, MolecularSpecies
             sage: P = PolynomialSpecies(ZZ, "X, Y")
             sage: A = AtomicSpecies("X, Y")
             sage: P(A(SymmetricGroup(3), {1: [1,2,3]}))
@@ -2932,6 +2907,16 @@ class PolynomialSpecies(CombinatorialFreeModule):
             Traceback (most recent call last):
             ...
             ValueError: all keys of the dict {E_3: 1} must be Atomic species in X, Y
+
+            sage: M = MolecularSpecies("X, Y")
+            sage: P(M(SymmetricGroup(3), {1: [1,2,3]}))
+            E_3(Y)
+
+            sage: M = MolecularSpecies("X, Z")
+            sage: P(M(SymmetricGroup(3), {0: [1,2,3]}))
+            Traceback (most recent call last):
+            ...
+            ValueError: E_3(X) must be a Molecular species in X, Y
         """
         if parent(G) is self:
             # pi cannot be None because of framework
@@ -2941,6 +2926,8 @@ class PolynomialSpecies(CombinatorialFreeModule):
             G = self._indices({G: ZZ.one()})
 
         if isinstance(G, MolecularSpecies.Element):
+            if check and not G.parent() == self._indices:
+                raise ValueError(f"{G} must be a {self._indices}")
             return self._from_dict({G: self.base_ring().one()})
 
         if isinstance(G, dict):
