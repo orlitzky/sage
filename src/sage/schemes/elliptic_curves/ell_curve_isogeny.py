@@ -1704,18 +1704,18 @@ class EllipticCurveIsogeny(EllipticCurveHom):
 
             sage: E = EllipticCurve(j=GF(7)(1728))
             sage: phi = EllipticCurveIsogeny(E, E((0,0)))
-            sage: phi.rational_maps()  # implicit doctest
+            sage: phi.rational_maps()  # indirect doctest
             ((x^2 + 1)/x, (x^2*y - y)/x^2)
 
             sage: R.<x> = GF(7)[]
             sage: phi = EllipticCurveIsogeny(E, x)
-            sage: phi.rational_maps()  # implicit doctest
+            sage: phi.rational_maps()  # indirect doctest
             ((x^2 + 1)/x, (x^2*y - y)/x^2)
 
             sage: E = EllipticCurve([1,2,3,4,5])
             sage: Eshort = E.short_weierstrass_model()
             sage: phi = E.isogeny(E(0), Eshort)
-            sage: phiX, phiY = phi.rational_maps()  # implicit doctest
+            sage: phiX, phiY = phi.rational_maps()  # indirect doctest
             sage: phiX(1,2), phiY(1,2)
             (63, 864)
         """
@@ -1755,7 +1755,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
 
             sage: E = EllipticCurve(j=GF(7)(1728))
             sage: phi = EllipticCurveIsogeny(E, E((0,0)))
-            sage: phi.kernel_polynomial()  # implicit doctest
+            sage: phi.kernel_polynomial()  # indirect doctest
             x
         """
         if self.__kernel_polynomial is None:
@@ -1955,7 +1955,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
 
             sage: E = EllipticCurve(GF(7), [0,0,0,-1,0])
             sage: P = E((4,2))
-            sage: phi = EllipticCurveIsogeny(E, [P,P]); phi  # implicit doctest
+            sage: phi = EllipticCurveIsogeny(E, [P,P]); phi  # indirect doctest
             Isogeny of degree 4
              from Elliptic Curve defined by y^2 = x^3 + 6*x over Finite Field of size 7
                to Elliptic Curve defined by y^2 = x^3 + 2*x over Finite Field of size 7
@@ -1989,7 +1989,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
 
             sage: E = EllipticCurve(GF(7), [0,0,0,-1,0])
             sage: P = E((4,2))
-            sage: phi = EllipticCurveIsogeny(E, P); phi  # implicit doctest
+            sage: phi = EllipticCurveIsogeny(E, P); phi  # indirect doctest
             Isogeny of degree 4
              from Elliptic Curve defined by y^2 = x^3 + 6*x over Finite Field of size 7
                to Elliptic Curve defined by y^2 = x^3 + 2*x over Finite Field of size 7
@@ -2030,7 +2030,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
 
             sage: E = EllipticCurve(GF(7), [0,0,0,-1,0])
             sage: P = E((4,2))
-            sage: phi = EllipticCurveIsogeny(E, [P,P]); phi  # implicit doctest
+            sage: phi = EllipticCurveIsogeny(E, [P,P]); phi  # indirect doctest
             Isogeny of degree 4
              from Elliptic Curve defined by y^2 = x^3 + 6*x over Finite Field of size 7
                to Elliptic Curve defined by y^2 = x^3 + 2*x over Finite Field of size 7
@@ -2243,7 +2243,7 @@ class EllipticCurveIsogeny(EllipticCurveHom):
             sage: E = EllipticCurve(GF(7), [0,0,0,-1,0])
             sage: P = E((4,2))
             sage: phi = EllipticCurveIsogeny(E, P)
-            sage: phi.kernel_polynomial()  # implicit doctest
+            sage: phi.kernel_polynomial()  # indirect doctest
             x^2 + 2*x + 4
         """
         poly_ring, x = self.__poly_ring.objgen()
