@@ -6497,12 +6497,24 @@ class FinitePoset(UniqueRepresentation, Parent):
             Traceback (most recent call last):
             ...
             TypeError: 'sage.rings.integer.Integer' object is not iterable
+
+            sage: L = LatticePoset({0:[1,2],1:[3],2:[3]})
+            sage: S = L.subposet([], category=LatticePosets().Finite()); S
+            Finite lattice containing 0 elements
+            sage: S.category()
+            Category of facade finite enumerated lattice posets
         """
         H = self._hasse_diagram
         elms = sorted({self._element_to_vertex(e) for e in elements})
 
+        if category is not None and category.is_subcategory(LatticePosets()):
+            from sage.combinat.posets.lattices import LatticePoset
+            constructor = LatticePoset
+        else:
+            constructor = Poset
+
         if not elms:
-            return Poset(category=category)
+            return constructor(facade=self._is_facade, category=category)
 
         relations = []
         lt = [set() for _ in range(elms[-1] + 1)]
@@ -6520,12 +6532,6 @@ class FinitePoset(UniqueRepresentation, Parent):
         else:
             g.relabel(lambda v: self._vertex_to_element(v).element,
                       inplace=True)
-
-        if category is not None and category.is_subcategory(LatticePosets()):
-            from sage.combinat.posets.lattices import LatticePoset
-            constructor = LatticePoset
-        else:
-            constructor = Poset
 
         return constructor(g, cover_relations=False,
                            facade=self._is_facade, category=category)
