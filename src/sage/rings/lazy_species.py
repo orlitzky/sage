@@ -1082,15 +1082,14 @@ class LazyCombinatorialSpeciesElement(LazyCompletionGradedAlgebraElement):
         For a multisort species, the derivative with respect to sort `i`
         is defined by
 
-        \frac{\partial}{\partial X_i} F[U_1, \ldots, U_k]
-        = F[U_1, \ldots, U_i \sqcup \{*\}, \ldots, U_k].
+        .. MATH::
+
+            \frac{\partial}{\partial X_i} F[U_1, \ldots, U_k] = F[U_1, \ldots, U_i \sqcup \{*\}, \ldots, U_k].
 
         The arguments follow Sage's standard derivative syntax (see
         :func:`sage.misc.derivative.derivative_parse`). The sort generator
         may be omitted if the parent is unisort. It must be specified if
         the parent is multisort.
-
-
 
         EXAMPLES::
 
@@ -2049,6 +2048,7 @@ class DerivativeSpeciesElement(LazyCombinatorialSpeciesElement):
         )
         coeff_stream = Stream_shift(coeff_stream, -1)
         super().__init__(P, coeff_stream)
+
     def generating_series(self):
         r"""
         Return the exponential generating series of ``self``.
