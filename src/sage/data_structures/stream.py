@@ -1385,6 +1385,24 @@ class DominatingAction(Action):
             Univariate Polynomial Ring in a over
              Fraction Field of Infinite polynomial ring in FESDUMMY over
              Univariate Polynomial Ring in b over Univariate Polynomial Ring in t over Integer Ring
+
+        Elements of modules with basis are moved over to the larger coefficient ring so that undetermined
+        coefficients can be operated with symmetric functions::
+
+            sage: p = SymmetricFunctions(ZZ).p()
+            sage: y = g * p[1]; y
+            FESDUMMY_0*p[1]
+            sage: y.parent()
+            Symmetric Functions over CoefficientRing over Integer Ring in the powersum basis
+            sage: y.parent().base_ring()
+            CoefficientRing over Integer Ring
+
+        This includes tensor products that appear in multisort plethysm ::
+
+            sage: p2 = tensor([p, p])
+            sage: y = g * tensor([p[1], p[2]])
+            sage: y.parent().base_ring()
+            CoefficientRing over Integer Ring
         """
         G = g.parent()
         if x in G.base_ring():
