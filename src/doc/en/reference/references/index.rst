@@ -5535,6 +5535,12 @@ REFERENCES:
              Volume 34, Issue 3, May 1983, Pages 340--359.
              :doi:`10.1016/0097-3165(83)90068-7`
 
+.. [MRRW1977] \R. J. McEliece, \E. R. Rodemich, \H. Rumsey, Jr.,
+              \L. R. Welch, *New Upper Bounds on the Rate of a Code via the
+              Delsarte-MacWilliams Inequalities*, IEEE Transactions on
+              Information Theory **23** (1977), no. 2, 157--166.
+              :doi:`10.1109/TIT.1977.1055688`
+
 .. [MR2016] \B. Malmskog, C. Rasmussen, *Picard curves over Q
             with good reduction away from 3*. LMS Journal of Computation and
             Mathematics 19 (2016), no. 2, 382-408.
