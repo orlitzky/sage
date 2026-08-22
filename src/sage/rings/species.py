@@ -1670,6 +1670,19 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
                 sage: A.cycle_index()
                 1/4*p[1, 1] # p[1, 1, 1, 1] + 1/4*p[1, 1] # p[2, 2] + 1/4*p[2] # p[1, 1, 1, 1] + 1/4*p[2] # p[2, 2]
 
+            For multisort species, the result is a tensor product of
+            symmetric functions::
+
+                sage: h = SymmetricFunctions(QQ).h()
+                sage: tensor([h, h])(A.cycle_index())
+                h[2] # h[1, 1, 1, 1] - 2*h[2] # h[2, 1, 1] + 2*h[2] # h[2, 2]
+
+            For unisort species, the result is a symmetric function:
+
+                sage: M = MolecularSpecies("X")
+                sage: h(M(SymmetricGroup(3)).cycle_index())
+                h[3]
+
             Find two molecular species with the same cycle index::
 
                 sage: M = MolecularSpecies("X")
@@ -1717,7 +1730,10 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
             k = self.parent()._arity
             if parent is None:
                 p = SymmetricFunctions(QQ).powersum()
-                parent = tensor([p]*k)
+                if k == 1:
+                    parent = p
+                else:
+                    parent = tensor([p]*k)
             elif parent not in Modules.WithBasis:
                 raise ValueError("`parent` should be a module with basis indexed by partitions")
             base_ring = parent.base_ring()
@@ -1726,13 +1742,17 @@ class MolecularSpecies(IndexedFreeAbelianMonoid):
             for i, s in enumerate(dompart):
                 pi.update({e: i for e in s})
 
+
             def cycle_type(g):
                 tuples = g.cycle_tuples(singletons=True)
                 cycle_type = [[] for _ in range(k)]
                 for c in tuples:
                     cycle_type[pi[c[0]]].append(len(c))
-                return tuple([_Partitions(sorted(c, reverse=True))
-                              for c in cycle_type])
+                parts = [_Partitions(sorted(c, reverse=True))
+                         for c in cycle_type]
+                if k == 1:
+                    return parts[0]
+                return tuple(parts)
 
             return (parent.sum_of_terms([cycle_type(C.an_element()),
                                          base_ring(C.cardinality())]
