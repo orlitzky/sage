@@ -1390,9 +1390,9 @@ class DominatingAction(Action):
             sage: p = SymmetricFunctions(ZZ).p()
             sage: y = g * p[1]; y
             FESDUMMY_0*p[1]
-            sage: y.parent().base_ring()
+            sage: y.parent()
             Symmetric Functions over CoefficientRing over Integer Ring in the powersum basis
-            sage: (p[2] * g).parent().base_ring()
+            sage: y.parent().base_ring()
             CoefficientRing over Integer Ring
 
         This includes tensor products that appear in multisort plethysm ::
