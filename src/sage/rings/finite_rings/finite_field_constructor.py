@@ -613,22 +613,22 @@ class FiniteFieldFactory(UniqueFactory):
 
         TESTS::
 
-            sage: GF((6, 1), 'a')       # implicit doctest
+            sage: GF((6, 1), 'a')       # indirect doctest
             Traceback (most recent call last):
             ...
             ValueError: the order of a finite field must be a prime power
 
-            sage: GF((9, 1), 'a')       # implicit doctest
+            sage: GF((9, 1), 'a')       # indirect doctest
             Traceback (most recent call last):
             ...
             ValueError: the order of a finite field must be a prime power
 
-            sage: GF((5, 0), 'a')       # implicit doctest
+            sage: GF((5, 0), 'a')       # indirect doctest
             Traceback (most recent call last):
             ...
             ValueError: the order of a finite field must be a prime power
 
-            sage: GF((3, 2, 1), 'a')    # implicit doctest
+            sage: GF((3, 2, 1), 'a')    # indirect doctest
             Traceback (most recent call last):
             ...
             ValueError: wrong input for finite field constructor

@@ -425,7 +425,7 @@ class EllipticCurveHom_composite(EllipticCurveHom):
 
             sage: from sage.schemes.elliptic_curves.hom_composite import EllipticCurveHom_composite
             sage: E = EllipticCurve([1,0])
-            sage: phi = EllipticCurveHom_composite(E, E(0,0))   # implicit doctest
+            sage: phi = EllipticCurveHom_composite(E, E(0,0))   # indirect doctest
             sage: from sage.schemes.elliptic_curves.hom import EllipticCurveHom
             sage: print(EllipticCurveHom._repr_(phi))
             Elliptic-curve morphism:
