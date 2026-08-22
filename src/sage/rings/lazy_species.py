@@ -96,6 +96,7 @@ from sage.groups.perm_gps.permgroup_named import (AlternatingGroup,
                                                   DihedralGroup,
                                                   SymmetricGroup)
 from sage.modules.free_module_element import vector
+from sage.misc.derivative import multi_derivative
 from sage.misc.inherit_comparison import InheritComparisonClasscallMetaclass
 from sage.structure.element import parent
 from sage.structure.unique_representation import UniqueRepresentation
@@ -1068,7 +1069,7 @@ class LazyCombinatorialSpeciesElement(LazyCompletionGradedAlgebraElement):
         """
         return HadamardProductSpeciesElement(self, other)
 
-    def derivative(self):
+    def derivative(self, *args):
         r"""
         Return the derivative species of ``self``.
 
@@ -1078,6 +1079,18 @@ class LazyCombinatorialSpeciesElement(LazyCompletionGradedAlgebraElement):
         unique bijection `U \sqcup \{*\} \to V \sqcup \{*\}` that agrees
         with `\sigma` on `U` and fixes `*`.
 
+        For a multisort species, the derivative with respect to sort `i`
+        is defined by
+
+        .. MATH::
+
+            \frac{\partial}{\partial X_i} F[U_1, \ldots, U_k] = F[U_1, \ldots, U_i \sqcup \{*\}, \ldots, U_k].
+
+        The arguments follow Sage's standard derivative syntax (see
+        :func:`sage.misc.derivative.derivative_parse`). The sort generator
+        may be omitted if the parent is unisort. It must be specified if
+        the parent is multisort.
+
         EXAMPLES::
 
             sage: L.<X> = LazyCombinatorialSpecies(QQ)
@@ -1086,8 +1099,54 @@ class LazyCombinatorialSpeciesElement(LazyCompletionGradedAlgebraElement):
             sage: Lin = 1 / (1 - X)
             sage: Lin.derivative()[4] == (Lin^2)[4]
             True
+
+        Partial derivatives of multisort lazy species are obtained by
+        specifying a sort generator::
+
+            sage: L.<X, Y> = LazyCombinatorialSpecies(QQ)
+            sage: F = X^2 * Y^2
+            sage: F.derivative(X, 2)[2]
+            2*Y^2
+            sage: F.derivative(X, Y)[2]
+            4*X*Y
+            sage: F.derivative([X, Y])[2]
+            4*X*Y
+            sage: F.derivative(0) is F
+            True
+            sage: X.derivative(Y)[0]
+            0
         """
-        return DerivativeSpeciesElement(self)
+        return multi_derivative(self, args)
+
+    def _derivative(self, variable=None):
+        r"""
+        Return the derivative of ``self`` with respect to one sort.
+
+        TESTS::
+
+            sage: L.<X, Y> = LazyCombinatorialSpecies(QQ)
+            sage: F = X^2 * Y^2
+            sage: F._derivative(X)[3]
+            2*X*Y^2
+        """
+        P = self.parent()
+        if variable is None:
+            if P._arity != 1:
+                raise ValueError(
+                    "the derivative variable must be specified for multisort species"
+                )
+            sort = 0
+        else:
+            variables = P._first_ngens(P._arity)
+            if (parent(variable) is not P
+                    or not isinstance(variable._coeff_stream, Stream_exact)
+                    or variable not in variables):
+                raise ValueError(
+                    "the derivative variable must be a sort generator of the parent"
+                )
+            sort = variables.index(variable)
+
+        return DerivativeSpeciesElement(self, sort)
 
 
 class LazyCombinatorialSpeciesElementGeneratingSeriesMixin:
@@ -1943,7 +2002,7 @@ class HadamardProductSpeciesElement(LazyCombinatorialSpeciesElement):
 
 
 class DerivativeSpeciesElement(LazyCombinatorialSpeciesElement):
-    def __init__(self, F):
+    def __init__(self, F, sort=0):
         r"""
         Initialize the derivative of ``F``.
 
@@ -1964,20 +2023,32 @@ class DerivativeSpeciesElement(LazyCombinatorialSpeciesElement):
             sage: M = dA._coeff_stream.input_streams()[0]
             sage: M.input_streams()[0] is A._coeff_stream
             True
+
+        Partial derivatives of undefined multisort species retain their
+        dependencies through nested shifted streams::
+
+            sage: L.<X, Y> = LazyCombinatorialSpecies(QQ)
+            sage: F = L.undefined(1)
+            sage: D = F.derivative(X)
+            sage: Dxy = F.derivative(X, Y)
+            sage: F.define(X + Y*F)
+            sage: [D[n] for n in range(3)]
+            [1, Y, Y^2]
+            sage: [Dxy[n] for n in range(3)]
+            [1, 2*Y, 3*Y^2]
         """
-        if F.parent()._arity != 1:
-            raise NotImplementedError("derivative is not yet implemented for multisort species")
-
         self._F = F
-
+        self._sort = sort
         P = F.parent()
+        sort_variable = P._laurent_poly_ring._first_ngens(P._arity)[sort]
         coeff_stream = Stream_map_coefficients(
             F._coeff_stream,
-            lambda c: c.derivative(),
+            lambda c: c._derivative(sort_variable),
             P._sparse,
         )
         coeff_stream = Stream_shift(coeff_stream, -1)
         super().__init__(P, coeff_stream)
+
     def generating_series(self):
         r"""
         Return the exponential generating series of ``self``.
@@ -1993,7 +2064,8 @@ class DerivativeSpeciesElement(LazyCombinatorialSpeciesElement):
             sage: Lin.derivative().generating_series() - (Lin^2).generating_series()
             O(X^7)
         """
-        return self._F.generating_series().derivative()
+        f = self._F.generating_series()
+        return f.derivative(f.parent().gen(self._sort))
 
     def cycle_index_series(self):
         r"""
@@ -2006,6 +2078,8 @@ class DerivativeSpeciesElement(LazyCombinatorialSpeciesElement):
             sage: E.derivative().cycle_index_series() - E.cycle_index_series()
             O^6
         """
+        if self.parent()._arity != 1:
+            return super().cycle_index_series()
         return self._F.cycle_index_series().derivative_with_respect_to_p1()
 
 
