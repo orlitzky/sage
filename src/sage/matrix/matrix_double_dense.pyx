@@ -3931,15 +3931,20 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
             sage: B.rank()
             1
 
-        Changing the ring of a random matrix over an exact field to
+        As long as its entries do not vary too widely in magnitude,
+        changing the ring of a random matrix over an exact field to
         ``RDF`` or ``CDF`` should not affect its rank::
 
-            sage: A = matrix.random(QQ, 4)
+            sage: entries = [ QQ.random_element(2^16)
+            ....:             for _ in range(16) ]
+            sage: A = matrix(QQ, 4, entries)
             sage: B = A.change_ring(RDF)
             sage: A.rank() == B.rank()
             True
             sage: F = GaussianIntegers().fraction_field()
-            sage: A = matrix.random(F, 4)
+            sage: entries = [ F.random_element(2^16, 2^16)
+            ....:             for _ in range(16) ]
+            sage: A = matrix(F, 4, entries)
             sage: B = A.change_ring(CDF)
             sage: A.rank() == B.rank()
             True
@@ -3963,6 +3968,7 @@ cdef class Matrix_double_dense(Matrix_numpy_dense):
             True
             sage: A.rank(hermitian=True)
             4
+
         """
         key = ("rank", tol, hermitian, rtol)
         cached = self.fetch(key)
