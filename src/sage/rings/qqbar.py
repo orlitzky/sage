@@ -6266,15 +6266,6 @@ class AlgebraicReal(AlgebraicNumber_base):
                     return -0.0
                 return 0.0
 
-            # When one endpoint rounds to zero and the interval still
-            # contains zero, refine instead of asking an exact sign
-            # question.  Exact zero tests can otherwise dominate callers
-            # that only need a double approximation.
-            if value.contains_zero() and (lower == 0.0 or upper == 0.0):
-                self._more_precision()
-                value = self._value
-                continue
-
             # If the endpoint results are adjacent, their exact midpoint
             # is the only possible rounding boundary inside the interval.
             # Overflow has a finite boundary but an infinite endpoint.
